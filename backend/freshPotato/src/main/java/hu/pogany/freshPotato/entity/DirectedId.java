@@ -1,4 +1,4 @@
-package entity;
+package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

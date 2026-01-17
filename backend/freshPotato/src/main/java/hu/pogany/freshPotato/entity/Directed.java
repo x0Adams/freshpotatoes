@@ -1,14 +1,14 @@
-package entity;
+package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "genre_movie")
-public class GenreMovie {
+@Table(name = "directed")
+public class Directed {
     @EmbeddedId
-    private GenreMovieId id;
+    private DirectedId id;
 
     @MapsId("movie")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -16,17 +16,17 @@ public class GenreMovie {
     @JoinColumn(name = "movie", nullable = false)
     private Movie movie;
 
-    @MapsId("genre")
+    @MapsId("director")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "genre", nullable = false)
-    private Genre genre;
+    @JoinColumn(name = "director", nullable = false)
+    private Director director;
 
-    public GenreMovieId getId() {
+    public DirectedId getId() {
         return id;
     }
 
-    public void setId(GenreMovieId id) {
+    public void setId(DirectedId id) {
         this.id = id;
     }
 
@@ -38,12 +38,12 @@ public class GenreMovie {
         this.movie = movie;
     }
 
-    public Genre getGenre() {
-        return genre;
+    public Director getDirector() {
+        return director;
     }
 
-    public void setGenre(Genre genre) {
-        this.genre = genre;
+    public void setDirector(Director director) {
+        this.director = director;
     }
 
 }

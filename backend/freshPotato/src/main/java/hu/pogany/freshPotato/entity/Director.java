@@ -1,4 +1,4 @@
-package entity;
+package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
 
@@ -7,8 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "actor")
-public class Actor {
+@Table(name = "director")
+public class Director {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

@@ -1,4 +1,4 @@
-package entity;
+package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
