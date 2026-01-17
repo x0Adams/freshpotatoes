@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "genre")
+@Table(name = "genre", schema = "fresh_potato")
 public class Genre {
     @Id
     @Column(name = "name", nullable = false, length = 75)

@@ -8,10 +8,10 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refresh_token")
-public class RefreshToken {
+@Table(name = "refresh_token", schema = "fresh_potato")
+public class RefreshToken implements UuidPrimaryKey{
     @Id
-    @Column(name = "uuid", nullable = false, length = 16)
+    @Column(name = "uuid", nullable = false, length = 36)
     private String uuid;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

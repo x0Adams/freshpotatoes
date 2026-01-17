@@ -8,11 +8,11 @@ import java.util.Objects;
 
 @Embeddable
 public class RateId implements Serializable {
-    private static final long serialVersionUID = -2755693827180204458L;
-    @Column(name = "user", nullable = false, length = 16)
+    private static final long serialVersionUID = -765172746569342544L;
+    @Column(name = "user", nullable = false, length = 36)
     private String user;
 
-    @Column(name = "movie", nullable = false, length = 16)
+    @Column(name = "movie", nullable = false, length = 36)
     private String movie;
 
     public String getUser() {

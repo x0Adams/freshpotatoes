@@ -2,16 +2,24 @@ package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
-public class User {
+@Table(name = "user", schema = "fresh_potato", indexes = {@Index(name = "email_2",
+        columnList = "email",
+        unique = true)}, uniqueConstraints = {
+        @UniqueConstraint(name = "email",
+                columnNames = {"email"}),
+        @UniqueConstraint(name = "user_name",
+                columnNames = {"user_name"})})
+public class User implements UuidPrimaryKey{
     @Id
-    @Column(name = "uuid", nullable = false, length = 16)
+    @Column(name = "uuid", nullable = false, length = 36)
     private String uuid;
 
     @Column(name = "email", nullable = false, length = 70)
@@ -23,14 +31,21 @@ public class User {
     @Column(name = "password_hash", nullable = false, length = 250)
     private String passwordHash;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "role", nullable = false)
+    private Role role;
+
     @ColumnDefault("current_timestamp()")
     @Column(name = "creation_date", nullable = false)
     private Instant creationDate;
 
-    @ManyToMany(mappedBy = "users")
+    @ManyToMany
+    @JoinTable(name = "rate", joinColumns = {@JoinColumn(name = "user")}, inverseJoinColumns = {@JoinColumn(name = "movie")})
     private Set<Movie> movies = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "userUuid")
+    @OneToMany
+    @JoinColumn(name = "user_uuid")
     private Set<RefreshToken> refreshTokens = new LinkedHashSet<>();
 
     public String getUuid() {
@@ -63,6 +78,14 @@ public class User {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public Instant getCreationDate() {
