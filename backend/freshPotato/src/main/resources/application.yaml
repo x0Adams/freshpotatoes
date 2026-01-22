@@ -6,7 +6,7 @@ spring:
     username: root
     password:
   jpa:
-    database-platform: org.hibernate.dialect.MariaDBDialect
+    open-in-view: false
     show-sql: true
     properties:
       hibernate:
