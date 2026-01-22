@@ -8,10 +8,11 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refresh_token")
+@Table(name = "refresh_token", schema = "fresh_potato")
 public class RefreshToken {
     @Id
-    @Column(name = "uuid", nullable = false, length = 16)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "uuid", nullable = false, length = 36)
     private String uuid;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

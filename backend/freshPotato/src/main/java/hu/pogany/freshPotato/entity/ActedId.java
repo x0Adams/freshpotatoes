@@ -8,8 +8,8 @@ import java.util.Objects;
 
 @Embeddable
 public class ActedId implements Serializable {
-    private static final long serialVersionUID = -4035724308296276306L;
-    @Column(name = "movie", nullable = false, length = 16)
+    private static final long serialVersionUID = 615288987210108610L;
+    @Column(name = "movie", nullable = false, length = 36)
     private String movie;
 
     @Column(name = "actor", nullable = false)
