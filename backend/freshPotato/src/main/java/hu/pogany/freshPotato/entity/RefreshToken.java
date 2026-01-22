@@ -9,8 +9,9 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "refresh_token", schema = "fresh_potato")
-public class RefreshToken implements UuidPrimaryKey{
+public class RefreshToken {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "uuid", nullable = false, length = 36)
     private String uuid;
 

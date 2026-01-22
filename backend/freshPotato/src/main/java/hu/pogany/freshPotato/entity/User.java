@@ -17,8 +17,9 @@ import java.util.Set;
                 columnNames = {"email"}),
         @UniqueConstraint(name = "user_name",
                 columnNames = {"user_name"})})
-public class User implements UuidPrimaryKey{
+public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "uuid", nullable = false, length = 36)
     private String uuid;
 

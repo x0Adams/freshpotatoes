@@ -6,8 +6,9 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "movie", schema = "fresh_potato")
-public class Movie implements UuidPrimaryKey{
+public class Movie{
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "uuid", nullable = false, length = 36)
     private String uuid;
 
