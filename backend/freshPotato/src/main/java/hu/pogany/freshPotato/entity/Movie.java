@@ -3,6 +3,8 @@ package hu.pogany.freshPotato.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "movie", schema = "fresh_potato")
@@ -39,6 +41,18 @@ public class Movie{
     @Lob
     @Column(name = "trailer", nullable = false)
     private String trailer;
+
+    @ManyToMany
+    @JoinTable(name = "genre_movie", joinColumns = {@JoinColumn(name = "movie")}, inverseJoinColumns = {@JoinColumn(name = "genre")})
+    private Set<Genre> genres = new LinkedHashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "acted", joinColumns = {@JoinColumn(name = "movie")}, inverseJoinColumns = {@JoinColumn(name = "actor")})
+    private Set<Actor> actors = new LinkedHashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "directed", joinColumns = {@JoinColumn(name = "movie")}, inverseJoinColumns = {@JoinColumn(name = "director")})
+    private Set<Director> directors = new LinkedHashSet<>();
 
     public String getUuid() {
         return uuid;
@@ -112,4 +126,27 @@ public class Movie{
         this.trailer = trailer;
     }
 
+    public Set<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Set<Genre> genres) {
+        this.genres = genres;
+    }
+
+    public Set<Actor> getActors() {
+        return actors;
+    }
+
+    public void setActors(Set<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public Set<Director> getDirectors() {
+        return directors;
+    }
+
+    public void setDirectors(Set<Director> directors) {
+        this.directors = directors;
+    }
 }
