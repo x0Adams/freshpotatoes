@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 21, 2026 at 06:33 AM
+-- Generation Time: Feb 11, 2026 at 08:18 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,49 +24,12 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `acted`
+-- Table structure for table `country`
 --
 
-CREATE TABLE `acted` (
-  `movie` varchar(36) NOT NULL,
-  `actor` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `actor`
---
-
-CREATE TABLE `actor` (
+CREATE TABLE `country` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `birth_day` date NOT NULL,
-  `country_of_origin` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `directed`
---
-
-CREATE TABLE `directed` (
-  `movie` varchar(36) NOT NULL,
-  `director` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `director`
---
-
-CREATE TABLE `director` (
-  `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `birth_day` date NOT NULL,
-  `country_of_origin` varchar(50) NOT NULL
+  `name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -76,7 +39,8 @@ CREATE TABLE `director` (
 --
 
 CREATE TABLE `genre` (
-  `name` varchar(75) NOT NULL
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -86,8 +50,8 @@ CREATE TABLE `genre` (
 --
 
 CREATE TABLE `genre_movie` (
-  `movie` varchar(36) NOT NULL,
-  `genre` varchar(75) NOT NULL
+  `movie` int(11) NOT NULL,
+  `genre` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -97,15 +61,25 @@ CREATE TABLE `genre_movie` (
 --
 
 CREATE TABLE `movie` (
-  `uuid` varchar(36) NOT NULL,
+  `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `poster_path` text NOT NULL,
+  `poster_path` varchar(150) NOT NULL,
   `duration` int(11) NOT NULL,
   `release_date` date NOT NULL,
-  `youtube_movie` text NOT NULL,
-  `google_knowledge_graph` text NOT NULL,
-  `country_of_origin` varchar(50) NOT NULL,
-  `trailer` text NOT NULL
+  `youtube_movie` varchar(200) NOT NULL,
+  `google_knowledge_graph` varchar(200) NOT NULL,
+  `trailer` varchar(200) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `productions_country`
+--
+
+CREATE TABLE `productions_country` (
+  `movie` int(11) NOT NULL,
+  `country` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -115,8 +89,9 @@ CREATE TABLE `movie` (
 --
 
 CREATE TABLE `rate` (
-  `user` varchar(36) NOT NULL,
-  `movie` varchar(36) NOT NULL
+  `user` int(11) NOT NULL,
+  `movie` int(11) NOT NULL,
+  `rating` tinyint(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -126,12 +101,12 @@ CREATE TABLE `rate` (
 --
 
 CREATE TABLE `refresh_token` (
-  `uuid` varchar(36) NOT NULL,
-  `user_uuid` varchar(36) NOT NULL,
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `token` varchar(64) NOT NULL,
   `creation_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `expiration_date` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `used` tinyint(1) NOT NULL
+  `used` int(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -141,7 +116,33 @@ CREATE TABLE `refresh_token` (
 --
 
 CREATE TABLE `role` (
-  `role` varchar(30) NOT NULL
+  `id` int(11) NOT NULL,
+  `role` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff`
+--
+
+CREATE TABLE `staff` (
+  `id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `birthday` date NOT NULL,
+  `birth_country` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `staff_tole_in_movie`
+--
+
+CREATE TABLE `staff_tole_in_movie` (
+  `role` int(11) NOT NULL,
+  `movie` int(11) NOT NULL,
+  `staff` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -151,11 +152,10 @@ CREATE TABLE `role` (
 --
 
 CREATE TABLE `user` (
-  `uuid` varchar(36) NOT NULL,
-  `email` varchar(70) NOT NULL,
-  `user_name` varchar(50) NOT NULL,
-  `password_hash` char(250) NOT NULL,
-  `role` varchar(30) NOT NULL,
+  `id` int(11) NOT NULL,
+  `emai` varchar(75) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `password_hash` varchar(250) NOT NULL,
   `creation_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -164,49 +164,35 @@ CREATE TABLE `user` (
 --
 
 --
--- Indexes for table `acted`
+-- Indexes for table `country`
 --
-ALTER TABLE `acted`
-  ADD PRIMARY KEY (`movie`,`actor`),
-  ADD KEY `actor` (`actor`);
-
---
--- Indexes for table `actor`
---
-ALTER TABLE `actor`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `directed`
---
-ALTER TABLE `directed`
-  ADD PRIMARY KEY (`movie`,`director`),
-  ADD KEY `director` (`director`);
-
---
--- Indexes for table `director`
---
-ALTER TABLE `director`
+ALTER TABLE `country`
   ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `genre`
 --
 ALTER TABLE `genre`
-  ADD PRIMARY KEY (`name`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `genre_movie`
 --
 ALTER TABLE `genre_movie`
-  ADD PRIMARY KEY (`movie`,`genre`),
-  ADD KEY `genre` (`genre`);
+  ADD PRIMARY KEY (`movie`,`genre`);
 
 --
 -- Indexes for table `movie`
 --
 ALTER TABLE `movie`
-  ADD PRIMARY KEY (`uuid`);
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `productions_country`
+--
+ALTER TABLE `productions_country`
+  ADD PRIMARY KEY (`movie`,`country`),
+  ADD KEY `country` (`country`);
 
 --
 -- Indexes for table `rate`
@@ -219,39 +205,86 @@ ALTER TABLE `rate`
 -- Indexes for table `refresh_token`
 --
 ALTER TABLE `refresh_token`
-  ADD PRIMARY KEY (`uuid`),
-  ADD KEY `user_refresh_token` (`user_uuid`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_token` (`user_id`);
 
 --
 -- Indexes for table `role`
 --
 ALTER TABLE `role`
-  ADD PRIMARY KEY (`role`);
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `staff`
+--
+ALTER TABLE `staff`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `birth_country` (`birth_country`);
+
+--
+-- Indexes for table `staff_tole_in_movie`
+--
+ALTER TABLE `staff_tole_in_movie`
+  ADD PRIMARY KEY (`role`,`movie`,`staff`),
+  ADD KEY `movie` (`movie`),
+  ADD KEY `staff` (`staff`);
 
 --
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`uuid`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `user_name` (`user_name`),
-  ADD UNIQUE KEY `email_2` (`email`),
-  ADD KEY `user_role` (`role`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `actor`
+-- AUTO_INCREMENT for table `country`
 --
-ALTER TABLE `actor`
+ALTER TABLE `country`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `director`
+-- AUTO_INCREMENT for table `genre`
 --
-ALTER TABLE `director`
+ALTER TABLE `genre`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `movie`
+--
+ALTER TABLE `movie`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `rate`
+--
+ALTER TABLE `rate`
+  MODIFY `user` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `refresh_token`
+--
+ALTER TABLE `refresh_token`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `role`
+--
+ALTER TABLE `role`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `staff`
+--
+ALTER TABLE `staff`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -259,44 +292,44 @@ ALTER TABLE `director`
 --
 
 --
--- Constraints for table `acted`
---
-ALTER TABLE `acted`
-  ADD CONSTRAINT `acted` FOREIGN KEY (`movie`) REFERENCES `movie` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `actor` FOREIGN KEY (`actor`) REFERENCES `actor` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `directed`
---
-ALTER TABLE `directed`
-  ADD CONSTRAINT `directed` FOREIGN KEY (`movie`) REFERENCES `movie` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `director` FOREIGN KEY (`director`) REFERENCES `director` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Constraints for table `genre_movie`
 --
 ALTER TABLE `genre_movie`
-  ADD CONSTRAINT `genre` FOREIGN KEY (`genre`) REFERENCES `genre` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `genre_to_movie` FOREIGN KEY (`movie`) REFERENCES `movie` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `movie_genre` FOREIGN KEY (`movie`) REFERENCES `genre` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `productions_country`
+--
+ALTER TABLE `productions_country`
+  ADD CONSTRAINT `country` FOREIGN KEY (`country`) REFERENCES `country` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `production_movie` FOREIGN KEY (`movie`) REFERENCES `movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `rate`
 --
 ALTER TABLE `rate`
-  ADD CONSTRAINT `movie_rate` FOREIGN KEY (`movie`) REFERENCES `movie` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `user_rate` FOREIGN KEY (`user`) REFERENCES `user` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `movie_rate` FOREIGN KEY (`movie`) REFERENCES `movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `user_rate` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `refresh_token`
 --
 ALTER TABLE `refresh_token`
-  ADD CONSTRAINT `user_refresh_token` FOREIGN KEY (`user_uuid`) REFERENCES `user` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `user_token` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `user`
+-- Constraints for table `staff`
 --
-ALTER TABLE `user`
-  ADD CONSTRAINT `user_role` FOREIGN KEY (`role`) REFERENCES `role` (`role`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `staff`
+  ADD CONSTRAINT `birth_country` FOREIGN KEY (`birth_country`) REFERENCES `country` (`id`);
+
+--
+-- Constraints for table `staff_tole_in_movie`
+--
+ALTER TABLE `staff_tole_in_movie`
+  ADD CONSTRAINT `movie` FOREIGN KEY (`movie`) REFERENCES `movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `role` FOREIGN KEY (`role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `staff` FOREIGN KEY (`staff`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
