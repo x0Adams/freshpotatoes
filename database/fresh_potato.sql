@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Feb 11, 2026 at 08:18 PM
+-- Generation Time: Feb 11, 2026 at 10:03 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -179,7 +179,8 @@ ALTER TABLE `genre`
 -- Indexes for table `genre_movie`
 --
 ALTER TABLE `genre_movie`
-  ADD PRIMARY KEY (`movie`,`genre`);
+  ADD PRIMARY KEY (`movie`,`genre`),
+  ADD KEY `genre_movie` (`genre`);
 
 --
 -- Indexes for table `movie`
@@ -295,7 +296,8 @@ ALTER TABLE `user`
 -- Constraints for table `genre_movie`
 --
 ALTER TABLE `genre_movie`
-  ADD CONSTRAINT `movie_genre` FOREIGN KEY (`movie`) REFERENCES `genre` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `genre_movie` FOREIGN KEY (`genre`) REFERENCES `genre` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `movie_genre` FOREIGN KEY (`movie`) REFERENCES `movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `productions_country`
