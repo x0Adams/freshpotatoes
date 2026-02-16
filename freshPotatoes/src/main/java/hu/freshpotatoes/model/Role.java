@@ -1,17 +1,17 @@
-package hu.freshpotatoes.pojos;
+package hu.freshpotatoes.model;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "genre", schema = "fresh_potatoes")
-public class Genre {
+@Table(name = "role", schema = "fresh_potatoes")
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
+    @Column(name = "role", nullable = false, length = 50)
+    private String role;
 
     public Integer getId() {
         return id;
@@ -21,12 +21,12 @@ public class Genre {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getRole() {
+        return role;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRole(String role) {
+        this.role = role;
     }
 
 }

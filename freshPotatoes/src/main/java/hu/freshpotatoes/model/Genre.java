@@ -1,16 +1,16 @@
-package hu.freshpotatoes.pojos;
+package hu.freshpotatoes.model;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "country", schema = "fresh_potatoes")
-public class Country {
+@Table(name = "genre", schema = "fresh_potatoes")
+public class Genre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
     public Integer getId() {

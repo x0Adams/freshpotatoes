@@ -1,4 +1,4 @@
-package hu.freshpotatoes.pojos;
+package hu.freshpotatoes.model;
 
 import jakarta.persistence.*;
 
