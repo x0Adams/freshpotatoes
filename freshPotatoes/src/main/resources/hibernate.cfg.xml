@@ -8,16 +8,16 @@
         <property name="connection.username">root</property>
         <property name="connection.password"></property>
         <property name="connection.driver_class">org.mariadb.jdbc.Driver</property>
-        <mapping class="hu.freshpotatoes.pojos.Country"/>
-        <mapping class="hu.freshpotatoes.pojos.Genre"/>
-        <mapping class="hu.freshpotatoes.pojos.GenreMovie"/>
-        <mapping class="hu.freshpotatoes.pojos.Movie"/>
-        <mapping class="hu.freshpotatoes.pojos.ProductionsCountry"/>
-        <mapping class="hu.freshpotatoes.pojos.Rate"/>
-        <mapping class="hu.freshpotatoes.pojos.RefreshToken"/>
-        <mapping class="hu.freshpotatoes.pojos.Role"/>
-        <mapping class="hu.freshpotatoes.pojos.Staff"/>
-        <mapping class="hu.freshpotatoes.pojos.StaffToleInMovie"/>
-        <mapping class="hu.freshpotatoes.pojos.User"/>
+        <mapping class="hu.freshpotatoes.model.Country"/>
+        <mapping class="hu.freshpotatoes.model.Genre"/>
+        <mapping class="hu.freshpotatoes.model.GenreMovie"/>
+        <mapping class="hu.freshpotatoes.model.Movie"/>
+        <mapping class="hu.freshpotatoes.model.ProductionsCountry"/>
+        <mapping class="hu.freshpotatoes.model.Rate"/>
+        <mapping class="hu.freshpotatoes.model.RefreshToken"/>
+        <mapping class="hu.freshpotatoes.model.Role"/>
+        <mapping class="hu.freshpotatoes.model.Staff"/>
+        <mapping class="hu.freshpotatoes.model.StaffToleInMovie"/>
+        <mapping class="hu.freshpotatoes.model.User"/>
     </session-factory>
 </hibernate-configuration>
