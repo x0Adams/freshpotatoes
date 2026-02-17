@@ -1,6 +1,6 @@
 package hu.freshpotatoes;
 
-import hu.freshpotatoes.dao.DatabaseConnection;
+import hu.freshpotatoes.config.DatabaseConnection;
 
 import java.sql.SQLException;
 
@@ -12,5 +12,6 @@ public class Main {
             System.out.println("Successfully connected to MariaDB!");
             System.out.println("Driver Name: " + databaseConnection.getConnection().getMetaData().getDriverName());
         }
+        databaseConnection.getConnection().close();
     }
 }

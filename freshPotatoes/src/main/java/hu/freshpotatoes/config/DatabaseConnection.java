@@ -1,4 +1,4 @@
-package hu.freshpotatoes.dao;
+package hu.freshpotatoes.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
