@@ -13,6 +13,14 @@ public class Country {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    public Country(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Country() {
+    }
+
     public Integer getId() {
         return id;
     }

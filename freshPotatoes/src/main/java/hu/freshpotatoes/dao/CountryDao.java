@@ -1,4 +1,7 @@
 package hu.freshpotatoes.dao;
 
-public interface CountryDao {
+import hu.freshpotatoes.model.Country;
+
+public interface CountryDao extends Dao<Country, Integer> {
+    String findByName(String countryName);
 }
