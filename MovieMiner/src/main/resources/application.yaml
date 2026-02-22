@@ -1,3 +1,17 @@
 spring:
   application:
     name: MovieMiner
+
+
+miner:
+  dump:
+    path: "/mnt/ssd/wikidata-dump.json.bz2"
+
+threadpool:
+  size:
+    initial: 5
+    max: 1000
+
+reader:
+  buffer:
+    MB: 200
