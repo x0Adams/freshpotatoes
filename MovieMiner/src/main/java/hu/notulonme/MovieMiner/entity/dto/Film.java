@@ -12,13 +12,12 @@ public record Film(
         String qid,
         String title,
         int duration,
-        Date releaseDate,
+        String releaseDate,
         List<String> genres,
         List<String> actors,
         List<String> directors,
         List<String> productionCountries,
         String youtubeId,
-        String googleKnowledGraphId,
         String wikipediaTitle
 ) implements DumpDocument{
 }

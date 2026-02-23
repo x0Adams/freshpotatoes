@@ -40,7 +40,7 @@ public class ZipReaderService implements Runnable{
                 dumpRepository.offer(line);
                 logLineCount(lineCount);
                 percentage = logPercentage(percentage, tracker.getPercentage());
-                log.info(tracker.getRead());
+                log.debug(tracker.getRead());
             }
         } catch (IOException e) {
             log.error("zip can't be read");
@@ -53,7 +53,7 @@ public class ZipReaderService implements Runnable{
 
     private void logLineCount(long lineCount) {
         if (++lineCount % 1000 == 0) {
-            log.info("lines read: " + lineCount);
+            log.debug("lines read: " + lineCount);
         } else {
             log.debug("lines read: " + lineCount);
         }

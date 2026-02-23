@@ -13,6 +13,6 @@ public record Staff(
         String name,
         String genderQid,
         List<String> citizenships,
-        Date birthday
+        String birthday
 ) implements DumpDocument{
 }

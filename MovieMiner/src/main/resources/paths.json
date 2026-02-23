@@ -34,7 +34,7 @@
   "extraction_paths": {
     "common": {
       "entity_id": "$.id",
-      "instance_of_ids": "$.claims.P31[0].mainsnak.datavalue.value.id",
+      "instance_of_ids": "$.claims.P31[*].mainsnak.datavalue.value.id",
       "english_label": "$.labels.en.value"
     },
     "specific_schemas": {
@@ -48,13 +48,12 @@
       "film": {
         "english_title": "$.labels.en.value",
         "genre_ids": "$.claims.P136[*].mainsnak.datavalue.value.id",
-        "duration_minutes": "$.claims.P2047[*].mainsnak.datavalue.value.amount", //should be 0 instead of *
-        "release_date_time": "$.claims.P577[*].mainsnak.datavalue.value.time", //should be 0 instead of *
-        "youtube_video_id": "$.claims.P1651[*].mainsnak.datavalue.value", //should be 0 instead of *
-        "google_knowledge_graph_id": "$.claims.P2671[*].mainsnak.datavalue.value", //should be 0 instead of 1
+        "duration_minutes": "$.claims.P2047[0].mainsnak.datavalue.value.amount",
+        "release_date_time": "$.claims.P577[0].mainsnak.datavalue.value.time",
+        "youtube_video_id": "$.claims.P1651[0].mainsnak.datavalue.value",
         "actor_ids": "$.claims.P161[*].mainsnak.datavalue.value.id",
         "director_ids": "$.claims.P57[*].mainsnak.datavalue.value.id",
-        "wikipedia_title_api": "$.sitelinks.enwiki.title", //should be url instead of title
+        "wikipedia_title_api": "$.sitelinks.enwiki.title",
         "production_country_ids": "$.claims.P495[*].mainsnak.datavalue.value.id"
       },
       "film_genre": {
@@ -63,8 +62,8 @@
       "actor_or_director": {
         "name": "$.labels.en.value",
         "occupation_ids": "$.claims.P106[*].mainsnak.datavalue.value.id",
-        "gender_id": "$.claims.P21[*].mainsnak.datavalue.value.id", //should be 0 instead of *
-        "birthday_time": "$.claims.P569[*].mainsnak.datavalue.value.time", //should be 0 instead of *
+        "gender_id": "$.claims.P21[0].mainsnak.datavalue.value.id",
+        "birthday_time": "$.claims.P569[0].mainsnak.datavalue.value.time",
         "citizenship_country_id": "$.claims.P27[*].mainsnak.datavalue.value.id"
       },
       "human_gender": {

@@ -13,7 +13,7 @@ public class Batch<T> {
     public static final int BATCH_SIZE = 100;
 
     public Batch() {
-        queue = new LinkedBlockingQueue<>(BATCH_SIZE);
+        queue = new LinkedBlockingQueue<>(BATCH_SIZE + 10);
     }
 
     public int size() {
@@ -28,7 +28,7 @@ public class Batch<T> {
     }
 
     public void put(T entity) {
-        log.info("entity was put inside batch");
+        log.debug("entity was put inside batch");
         queue.add(entity);
     }
 }
