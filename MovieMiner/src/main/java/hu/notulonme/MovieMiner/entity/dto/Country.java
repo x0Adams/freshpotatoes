@@ -8,6 +8,6 @@ public record Country(
         @Id
         String qid,
         String name,
-        String continentQid
+        String continentQid //should be a list
 ) implements DumpDocument {
 }
