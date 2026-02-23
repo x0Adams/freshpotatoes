@@ -1,7 +1,8 @@
-package hu.freshpotatoes.dao.impl;
+package impl;
 
-import hu.freshpotatoes.model.Rate;
-import hu.freshpotatoes.model.RateId;
+import hu.freshpotatoes.dao.impl.GenreMovieDaoImpl;
+import hu.freshpotatoes.model.GenreMovie;
+import hu.freshpotatoes.model.GenreMovieId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RateDaoImplTest {
+class GenreMovieDaoImplTest {
 
     @Mock
     private DataSource dataSource;
@@ -37,7 +38,7 @@ class RateDaoImplTest {
     private ResultSet resultSet;
 
     @InjectMocks
-    private RateDaoImpl rateDao;
+    private GenreMovieDaoImpl genreMovieDao;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -46,40 +47,38 @@ class RateDaoImplTest {
 
     @Test
     void findById() throws SQLException {
-        RateId id = new RateId();
-        id.setUser(1);
-        id.setMovie(2);
+        GenreMovieId id = new GenreMovieId();
+        id.setMovie(1);
+        id.setGenre(2);
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
-        when(resultSet.getInt("user")).thenReturn(1);
-        when(resultSet.getInt("movie")).thenReturn(2);
-        when(resultSet.getByte("rating")).thenReturn((byte) 5);
+        when(resultSet.getInt("movie")).thenReturn(1);
+        when(resultSet.getInt("genre")).thenReturn(2);
 
-        Optional<Rate> result = rateDao.findById(id);
+        Optional<GenreMovie> result = genreMovieDao.findById(id);
 
         assertTrue(result.isPresent());
-        assertEquals(1, result.get().getId().getUser());
-        assertEquals(2, result.get().getId().getMovie());
-        assertEquals((byte) 5, result.get().getRating());
-        assertEquals(1, result.get().getUser().getId());
-        assertEquals(2, result.get().getMovie().getId());
+        assertEquals(1, result.get().getId().getMovie());
+        assertEquals(2, result.get().getId().getGenre());
+        assertEquals(1, result.get().getMovie().getId());
+        assertEquals(2, result.get().getGenre().getId());
         verify(preparedStatement).setInt(1, 1);
         verify(preparedStatement).setInt(2, 2);
     }
 
     @Test
     void findById_NotFound() throws SQLException {
-        RateId id = new RateId();
-        id.setUser(99);
+        GenreMovieId id = new GenreMovieId();
         id.setMovie(99);
+        id.setGenre(99);
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        Optional<Rate> result = rateDao.findById(id);
+        Optional<GenreMovie> result = genreMovieDao.findById(id);
 
         assertFalse(result.isPresent());
         verify(preparedStatement).setInt(1, 99);
@@ -91,72 +90,53 @@ class RateDaoImplTest {
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true, true, false);
-        when(resultSet.getInt("user")).thenReturn(1, 3);
-        when(resultSet.getInt("movie")).thenReturn(2, 4);
-        when(resultSet.getByte("rating")).thenReturn((byte) 4, (byte) 5);
+        when(resultSet.getInt("movie")).thenReturn(1, 3);
+        when(resultSet.getInt("genre")).thenReturn(2, 4);
 
-        List<Rate> results = rateDao.findAll();
+        List<GenreMovie> results = genreMovieDao.findAll();
 
         assertEquals(2, results.size());
-        assertEquals(1, results.get(0).getId().getUser());
-        assertEquals(2, results.get(0).getId().getMovie());
-        assertEquals((byte) 4, results.get(0).getRating());
-        assertEquals(3, results.get(1).getId().getUser());
-        assertEquals(4, results.get(1).getId().getMovie());
-        assertEquals((byte) 5, results.get(1).getRating());
+        assertEquals(1, results.get(0).getId().getMovie());
+        assertEquals(2, results.get(0).getId().getGenre());
+        assertEquals(3, results.get(1).getId().getMovie());
+        assertEquals(4, results.get(1).getId().getGenre());
     }
 
     @Test
     void save() throws SQLException {
-        RateId id = new RateId();
-        id.setUser(1);
-        id.setMovie(2);
-        Rate rate = new Rate();
-        rate.setId(id);
-        rate.setRating((byte) 5);
+        GenreMovieId id = new GenreMovieId();
+        id.setMovie(1);
+        id.setGenre(2);
+        GenreMovie genreMovie = new GenreMovie();
+        genreMovie.setId(id);
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
 
-        Rate savedRate = rateDao.save(rate);
+        GenreMovie savedGenreMovie = genreMovieDao.save(genreMovie);
 
-        assertEquals(1, savedRate.getId().getUser());
-        assertEquals(2, savedRate.getId().getMovie());
-        assertEquals((byte) 5, savedRate.getRating());
+        assertEquals(1, savedGenreMovie.getId().getMovie());
+        assertEquals(2, savedGenreMovie.getId().getGenre());
         verify(preparedStatement).setInt(1, 1);
         verify(preparedStatement).setInt(2, 2);
-        verify(preparedStatement).setByte(3, (byte) 5);
         verify(preparedStatement).executeUpdate();
     }
 
     @Test
-    void update() throws SQLException {
-        RateId id = new RateId();
-        id.setUser(1);
-        id.setMovie(2);
-        Rate rate = new Rate();
-        rate.setId(id);
-        rate.setRating((byte) 3);
-
-        when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-
-        rateDao.update(rate);
-
-        verify(preparedStatement).setByte(1, (byte) 3);
-        verify(preparedStatement).setInt(2, 1);
-        verify(preparedStatement).setInt(3, 2);
-        verify(preparedStatement).executeUpdate();
+    void update() {
+        GenreMovie genreMovie = new GenreMovie();
+        assertDoesNotThrow(() -> genreMovieDao.update(genreMovie));
     }
 
     @Test
     void delete() throws SQLException {
-        RateId id = new RateId();
-        id.setUser(1);
-        id.setMovie(2);
+        GenreMovieId id = new GenreMovieId();
+        id.setMovie(1);
+        id.setGenre(2);
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        rateDao.delete(id);
+        genreMovieDao.delete(id);
 
         verify(preparedStatement).setInt(1, 1);
         verify(preparedStatement).setInt(2, 2);

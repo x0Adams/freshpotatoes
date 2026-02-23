@@ -1,6 +1,7 @@
-package hu.freshpotatoes.dao.impl;
+package impl;
 
-import hu.freshpotatoes.model.Role;
+import hu.freshpotatoes.dao.impl.UserDaoImpl;
+import hu.freshpotatoes.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,11 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RoleDaoImplTest {
+class UserDaoImplTest {
 
     @Mock
     private DataSource dataSource;
@@ -38,11 +36,14 @@ class RoleDaoImplTest {
     private ResultSet resultSet;
 
     @InjectMocks
-    private RoleDaoImpl roleDao;
+    private UserDaoImpl userDao;
+
+    private Instant now;
 
     @BeforeEach
     void setUp() throws SQLException {
         lenient().when(dataSource.getConnection()).thenReturn(connection);
+        now = Instant.now();
     }
 
     @Test
@@ -51,13 +52,19 @@ class RoleDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getInt("id")).thenReturn(1);
-        when(resultSet.getString("role")).thenReturn("ADMIN");
+        when(resultSet.getString("emai")).thenReturn("test@example.com");
+        when(resultSet.getString("name")).thenReturn("John Doe");
+        when(resultSet.getString("password_hash")).thenReturn("hashed_password");
+        when(resultSet.getTimestamp("creation_date")).thenReturn(Timestamp.from(now));
 
-        Optional<Role> result = roleDao.findById(1);
+        Optional<User> result = userDao.findById(1);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
-        assertEquals("ADMIN", result.get().getRole());
+        assertEquals("test@example.com", result.get().getEmai());
+        assertEquals("John Doe", result.get().getName());
+        assertEquals("hashed_password", result.get().getPasswordHash());
+        assertEquals(now, result.get().getCreationDate());
         verify(preparedStatement).setInt(1, 1);
     }
 
@@ -67,7 +74,7 @@ class RoleDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        Optional<Role> result = roleDao.findById(99);
+        Optional<User> result = userDao.findById(99);
 
         assertFalse(result.isPresent());
         verify(preparedStatement).setInt(1, 99);
@@ -77,49 +84,62 @@ class RoleDaoImplTest {
     void findAll() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true, true, false);
-        when(resultSet.getInt("id")).thenReturn(1, 2);
-        when(resultSet.getString("role")).thenReturn("ADMIN", "USER");
+        when(resultSet.next()).thenReturn(true, false);
+        when(resultSet.getInt("id")).thenReturn(1);
+        when(resultSet.getString("emai")).thenReturn("test@example.com");
+        when(resultSet.getString("name")).thenReturn("John Doe");
+        when(resultSet.getString("password_hash")).thenReturn("hashed_password");
+        when(resultSet.getTimestamp("creation_date")).thenReturn(Timestamp.from(now));
 
-        List<Role> results = roleDao.findAll();
+        List<User> results = userDao.findAll();
 
-        assertEquals(2, results.size());
+        assertEquals(1, results.size());
         assertEquals(1, results.get(0).getId());
-        assertEquals("ADMIN", results.get(0).getRole());
-        assertEquals(2, results.get(1).getId());
-        assertEquals("USER", results.get(1).getRole());
+        assertEquals("test@example.com", results.get(0).getEmai());
+        assertEquals("John Doe", results.get(0).getName());
     }
 
     @Test
     void save() throws SQLException {
-        Role role = new Role();
-        role.setRole("MODERATOR");
+        User user = new User();
+        user.setEmai("newuser@example.com");
+        user.setName("Jane Doe");
+        user.setPasswordHash("secret_hash");
+        user.setCreationDate(now);
 
         when(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).thenReturn(preparedStatement);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
-        when(resultSet.getInt(1)).thenReturn(3);
+        when(resultSet.getInt(1)).thenReturn(5);
 
-        Role savedRole = roleDao.save(role);
+        User savedUser = userDao.save(user);
 
-        assertEquals(3, savedRole.getId());
-        assertEquals("MODERATOR", savedRole.getRole());
-        verify(preparedStatement).setString(1, "MODERATOR");
+        assertEquals(5, savedUser.getId());
+        verify(preparedStatement).setString(1, "newuser@example.com");
+        verify(preparedStatement).setString(2, "Jane Doe");
+        verify(preparedStatement).setString(3, "secret_hash");
+        verify(preparedStatement).setTimestamp(4, Timestamp.from(now));
         verify(preparedStatement).executeUpdate();
     }
 
     @Test
     void update() throws SQLException {
-        Role role = new Role();
-        role.setId(1);
-        role.setRole("SUPER_ADMIN");
+        User user = new User();
+        user.setId(1);
+        user.setEmai("updated@example.com");
+        user.setName("Updated Name");
+        user.setPasswordHash("new_hash");
+        user.setCreationDate(now);
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        roleDao.update(role);
+        userDao.update(user);
 
-        verify(preparedStatement).setString(1, "SUPER_ADMIN");
-        verify(preparedStatement).setInt(2, 1);
+        verify(preparedStatement).setString(1, "updated@example.com");
+        verify(preparedStatement).setString(2, "Updated Name");
+        verify(preparedStatement).setString(3, "new_hash");
+        verify(preparedStatement).setTimestamp(4, Timestamp.from(now));
+        verify(preparedStatement).setInt(5, 1);
         verify(preparedStatement).executeUpdate();
     }
 
@@ -127,7 +147,7 @@ class RoleDaoImplTest {
     void delete() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        roleDao.delete(1);
+        userDao.delete(1);
 
         verify(preparedStatement).setInt(1, 1);
         verify(preparedStatement).executeUpdate();

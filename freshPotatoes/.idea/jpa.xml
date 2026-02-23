@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="JpaBuddyIdeaProjectConfig" migrateDefaultValues="false">
-    <option name="migrateDefaultValues" value="false" />
-    <option name="reLastEntityCreationPackage" value="src/main/java/hu/freshpotatoes/pojos" />
-    <option name="reverseEngineeringLastDbConnectionId" value="9c27b2e8-daf6-4bd7-942d-d5283b0d8f11" />
-  </component>
-</project>

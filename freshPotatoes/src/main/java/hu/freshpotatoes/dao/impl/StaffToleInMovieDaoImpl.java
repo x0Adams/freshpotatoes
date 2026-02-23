@@ -1,11 +1,7 @@
 package hu.freshpotatoes.dao.impl;
 
 import hu.freshpotatoes.dao.StaffToleInMovieDao;
-import hu.freshpotatoes.model.Movie;
-import hu.freshpotatoes.model.Role;
-import hu.freshpotatoes.model.Staff;
-import hu.freshpotatoes.model.StaffToleInMovie;
-import hu.freshpotatoes.model.StaffToleInMovieId;
+import hu.freshpotatoes.model.*;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

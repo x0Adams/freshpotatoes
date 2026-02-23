@@ -1,6 +1,7 @@
-package hu.freshpotatoes.dao.impl;
+package impl;
 
-import hu.freshpotatoes.model.User;
+import hu.freshpotatoes.dao.impl.MovieDaoImpl;
+import hu.freshpotatoes.model.Movie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserDaoImplTest {
+class MovieDaoImplTest {
 
     @Mock
     private DataSource dataSource;
@@ -35,14 +36,11 @@ class UserDaoImplTest {
     private ResultSet resultSet;
 
     @InjectMocks
-    private UserDaoImpl userDao;
-
-    private Instant now;
+    private MovieDaoImpl movieDao;
 
     @BeforeEach
     void setUp() throws SQLException {
         lenient().when(dataSource.getConnection()).thenReturn(connection);
-        now = Instant.now();
     }
 
     @Test
@@ -51,19 +49,20 @@ class UserDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getInt("id")).thenReturn(1);
-        when(resultSet.getString("emai")).thenReturn("test@example.com");
-        when(resultSet.getString("name")).thenReturn("John Doe");
-        when(resultSet.getString("password_hash")).thenReturn("hashed_password");
-        when(resultSet.getTimestamp("creation_date")).thenReturn(Timestamp.from(now));
+        when(resultSet.getString("name")).thenReturn("The Matrix");
+        when(resultSet.getString("poster_path")).thenReturn("/matrix.jpg");
+        when(resultSet.getInt("duration")).thenReturn(136);
+        when(resultSet.getDate("release_date")).thenReturn(Date.valueOf("1999-03-31"));
+        when(resultSet.getString("youtube_movie")).thenReturn("yt_link");
+        when(resultSet.getString("google_knowledge_graph")).thenReturn("kg_link");
+        when(resultSet.getString("trailer")).thenReturn("trailer_link");
 
-        Optional<User> result = userDao.findById(1);
+        Optional<Movie> result = movieDao.findById(1);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
-        assertEquals("test@example.com", result.get().getEmai());
-        assertEquals("John Doe", result.get().getName());
-        assertEquals("hashed_password", result.get().getPasswordHash());
-        assertEquals(now, result.get().getCreationDate());
+        assertEquals("The Matrix", result.get().getName());
+        assertEquals(LocalDate.of(1999, 3, 31), result.get().getReleaseDate());
         verify(preparedStatement).setInt(1, 1);
     }
 
@@ -73,7 +72,7 @@ class UserDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        Optional<User> result = userDao.findById(99);
+        Optional<Movie> result = movieDao.findById(99);
 
         assertFalse(result.isPresent());
         verify(preparedStatement).setInt(1, 99);
@@ -85,60 +84,64 @@ class UserDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true, false);
         when(resultSet.getInt("id")).thenReturn(1);
-        when(resultSet.getString("emai")).thenReturn("test@example.com");
-        when(resultSet.getString("name")).thenReturn("John Doe");
-        when(resultSet.getString("password_hash")).thenReturn("hashed_password");
-        when(resultSet.getTimestamp("creation_date")).thenReturn(Timestamp.from(now));
+        when(resultSet.getString("name")).thenReturn("The Matrix");
+        when(resultSet.getString("poster_path")).thenReturn("/matrix.jpg");
+        when(resultSet.getInt("duration")).thenReturn(136);
+        when(resultSet.getDate("release_date")).thenReturn(Date.valueOf("1999-03-31"));
+        when(resultSet.getString("youtube_movie")).thenReturn("yt_link");
+        when(resultSet.getString("google_knowledge_graph")).thenReturn("kg_link");
+        when(resultSet.getString("trailer")).thenReturn("trailer_link");
 
-        List<User> results = userDao.findAll();
+        List<Movie> results = movieDao.findAll();
 
         assertEquals(1, results.size());
         assertEquals(1, results.get(0).getId());
-        assertEquals("test@example.com", results.get(0).getEmai());
-        assertEquals("John Doe", results.get(0).getName());
+        assertEquals("The Matrix", results.get(0).getName());
     }
 
     @Test
     void save() throws SQLException {
-        User user = new User();
-        user.setEmai("newuser@example.com");
-        user.setName("Jane Doe");
-        user.setPasswordHash("secret_hash");
-        user.setCreationDate(now);
+        Movie movie = new Movie();
+        movie.setName("Inception");
+        movie.setPosterPath("/inception.jpg");
+        movie.setDuration(148);
+        movie.setReleaseDate(LocalDate.of(2010, 7, 16));
+        movie.setYoutubeMovie("yt_link");
+        movie.setGoogleKnowledgeGraph("kg_link");
+        movie.setTrailer("trailer_link");
 
         when(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).thenReturn(preparedStatement);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
-        when(resultSet.getInt(1)).thenReturn(5);
+        when(resultSet.getInt(1)).thenReturn(10);
 
-        User savedUser = userDao.save(user);
+        Movie savedMovie = movieDao.save(movie);
 
-        assertEquals(5, savedUser.getId());
-        verify(preparedStatement).setString(1, "newuser@example.com");
-        verify(preparedStatement).setString(2, "Jane Doe");
-        verify(preparedStatement).setString(3, "secret_hash");
-        verify(preparedStatement).setTimestamp(4, Timestamp.from(now));
+        assertEquals(10, savedMovie.getId());
+        assertEquals("Inception", savedMovie.getName());
+        verify(preparedStatement).setString(1, "Inception");
+        verify(preparedStatement).setDate(4, Date.valueOf(LocalDate.of(2010, 7, 16)));
         verify(preparedStatement).executeUpdate();
     }
 
     @Test
     void update() throws SQLException {
-        User user = new User();
-        user.setId(1);
-        user.setEmai("updated@example.com");
-        user.setName("Updated Name");
-        user.setPasswordHash("new_hash");
-        user.setCreationDate(now);
+        Movie movie = new Movie();
+        movie.setId(1);
+        movie.setName("Interstellar");
+        movie.setPosterPath("/interstellar.jpg");
+        movie.setDuration(169);
+        movie.setReleaseDate(LocalDate.of(2014, 11, 7));
+        movie.setYoutubeMovie("yt_link");
+        movie.setGoogleKnowledgeGraph("kg_link");
+        movie.setTrailer("trailer_link");
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        userDao.update(user);
+        movieDao.update(movie);
 
-        verify(preparedStatement).setString(1, "updated@example.com");
-        verify(preparedStatement).setString(2, "Updated Name");
-        verify(preparedStatement).setString(3, "new_hash");
-        verify(preparedStatement).setTimestamp(4, Timestamp.from(now));
-        verify(preparedStatement).setInt(5, 1);
+        verify(preparedStatement).setString(1, "Interstellar");
+        verify(preparedStatement).setInt(8, 1);
         verify(preparedStatement).executeUpdate();
     }
 
@@ -146,7 +149,7 @@ class UserDaoImplTest {
     void delete() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        userDao.delete(1);
+        movieDao.delete(1);
 
         verify(preparedStatement).setInt(1, 1);
         verify(preparedStatement).executeUpdate();

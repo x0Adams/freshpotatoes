@@ -1,5 +1,6 @@
-package hu.freshpotatoes.dao.impl;
+package impl;
 
+import hu.freshpotatoes.dao.impl.RefreshTokenDaoImpl;
 import hu.freshpotatoes.model.RefreshToken;
 import hu.freshpotatoes.model.User;
 import org.junit.jupiter.api.BeforeEach;

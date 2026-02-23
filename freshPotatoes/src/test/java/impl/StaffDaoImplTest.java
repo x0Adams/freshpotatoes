@@ -1,6 +1,8 @@
-package hu.freshpotatoes.dao.impl;
+package impl;
 
-import hu.freshpotatoes.model.Movie;
+import hu.freshpotatoes.dao.impl.StaffDaoImpl;
+import hu.freshpotatoes.model.Country;
+import hu.freshpotatoes.model.Staff;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MovieDaoImplTest {
+class StaffDaoImplTest {
 
     @Mock
     private DataSource dataSource;
@@ -35,7 +37,7 @@ class MovieDaoImplTest {
     private ResultSet resultSet;
 
     @InjectMocks
-    private MovieDaoImpl movieDao;
+    private StaffDaoImpl staffDao;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -48,20 +50,17 @@ class MovieDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getInt("id")).thenReturn(1);
-        when(resultSet.getString("name")).thenReturn("The Matrix");
-        when(resultSet.getString("poster_path")).thenReturn("/matrix.jpg");
-        when(resultSet.getInt("duration")).thenReturn(136);
-        when(resultSet.getDate("release_date")).thenReturn(Date.valueOf("1999-03-31"));
-        when(resultSet.getString("youtube_movie")).thenReturn("yt_link");
-        when(resultSet.getString("google_knowledge_graph")).thenReturn("kg_link");
-        when(resultSet.getString("trailer")).thenReturn("trailer_link");
+        when(resultSet.getString("name")).thenReturn("Steven Spielberg");
+        when(resultSet.getDate("birthday")).thenReturn(Date.valueOf("1946-12-18"));
+        when(resultSet.getInt("birth_country")).thenReturn(10);
 
-        Optional<Movie> result = movieDao.findById(1);
+        Optional<Staff> result = staffDao.findById(1);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
-        assertEquals("The Matrix", result.get().getName());
-        assertEquals(LocalDate.of(1999, 3, 31), result.get().getReleaseDate());
+        assertEquals("Steven Spielberg", result.get().getName());
+        assertEquals(LocalDate.of(1946, 12, 18), result.get().getBirthday());
+        assertEquals(10, result.get().getBirthCountry().getId());
         verify(preparedStatement).setInt(1, 1);
     }
 
@@ -71,7 +70,7 @@ class MovieDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        Optional<Movie> result = movieDao.findById(99);
+        Optional<Staff> result = staffDao.findById(99);
 
         assertFalse(result.isPresent());
         verify(preparedStatement).setInt(1, 99);
@@ -83,64 +82,62 @@ class MovieDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true, false);
         when(resultSet.getInt("id")).thenReturn(1);
-        when(resultSet.getString("name")).thenReturn("The Matrix");
-        when(resultSet.getString("poster_path")).thenReturn("/matrix.jpg");
-        when(resultSet.getInt("duration")).thenReturn(136);
-        when(resultSet.getDate("release_date")).thenReturn(Date.valueOf("1999-03-31"));
-        when(resultSet.getString("youtube_movie")).thenReturn("yt_link");
-        when(resultSet.getString("google_knowledge_graph")).thenReturn("kg_link");
-        when(resultSet.getString("trailer")).thenReturn("trailer_link");
+        when(resultSet.getString("name")).thenReturn("Steven Spielberg");
+        when(resultSet.getDate("birthday")).thenReturn(Date.valueOf("1946-12-18"));
+        when(resultSet.getInt("birth_country")).thenReturn(10);
 
-        List<Movie> results = movieDao.findAll();
+        List<Staff> results = staffDao.findAll();
 
         assertEquals(1, results.size());
         assertEquals(1, results.get(0).getId());
-        assertEquals("The Matrix", results.get(0).getName());
+        assertEquals("Steven Spielberg", results.get(0).getName());
+        assertEquals(LocalDate.of(1946, 12, 18), results.get(0).getBirthday());
     }
 
     @Test
     void save() throws SQLException {
-        Movie movie = new Movie();
-        movie.setName("Inception");
-        movie.setPosterPath("/inception.jpg");
-        movie.setDuration(148);
-        movie.setReleaseDate(LocalDate.of(2010, 7, 16));
-        movie.setYoutubeMovie("yt_link");
-        movie.setGoogleKnowledgeGraph("kg_link");
-        movie.setTrailer("trailer_link");
+        Country country = new Country();
+        country.setId(10);
+
+        Staff staff = new Staff();
+        staff.setName("Christopher Nolan");
+        staff.setBirthday(LocalDate.of(1970, 7, 30));
+        staff.setBirthCountry(country);
 
         when(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).thenReturn(preparedStatement);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
-        when(resultSet.getInt(1)).thenReturn(10);
+        when(resultSet.getInt(1)).thenReturn(2);
 
-        Movie savedMovie = movieDao.save(movie);
+        Staff savedStaff = staffDao.save(staff);
 
-        assertEquals(10, savedMovie.getId());
-        assertEquals("Inception", savedMovie.getName());
-        verify(preparedStatement).setString(1, "Inception");
-        verify(preparedStatement).setDate(4, Date.valueOf(LocalDate.of(2010, 7, 16)));
+        assertEquals(2, savedStaff.getId());
+        assertEquals("Christopher Nolan", savedStaff.getName());
+        verify(preparedStatement).setString(1, "Christopher Nolan");
+        verify(preparedStatement).setDate(2, Date.valueOf(LocalDate.of(1970, 7, 30)));
+        verify(preparedStatement).setInt(3, 10);
         verify(preparedStatement).executeUpdate();
     }
 
     @Test
     void update() throws SQLException {
-        Movie movie = new Movie();
-        movie.setId(1);
-        movie.setName("Interstellar");
-        movie.setPosterPath("/interstellar.jpg");
-        movie.setDuration(169);
-        movie.setReleaseDate(LocalDate.of(2014, 11, 7));
-        movie.setYoutubeMovie("yt_link");
-        movie.setGoogleKnowledgeGraph("kg_link");
-        movie.setTrailer("trailer_link");
+        Country country = new Country();
+        country.setId(10);
+
+        Staff staff = new Staff();
+        staff.setId(1);
+        staff.setName("Quentin Tarantino");
+        staff.setBirthday(LocalDate.of(1963, 3, 27));
+        staff.setBirthCountry(country);
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        movieDao.update(movie);
+        staffDao.update(staff);
 
-        verify(preparedStatement).setString(1, "Interstellar");
-        verify(preparedStatement).setInt(8, 1);
+        verify(preparedStatement).setString(1, "Quentin Tarantino");
+        verify(preparedStatement).setDate(2, Date.valueOf(LocalDate.of(1963, 3, 27)));
+        verify(preparedStatement).setInt(3, 10);
+        verify(preparedStatement).setInt(4, 1);
         verify(preparedStatement).executeUpdate();
     }
 
@@ -148,7 +145,7 @@ class MovieDaoImplTest {
     void delete() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        movieDao.delete(1);
+        staffDao.delete(1);
 
         verify(preparedStatement).setInt(1, 1);
         verify(preparedStatement).executeUpdate();

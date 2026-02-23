@@ -1,7 +1,7 @@
-package hu.freshpotatoes.dao.impl;
+package impl;
 
-import hu.freshpotatoes.model.Country;
-import hu.freshpotatoes.model.Staff;
+import hu.freshpotatoes.dao.impl.GenreDaoImpl;
+import hu.freshpotatoes.model.Genre;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class StaffDaoImplTest {
+class GenreDaoImplTest {
 
     @Mock
     private DataSource dataSource;
@@ -36,7 +35,7 @@ class StaffDaoImplTest {
     private ResultSet resultSet;
 
     @InjectMocks
-    private StaffDaoImpl staffDao;
+    private GenreDaoImpl genreDao;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -49,17 +48,13 @@ class StaffDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getInt("id")).thenReturn(1);
-        when(resultSet.getString("name")).thenReturn("Steven Spielberg");
-        when(resultSet.getDate("birthday")).thenReturn(Date.valueOf("1946-12-18"));
-        when(resultSet.getInt("birth_country")).thenReturn(10);
+        when(resultSet.getString("name")).thenReturn("Action");
 
-        Optional<Staff> result = staffDao.findById(1);
+        Optional<Genre> result = genreDao.findById(1);
 
         assertTrue(result.isPresent());
         assertEquals(1, result.get().getId());
-        assertEquals("Steven Spielberg", result.get().getName());
-        assertEquals(LocalDate.of(1946, 12, 18), result.get().getBirthday());
-        assertEquals(10, result.get().getBirthCountry().getId());
+        assertEquals("Action", result.get().getName());
         verify(preparedStatement).setInt(1, 1);
     }
 
@@ -69,7 +64,7 @@ class StaffDaoImplTest {
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
 
-        Optional<Staff> result = staffDao.findById(99);
+        Optional<Genre> result = genreDao.findById(99);
 
         assertFalse(result.isPresent());
         verify(preparedStatement).setInt(1, 99);
@@ -79,64 +74,49 @@ class StaffDaoImplTest {
     void findAll() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true, false);
-        when(resultSet.getInt("id")).thenReturn(1);
-        when(resultSet.getString("name")).thenReturn("Steven Spielberg");
-        when(resultSet.getDate("birthday")).thenReturn(Date.valueOf("1946-12-18"));
-        when(resultSet.getInt("birth_country")).thenReturn(10);
+        when(resultSet.next()).thenReturn(true, true, false);
+        when(resultSet.getInt("id")).thenReturn(1, 2);
+        when(resultSet.getString("name")).thenReturn("Action", "Comedy");
 
-        List<Staff> results = staffDao.findAll();
+        List<Genre> results = genreDao.findAll();
 
-        assertEquals(1, results.size());
+        assertEquals(2, results.size());
         assertEquals(1, results.get(0).getId());
-        assertEquals("Steven Spielberg", results.get(0).getName());
-        assertEquals(LocalDate.of(1946, 12, 18), results.get(0).getBirthday());
+        assertEquals("Action", results.get(0).getName());
+        assertEquals(2, results.get(1).getId());
+        assertEquals("Comedy", results.get(1).getName());
     }
 
     @Test
     void save() throws SQLException {
-        Country country = new Country();
-        country.setId(10);
-
-        Staff staff = new Staff();
-        staff.setName("Christopher Nolan");
-        staff.setBirthday(LocalDate.of(1970, 7, 30));
-        staff.setBirthCountry(country);
+        Genre genre = new Genre();
+        genre.setName("Sci-Fi");
 
         when(connection.prepareStatement(anyString(), eq(Statement.RETURN_GENERATED_KEYS))).thenReturn(preparedStatement);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true);
-        when(resultSet.getInt(1)).thenReturn(2);
+        when(resultSet.getInt(1)).thenReturn(10);
 
-        Staff savedStaff = staffDao.save(staff);
+        Genre savedGenre = genreDao.save(genre);
 
-        assertEquals(2, savedStaff.getId());
-        assertEquals("Christopher Nolan", savedStaff.getName());
-        verify(preparedStatement).setString(1, "Christopher Nolan");
-        verify(preparedStatement).setDate(2, Date.valueOf(LocalDate.of(1970, 7, 30)));
-        verify(preparedStatement).setInt(3, 10);
+        assertEquals(10, savedGenre.getId());
+        assertEquals("Sci-Fi", savedGenre.getName());
+        verify(preparedStatement).setString(1, "Sci-Fi");
         verify(preparedStatement).executeUpdate();
     }
 
     @Test
     void update() throws SQLException {
-        Country country = new Country();
-        country.setId(10);
-
-        Staff staff = new Staff();
-        staff.setId(1);
-        staff.setName("Quentin Tarantino");
-        staff.setBirthday(LocalDate.of(1963, 3, 27));
-        staff.setBirthCountry(country);
+        Genre genre = new Genre();
+        genre.setId(1);
+        genre.setName("Horror");
 
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        staffDao.update(staff);
+        genreDao.update(genre);
 
-        verify(preparedStatement).setString(1, "Quentin Tarantino");
-        verify(preparedStatement).setDate(2, Date.valueOf(LocalDate.of(1963, 3, 27)));
-        verify(preparedStatement).setInt(3, 10);
-        verify(preparedStatement).setInt(4, 1);
+        verify(preparedStatement).setString(1, "Horror");
+        verify(preparedStatement).setInt(2, 1);
         verify(preparedStatement).executeUpdate();
     }
 
@@ -144,7 +124,7 @@ class StaffDaoImplTest {
     void delete() throws SQLException {
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 
-        staffDao.delete(1);
+        genreDao.delete(1);
 
         verify(preparedStatement).setInt(1, 1);
         verify(preparedStatement).executeUpdate();
