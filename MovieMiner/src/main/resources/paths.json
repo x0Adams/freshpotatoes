@@ -1,0 +1,74 @@
+{
+  "comment": "Configuration for Wikidata Data Miner using Jayway JsonPath.",
+  "meta_definitions": {
+    "description": "Reference IDs to identify entity types (Q-codes) and properties (P-codes).",
+    "class_ids_qcodes": {
+      "continent": "Q5107",
+      "country": "Q6256",
+      "film": "Q11424",
+      "short_film": "Q24862",
+      "film_genre": "Q201658",
+      "human": "Q5",
+      "human_gender": "Q48277"
+    },
+    "occupation_ids_qcodes": {
+      "actor": "Q33999",
+      "director": "Q2526255"
+    },
+    "property_ids_pcodes": {
+      "P31": "Instance of (Type check)",
+      "P106": "Occupation (Actor/Director check)",
+      "P30": "Continent",
+      "P136": "Genre",
+      "P2047": "Duration",
+      "P577": "Publication/Release date",
+      "P1651": "YouTube video ID",
+      "P2671": "Google Knowledge Graph ID",
+      "P161": "Cast member",
+      "P57": "Director",
+      "P21": "Sex or gender",
+      "P569": "Date of birth",
+      "P27": "Country of citizenship"
+    }
+  },
+  "extraction_paths": {
+    "common": {
+      "entity_id": "$.id",
+      "instance_of_ids": "$.claims.P31[*].mainsnak.datavalue.value.id",
+      "english_label": "$.labels.en.value"
+    },
+    "specific_schemas": {
+      "continent": {
+        "name": "$.labels.en.value"
+      },
+      "country": {
+        "name": "$.labels.en.value",
+        "continent_id": "$.claims.P30[*].mainsnak.datavalue.value.id"
+      },
+      "film": {
+        "english_title": "$.labels.en.value",
+        "genre_ids": "$.claims.P136[*].mainsnak.datavalue.value.id",
+        "duration_minutes": "$.claims.P2047[0].mainsnak.datavalue.value.amount",
+        "release_date_time": "$.claims.P577[0].mainsnak.datavalue.value.time",
+        "youtube_video_id": "$.claims.P1651[0].mainsnak.datavalue.value",
+        "actor_ids": "$.claims.P161[*].mainsnak.datavalue.value.id",
+        "director_ids": "$.claims.P57[*].mainsnak.datavalue.value.id",
+        "wikipedia_title_api": "$.sitelinks.enwiki.title",
+        "production_country_ids": "$.claims.P495[*].mainsnak.datavalue.value.id"
+      },
+      "film_genre": {
+        "name": "$.labels.en.value"
+      },
+      "actor_or_director": {
+        "name": "$.labels.en.value",
+        "occupation_ids": "$.claims.P106[*].mainsnak.datavalue.value.id",
+        "gender_id": "$.claims.P21[0].mainsnak.datavalue.value.id",
+        "birthday_time": "$.claims.P569[0].mainsnak.datavalue.value.time",
+        "citizenship_country_id": "$.claims.P27[*].mainsnak.datavalue.value.id"
+      },
+      "human_gender": {
+        "name": "$.labels.en.value"
+      }
+    }
+  }
+}
