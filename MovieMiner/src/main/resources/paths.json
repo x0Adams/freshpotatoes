@@ -9,7 +9,9 @@
       "short_film": "Q24862",
       "film_genre": "Q201658",
       "human": "Q5",
-      "human_gender": "Q48277"
+      "human_gender": "Q48277",
+      "animated_film": "Q202866",
+      "anime_film": "Q20650540"
     },
     "occupation_ids_qcodes": {
       "actor": "Q33999",

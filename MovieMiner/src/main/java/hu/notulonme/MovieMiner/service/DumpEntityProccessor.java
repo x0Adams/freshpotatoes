@@ -45,7 +45,7 @@ class DumpEntityProccessor implements Runnable {
 
         List<String> instanceOf = readList("$.extraction_paths.common.instance_of_ids");
 
-        if (instanceOf.contains("Q11424") || instanceOf.contains("Q24862")) {
+        if (instanceOf.contains("Q11424") || instanceOf.contains("Q24862") || instanceOf.contains("Q202866") || instanceOf.contains("Q20650540")) {
             proccessMovieData();
         }
         if (instanceOf.contains("Q5107")) {
