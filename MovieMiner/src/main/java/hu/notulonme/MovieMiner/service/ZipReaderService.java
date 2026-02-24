@@ -1,29 +1,24 @@
 package hu.notulonme.MovieMiner.service;
 
-import hu.notulonme.MovieMiner.component.BufferedReaderSupplier;
+import hu.notulonme.MovieMiner.component.Bz2Reader;
 import hu.notulonme.MovieMiner.repository.JsonDumpRepository;
-import hu.notulonme.MovieMiner.util.TrackedFileInputStream;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 @Service
-public class ZipReaderService implements Runnable{
+public class ZipReaderService implements Runnable {
     private static final Logger log = LogManager.getLogger(ZipReaderService.class);
     private final JsonDumpRepository dumpRepository;
-    private final BufferedReader dump;
-    private final TrackedFileInputStream tracker;
+    private final Bz2Reader dump;
 
-    public ZipReaderService(JsonDumpRepository dumpRepository, TrackedFileInputStream tracker, BufferedReaderSupplier supplier) throws CompressorException {
+    public ZipReaderService(Bz2Reader dump, JsonDumpRepository dumpRepository) throws CompressorException {
         this.dumpRepository = dumpRepository;
-        this.dump = supplier.supply(tracker);
-        this.tracker = tracker;
+        this.dump = dump;
     }
 
     @Override
@@ -32,38 +27,34 @@ public class ZipReaderService implements Runnable{
     }
 
     public void read() {
+        try {
+            dump.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         String line;
-        long lineCount = 0;
-        int percentage = -1;
+        double gbRead = -1;
         try {
             while ((line = dump.readLine()) != null) {
                 dumpRepository.offer(line);
-                logLineCount(lineCount);
-                percentage = logPercentage(percentage, tracker.getPercentage());
-                log.debug(tracker.getRead());
+                gbRead = logGB(gbRead, dump.getReadGB());
+                log.debug("GB read: " + dump.getReadGB());
             }
         } catch (IOException e) {
             log.error("zip can't be read");
             throw new RuntimeException(e);
         }
         dumpRepository.finish();
-        log.info("zip file is read, consisted of " + lineCount + " lines");
+        log.info("zip file is read, consisted of " + dump.getReadGB() + " GB");
 
     }
 
-    private void logLineCount(long lineCount) {
-        if (++lineCount % 1000 == 0) {
-            log.debug("lines read: " + lineCount);
-        } else {
-            log.debug("lines read: " + lineCount);
+
+    private double logGB(double previous, double current) {
+        if ((int) previous % 10 != (int) current % 10) {
+            log.info(current + "GB is read");
         }
-    }
-    private int logPercentage(int previous, int current){
-        if (previous != current) {
-            log.info("zip is read: "+current + "%");
-            return current;
-        }
-        return previous;
+        return current;
     }
 
     @PreDestroy
