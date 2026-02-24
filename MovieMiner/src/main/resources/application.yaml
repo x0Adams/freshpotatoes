@@ -1,6 +1,8 @@
 spring:
   application:
     name: MovieMiner
+  mongodb:
+    uri: mongodb://localhost/dump
 
 
 miner:
@@ -14,4 +16,4 @@ threadpool:
 
 reader:
   buffer:
-    MB: 200
+    MB: 700
