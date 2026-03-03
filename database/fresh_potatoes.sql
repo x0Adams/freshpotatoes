@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Mar 02, 2026 at 12:57 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Mar 03, 2026 at 05:20 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -29,7 +29,6 @@ USE `fresh_potatoes`;
 -- Table structure for table `authorities`
 --
 
-DROP TABLE IF EXISTS `authorities`;
 CREATE TABLE `authorities` (
   `username` varchar(50) NOT NULL,
   `authority` varchar(30) NOT NULL
@@ -38,13 +37,36 @@ CREATE TABLE `authorities` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `continent`
+--
+
+CREATE TABLE `continent` (
+  `id` int(11) NOT NULL,
+  `name` int(11) NOT NULL,
+  `qid` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `country`
 --
 
-DROP TABLE IF EXISTS `country`;
 CREATE TABLE `country` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL
+  `name` varchar(50) NOT NULL,
+  `qid` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `country_continent`
+--
+
+CREATE TABLE `country_continent` (
+  `country` int(11) NOT NULL,
+  `continent` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -53,10 +75,10 @@ CREATE TABLE `country` (
 -- Table structure for table `gender`
 --
 
-DROP TABLE IF EXISTS `gender`;
 CREATE TABLE `gender` (
   `id` int(11) NOT NULL,
-  `name` int(11) NOT NULL
+  `name` int(11) NOT NULL,
+  `qid` varchar(40) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -65,10 +87,10 @@ CREATE TABLE `gender` (
 -- Table structure for table `genre`
 --
 
-DROP TABLE IF EXISTS `genre`;
 CREATE TABLE `genre` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
+  `name` varchar(100) NOT NULL,
+  `qid` varchar(40) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -77,7 +99,6 @@ CREATE TABLE `genre` (
 -- Table structure for table `genre_movie`
 --
 
-DROP TABLE IF EXISTS `genre_movie`;
 CREATE TABLE `genre_movie` (
   `movie` int(11) NOT NULL,
   `genre` int(11) NOT NULL
@@ -89,7 +110,6 @@ CREATE TABLE `genre_movie` (
 -- Table structure for table `movie`
 --
 
-DROP TABLE IF EXISTS `movie`;
 CREATE TABLE `movie` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -97,8 +117,8 @@ CREATE TABLE `movie` (
   `duration` int(11) NOT NULL,
   `release_date` date NOT NULL,
   `youtube_movie` varchar(200) NOT NULL,
-  `google_knowledge_graph` varchar(200) NOT NULL,
-  `trailer` varchar(200) NOT NULL
+  `trailer` varchar(200) NOT NULL,
+  `qid` varchar(40) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -107,7 +127,6 @@ CREATE TABLE `movie` (
 -- Table structure for table `movie_in_playlist`
 --
 
-DROP TABLE IF EXISTS `movie_in_playlist`;
 CREATE TABLE `movie_in_playlist` (
   `id` int(11) NOT NULL,
   `movie_id` int(11) NOT NULL,
@@ -120,7 +139,6 @@ CREATE TABLE `movie_in_playlist` (
 -- Table structure for table `playlist`
 --
 
-DROP TABLE IF EXISTS `playlist`;
 CREATE TABLE `playlist` (
   `id` int(11) NOT NULL,
   `owner_id` int(11) NOT NULL,
@@ -135,7 +153,6 @@ CREATE TABLE `playlist` (
 -- Table structure for table `productions_country`
 --
 
-DROP TABLE IF EXISTS `productions_country`;
 CREATE TABLE `productions_country` (
   `movie` int(11) NOT NULL,
   `country` int(11) NOT NULL
@@ -147,7 +164,6 @@ CREATE TABLE `productions_country` (
 -- Table structure for table `rate`
 --
 
-DROP TABLE IF EXISTS `rate`;
 CREATE TABLE `rate` (
   `user` int(11) NOT NULL,
   `movie` int(11) NOT NULL,
@@ -161,7 +177,6 @@ CREATE TABLE `rate` (
 -- Table structure for table `refresh_token`
 --
 
-DROP TABLE IF EXISTS `refresh_token`;
 CREATE TABLE `refresh_token` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -177,7 +192,6 @@ CREATE TABLE `refresh_token` (
 -- Table structure for table `review`
 --
 
-DROP TABLE IF EXISTS `review`;
 CREATE TABLE `review` (
   `user` int(11) NOT NULL,
   `movie` int(11) NOT NULL,
@@ -191,13 +205,13 @@ CREATE TABLE `review` (
 -- Table structure for table `staff`
 --
 
-DROP TABLE IF EXISTS `staff`;
 CREATE TABLE `staff` (
   `id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `birthday` date NOT NULL,
   `gender_id` int(11) NOT NULL,
-  `birth_country` int(11) NOT NULL
+  `birth_country` int(11) NOT NULL,
+  `qid` varchar(40) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -206,9 +220,8 @@ CREATE TABLE `staff` (
 -- Table structure for table `staff_role_in_movie`
 --
 
-DROP TABLE IF EXISTS `staff_role_in_movie`;
 CREATE TABLE `staff_role_in_movie` (
-  `role` int(11) NOT NULL,
+  `role` enum('actor','director') NOT NULL,
   `movie` int(11) NOT NULL,
   `staff` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -219,7 +232,6 @@ CREATE TABLE `staff_role_in_movie` (
 -- Table structure for table `user`
 --
 
-DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` int(11) NOT NULL,
   `email` varchar(75) NOT NULL,
@@ -236,7 +248,6 @@ CREATE TABLE `user` (
 -- Table structure for table `view`
 --
 
-DROP TABLE IF EXISTS `view`;
 CREATE TABLE `view` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
@@ -254,10 +265,23 @@ ALTER TABLE `authorities`
   ADD PRIMARY KEY (`username`,`authority`);
 
 --
+-- Indexes for table `continent`
+--
+ALTER TABLE `continent`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `country`
 --
 ALTER TABLE `country`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `country_continent`
+--
+ALTER TABLE `country_continent`
+  ADD PRIMARY KEY (`country`,`continent`),
+  ADD KEY `continent_country` (`continent`);
 
 --
 -- Indexes for table `gender`
@@ -362,6 +386,12 @@ ALTER TABLE `view`
 --
 
 --
+-- AUTO_INCREMENT for table `continent`
+--
+ALTER TABLE `continent`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `country`
 --
 ALTER TABLE `country`
@@ -432,6 +462,13 @@ ALTER TABLE `view`
 --
 
 --
+-- Constraints for table `country_continent`
+--
+ALTER TABLE `country_continent`
+  ADD CONSTRAINT `continent_country` FOREIGN KEY (`continent`) REFERENCES `continent` (`id`),
+  ADD CONSTRAINT `country_continent` FOREIGN KEY (`country`) REFERENCES `country` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `genre_movie`
 --
 ALTER TABLE `genre_movie`
@@ -489,21 +526,14 @@ ALTER TABLE `staff`
 -- Constraints for table `staff_role_in_movie`
 --
 ALTER TABLE `staff_role_in_movie`
-  ADD CONSTRAINT `movie` FOREIGN KEY (`movie`) REFERENCES `movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `role` FOREIGN KEY (`role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `staff` FOREIGN KEY (`staff`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `movie_role` FOREIGN KEY (`movie`) REFERENCES `movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `staff_role` FOREIGN KEY (`staff`) REFERENCES `staff` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user`
 --
 ALTER TABLE `user`
   ADD CONSTRAINT `user_gender` FOREIGN KEY (`gender_id`) REFERENCES `gender` (`id`);
-
---
--- Constraints for table `view`
---
-ALTER TABLE `view`
-  ADD CONSTRAINT `movie_view` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
