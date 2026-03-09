@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: DataTransferer
+
+  datasource:
+    url: jdbc:mariadb://localhost:3306/fresh_potatoes
+    username: root
+    password:
+
+  mongodb:
+    uri:uri: mongodb://localhost/dump

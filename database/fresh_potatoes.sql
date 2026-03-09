@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Mar 03, 2026 at 05:20 PM
+-- Generation Time: Mar 09, 2026 at 08:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,8 +42,7 @@ CREATE TABLE `authorities` (
 
 CREATE TABLE `continent` (
   `id` int(11) NOT NULL,
-  `name` int(11) NOT NULL,
-  `qid` int(11) NOT NULL
+  `name` varchar(40) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -54,8 +53,7 @@ CREATE TABLE `continent` (
 
 CREATE TABLE `country` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `qid` int(11) NOT NULL
+  `name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -77,8 +75,7 @@ CREATE TABLE `country_continent` (
 
 CREATE TABLE `gender` (
   `id` int(11) NOT NULL,
-  `name` int(11) NOT NULL,
-  `qid` varchar(40) NOT NULL
+  `name` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -89,8 +86,7 @@ CREATE TABLE `gender` (
 
 CREATE TABLE `genre` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `qid` varchar(40) NOT NULL
+  `name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -117,8 +113,7 @@ CREATE TABLE `movie` (
   `duration` int(11) NOT NULL,
   `release_date` date NOT NULL,
   `youtube_movie` varchar(200) NOT NULL,
-  `trailer` varchar(200) NOT NULL,
-  `qid` varchar(40) NOT NULL
+  `trailer` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -210,8 +205,7 @@ CREATE TABLE `staff` (
   `name` varchar(50) NOT NULL,
   `birthday` date NOT NULL,
   `gender_id` int(11) NOT NULL,
-  `birth_country` int(11) NOT NULL,
-  `qid` varchar(40) NOT NULL
+  `birth_country` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -386,36 +380,6 @@ ALTER TABLE `view`
 --
 
 --
--- AUTO_INCREMENT for table `continent`
---
-ALTER TABLE `continent`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `country`
---
-ALTER TABLE `country`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `gender`
---
-ALTER TABLE `gender`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `genre`
---
-ALTER TABLE `genre`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `movie`
---
-ALTER TABLE `movie`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `movie_in_playlist`
 --
 ALTER TABLE `movie_in_playlist`
@@ -437,12 +401,6 @@ ALTER TABLE `rate`
 -- AUTO_INCREMENT for table `refresh_token`
 --
 ALTER TABLE `refresh_token`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `staff`
---
-ALTER TABLE `staff`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
