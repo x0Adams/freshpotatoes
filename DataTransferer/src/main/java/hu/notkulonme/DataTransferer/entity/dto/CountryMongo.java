@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Document(collation = "country")
+@Document(collection = "country")
 public record CountryMongo(
         @Id
         String qid,

@@ -40,7 +40,7 @@ public class TransferApplication {
                     staff.setName(it.name());
                     int countryCode = Integer.parseInt(it.citizenships().getFirst().substring(1));
                     staff.setBirthCountry(countries.get(countryCode));
-                    var buffer = it.birthday().split("\\.");
+                    var buffer = it.birthday().split("-");
                     int year = Integer.parseInt(buffer[0]);
                     int month = Integer.parseInt(buffer[1]) == 0 ? 1 : Integer.parseInt(buffer[1]);
                     int day = Integer.parseInt(buffer[2]) == 0 ? 1 : Integer.parseInt(buffer[2]);
@@ -60,7 +60,7 @@ public class TransferApplication {
                     movie.setId(it.getIdFromQid());
                     movie.setName(it.title());
                     movie.setDuration(it.duration());
-                    var buffer = it.releaseDate().split("\\.");
+                    var buffer = it.releaseDate().split("-");
                     int year = Integer.parseInt(buffer[0]);
                     int month = Integer.parseInt(buffer[1]) == 0 ? 1 : Integer.parseInt(buffer[1]);
                     int day = Integer.parseInt(buffer[2]) == 0 ? 1 : Integer.parseInt(buffer[2]);
@@ -97,6 +97,9 @@ public class TransferApplication {
 
                 })
                 .toList();
+
+        System.out.println(movieList.size());
+
 
         saveMovies(movieList);
 
@@ -143,7 +146,15 @@ public class TransferApplication {
                     country.setId(it.getIdFromQid());
                     country.setName(it.name());
                     HashSet<Continent> continentList = it.continentQid().stream()
-                            .mapToInt(con -> Integer.parseInt(con.substring(1)))
+                            .mapToInt(con -> {
+                                try {
+                                    return Integer.parseInt(con.substring(1)) ;
+                                } catch (NumberFormatException e) {
+                                    return 0;
+                                }
+
+                            }
+                            )
                             .mapToObj(continents::get)
                             .collect(Collectors.toCollection(HashSet::new));
                     country.setContinents(continentList);

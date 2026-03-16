@@ -16,19 +16,19 @@ public class Movie {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "poster_path", nullable = false, length = 150)
+    @Column(name = "poster_path", nullable = true, length = 150)
     private String posterPath;
 
     @Column(name = "duration", nullable = false)
     private Integer duration;
 
-    @Column(name = "release_date", nullable = false)
+    @Column(name = "release_date", nullable = true)
     private LocalDate releaseDate;
 
-    @Column(name = "youtube_movie", nullable = false, length = 200)
+    @Column(name = "youtube_movie", nullable = true, length = 200)
     private String youtubeMovie;
 
-    @Column(name = "trailer", nullable = false, length = 200)
+    @Column(name = "trailer", nullable = true, length = 200)
     private String trailer;
 
     @ManyToMany

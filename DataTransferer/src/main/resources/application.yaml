@@ -8,4 +8,4 @@ spring:
     password:
 
   mongodb:
-    uri:uri: mongodb://localhost/dump
+    uri: mongodb://localhost/dump
