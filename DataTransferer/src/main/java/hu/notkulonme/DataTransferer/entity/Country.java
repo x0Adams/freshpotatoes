@@ -15,7 +15,12 @@ public class Country {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "country_continent",
+            joinColumns = @JoinColumn(name = "country"),
+            inverseJoinColumns = @JoinColumn(name = "continent")
+    )
     private Set<Continent> continents = new LinkedHashSet<>();
 
     public Integer getId() {
