@@ -5,32 +5,28 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "staff_role_in_movie", schema = "fresh_potatoes", indexes = {
-        @Index(name = "movie",
-                columnList = "movie_id"),
-        @Index(name = "staff",
-                columnList = "staff_id")})
-public class StaffRoleInMovie {
+@Table(name = "productions_country", schema = "fresh_potatoes")
+public class ProductionsCountry {
     @EmbeddedId
-    private StaffRoleInMovieId id;
+    private ProductionsCountryId id;
 
-    @MapsId("movie")
+    @MapsId("movieId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @MapsId("staff")
+    @MapsId("countryId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "staff_id", nullable = false)
-    private Staff staff;
+    @JoinColumn(name = "country_id", nullable = false)
+    private Country country;
 
-    public StaffRoleInMovieId getId() {
+    public ProductionsCountryId getId() {
         return id;
     }
 
-    public void setId(StaffRoleInMovieId id) {
+    public void setId(ProductionsCountryId id) {
         this.id = id;
     }
 
@@ -42,12 +38,12 @@ public class StaffRoleInMovie {
         this.movie = movie;
     }
 
-    public Staff getStaff() {
-        return staff;
+    public Country getCountry() {
+        return country;
     }
 
-    public void setStaff(Staff staff) {
-        this.staff = staff;
+    public void setCountry(Country country) {
+        this.country = country;
     }
 
 }

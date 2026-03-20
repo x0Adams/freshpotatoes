@@ -16,6 +16,9 @@ public class Country {
     private String name;
 
     @ManyToMany
+    @JoinTable(name = "country_continent", schema = "fresh_potatoes",
+            joinColumns = @JoinColumn(name = "country_id"),
+            inverseJoinColumns = @JoinColumn(name = "continent_id"))
     private Set<Continent> continents = new LinkedHashSet<>();
 
     public Integer getId() {

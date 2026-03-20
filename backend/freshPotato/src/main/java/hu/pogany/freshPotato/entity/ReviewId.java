@@ -9,10 +9,10 @@ import java.util.Objects;
 @Embeddable
 public class ReviewId implements Serializable {
     private static final long serialVersionUID = 8782677580751772476L;
-    @Column(name = "user", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Integer user;
 
-    @Column(name = "movie", nullable = false)
+    @Column(name = "movie_id", nullable = false)
     private Integer movie;
 
     public Integer getUser() {

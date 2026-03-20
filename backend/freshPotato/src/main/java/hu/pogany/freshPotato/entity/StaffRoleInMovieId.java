@@ -2,7 +2,8 @@ package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Lob;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -10,21 +11,21 @@ import java.util.Objects;
 @Embeddable
 public class StaffRoleInMovieId implements Serializable {
     private static final long serialVersionUID = 7573352992902781713L;
-    @Lob
     @Column(name = "role", nullable = false)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private StaffRole role;
 
-    @Column(name = "movie", nullable = false)
+    @Column(name = "movie_id", nullable = false)
     private Integer movie;
 
-    @Column(name = "staff", nullable = false)
+    @Column(name = "staff_id", nullable = false)
     private Integer staff;
 
-    public String getRole() {
+    public StaffRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(StaffRole role) {
         this.role = role;
     }
 

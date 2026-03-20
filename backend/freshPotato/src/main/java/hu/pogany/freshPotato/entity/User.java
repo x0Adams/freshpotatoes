@@ -18,8 +18,8 @@ public class User {
     @Column(name = "email", nullable = false, length = 75)
     private String email;
 
-    @Column(name = "name", nullable = false, length = 50)
-    private String name;
+    @Column(name = "username", nullable = false, length = 50)
+    private String username;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "gender_id", nullable = false)
@@ -34,6 +34,10 @@ public class User {
     @ColumnDefault("current_timestamp()")
     @Column(name = "creation_date", nullable = false)
     private Instant creationDate;
+
+    @ColumnDefault("1")
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled;
 
     @OneToMany(mappedBy = "owner")
     private Set<Playlist> playlists = new LinkedHashSet<>();
@@ -63,12 +67,12 @@ public class User {
         this.email = email;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Gender getGender() {
@@ -101,6 +105,14 @@ public class User {
 
     public void setCreationDate(Instant creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     public Set<Playlist> getPlaylists() {
