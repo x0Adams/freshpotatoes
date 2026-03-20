@@ -1,4 +1,4 @@
-package hu.pogany.freshPotato.dto.entity;
+package hu.pogany.freshPotato.dto;
 
 public record MovieDirectorDto(Integer id, String name) {
 }
