@@ -26,9 +26,9 @@ public class MovieController {
         return movieService.searchForName(name);
     }
 
-    @GetMapping("/api/movie/{uuid}")
-    public MovieDto getMovie(@PathVariable String uuid) {
-        return movieService.getMovie(uuid);
+    @GetMapping("/api/movie/{id}")
+    public MovieDto getMovie(@PathVariable int id) {
+        return movieService.getMovie(id);
     }
 
     @GetMapping("/api/movie/")

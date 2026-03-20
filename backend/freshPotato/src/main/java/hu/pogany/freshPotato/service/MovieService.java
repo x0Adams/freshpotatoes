@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.*;
+import hu.pogany.freshPotato.mapper.Mapper;
 import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,40 +17,24 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class MovieService {
     private final MovieRepository movieRepository;
+    private final Mapper mapper;
 
-    public MovieService(MovieRepository movieRepository) {
+    public MovieService(MovieRepository movieRepository, Mapper mapper) {
         this.movieRepository = movieRepository;
+        this.mapper = mapper;
     }
 
     public List<SearchMovieDto> searchForName(String name) {
         List<Movie> movies = movieRepository.findTop5ByNameIsLike(name + "%", JpaSort.unsafe("LENGTH(name)"));
-        return movies.stream().map(movie -> new SearchMovieDto(movie.getUuid(), movie.getName(), movie.getPosterPath())).toList();
+        return mapper.toSearchMovieDtoList(movies);
     }
 
-    public MovieDto getMovie(String uuid) {
-        Movie movie = movieRepository.findById(uuid).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
-
-        Set<MovieActorDto> actorDtos = movie.getActors().stream().map(actor -> new MovieActorDto(actor.getId(), actor.getName())).collect(Collectors.toSet());
-        Set<MovieDirectorDto> directorDtos = movie.getDirectors().stream().map(director -> new MovieDirectorDto(director.getId(), director.getName())).collect(Collectors.toSet());
-        Set<GenreDto> genres = movie.getGenres().stream().map(genre -> new GenreDto(genre.getName())).collect(Collectors.toSet());
-
-        return new MovieDto(
-                movie.getUuid(),
-                movie.getName(),
-                movie.getPosterPath(),
-                movie.getDuration(),
-                movie.getReleaseDate(),
-                movie.getYoutubeMovie(),
-                movie.getGoogleKnowledgeGraph(),
-                movie.getCountryOfOrigin(),
-                movie.getTrailer(),
-                genres,
-                actorDtos,
-                directorDtos
-        );
+    public MovieDto getMovie(int id) {
+        Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
+        return mapper.toMovieDto(movie);
     }
 
     public List<SearchMovieDto> randomMovies() {
-        return movieRepository.findRandom().stream().map(movie -> new SearchMovieDto(movie.getUuid(), movie.getName(), movie.getPosterPath())).toList();
+        return mapper.toSearchMovieDtoList(movieRepository.findRandom());
     }
 }

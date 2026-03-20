@@ -9,11 +9,11 @@ public record MovieDto(String id,
                        Integer duration,
                        LocalDate releaseDate,
                        String youtubeMovie,
-                       String googleKnowledgeGraph,
-                       String countryOfOrigin,
+                       String wikipediaTitle,
                        String trailer,
                        Set<GenreDto> genres,
-                       Set<MovieActorDto> actors,
-                       Set<MovieDirectorDto> directors
+                       Set<MovieStaffDto> actors,
+                       Set<MovieStaffDto> directors,
+                       Set<CountryDto> productionCountries
                        ){
 }

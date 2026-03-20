@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "movie", schema = "fresh_potatoes", indexes = {@Index(name = "name",
@@ -36,12 +37,18 @@ public class Movie {
     private String trailer;
 
     @ManyToMany
+    @JoinTable(name = "genre_movie", schema = "fresh_potatoes",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private Set<Genre> genres = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "movie")
     private Set<MovieInPlaylist> movieInPlaylists = new LinkedHashSet<>();
 
     @ManyToMany
+    @JoinTable(name = "productions_country", schema = "fresh_potatoes",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "country_id"))
     private Set<Country> countries = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "movie")
@@ -163,6 +170,21 @@ public class Movie {
 
     public void setStaffRoleInMovies(Set<StaffRoleInMovie> staffRoleInMovies) {
         this.staffRoleInMovies = staffRoleInMovies;
+    }
+
+    public Set<Staff> getActors() {
+        return getStaffWhereRole(StaffRole.ACTOR);
+    }
+
+    public Set<Staff> getDirectors() {
+        return getStaffWhereRole(StaffRole.DIRECTOR);
+    }
+
+    private Set<Staff> getStaffWhereRole(StaffRole role){
+        return getStaffRoleInMovies().stream()
+                .filter(it -> it.getId().getRole() == role)
+                .map(it -> it.getStaff())
+                .collect(Collectors.toSet());
     }
 
 }
