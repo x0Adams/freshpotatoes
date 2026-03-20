@@ -2,7 +2,7 @@ spring:
   application:
     name: freshPotato
   datasource:
-    url: jdbc:mariadb://localhost:3306/fresh_potato
+    url: jdbc:mariadb://localhost:3306/fresh_potatoes
     username: root
     password:
   jpa:
@@ -11,3 +11,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
+app:
+  wiki:
+    apiUrl: https://en.wikipedia.org/w/api.php
+    rateLimit: 200 # per second
+    userAgent: freshPotatoBot
+    contactEmail:
+
+  youtube:
+    apiUrl: https://www.googleapis.com/youtube/v3/search
+    apiKey:
