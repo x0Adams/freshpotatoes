@@ -1,4 +1,4 @@
-package hu.pogany.freshPotato.dao;
+package hu.pogany.freshPotato.repository;
 
 import hu.pogany.freshPotato.entity.Director;
 import org.springframework.data.jpa.repository.JpaRepository;

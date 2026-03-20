@@ -1,12 +1,9 @@
-package hu.pogany.freshPotato.dao;
+package hu.pogany.freshPotato.repository;
 
-import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, String> {
     User findByEmail(String email);

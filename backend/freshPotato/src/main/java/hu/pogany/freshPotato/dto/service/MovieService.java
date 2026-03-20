@@ -1,6 +1,6 @@
 package hu.pogany.freshPotato.dto.service;
 
-import hu.pogany.freshPotato.dao.MovieRepository;
+import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.dto.entity.*;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;

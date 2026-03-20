@@ -1,4 +1,4 @@
-package hu.pogany.freshPotato.dao;
+package hu.pogany.freshPotato.repository;
 
 import hu.pogany.freshPotato.entity.Movie;
 import org.springframework.data.domain.Sort;
