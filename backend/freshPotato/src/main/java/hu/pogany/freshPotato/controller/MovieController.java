@@ -38,7 +38,7 @@ public class MovieController {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity handleExcpetion(EntityNotFoundException e){
-        return ResponseEntity.status(404).build();
+        return ResponseEntity.status(404).body(e.getMessage());
     }
 
     @ExceptionHandler(SQLException.class)

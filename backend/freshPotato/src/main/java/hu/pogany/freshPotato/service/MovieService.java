@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,10 @@ public class MovieService {
 
     public List<SearchMovieDto> searchForName(String name) {
         List<Movie> movies = movieRepository.findTop5ByNameIsLike(name + "%", JpaSort.unsafe("LENGTH(name)"));
-        return mapper.toSearchMovieDtoList(movies);
+        if (!movies.isEmpty())
+            return mapper.toSearchMovieDtoList(movies);
+        else
+            throw new EntityNotFoundException("No movies found for name: " + name);
     }
 
     public MovieDto getMovie(int id) {
