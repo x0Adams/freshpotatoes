@@ -1,7 +1,7 @@
-package hu.pogany.freshPotato.dto.service;
+package hu.pogany.freshPotato.service;
 
-import hu.pogany.freshPotato.dao.MovieRepository;
-import hu.pogany.freshPotato.dto.entity.*;
+import hu.pogany.freshPotato.dto.*;
+import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.jpa.domain.JpaSort;

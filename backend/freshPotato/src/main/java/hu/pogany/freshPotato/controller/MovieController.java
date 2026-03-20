@@ -1,8 +1,8 @@
 package hu.pogany.freshPotato.controller;
 
-import hu.pogany.freshPotato.dto.entity.MovieDto;
-import hu.pogany.freshPotato.dto.entity.SearchMovieDto;
-import hu.pogany.freshPotato.dto.service.MovieService;
+import hu.pogany.freshPotato.dto.MovieDto;
+import hu.pogany.freshPotato.dto.SearchMovieDto;
+import hu.pogany.freshPotato.service.MovieService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

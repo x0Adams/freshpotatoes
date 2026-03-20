@@ -1,8 +1,4 @@
-package hu.pogany.freshPotato.dto.entity;
-
-import hu.pogany.freshPotato.entity.Actor;
-import hu.pogany.freshPotato.entity.Director;
-import hu.pogany.freshPotato.entity.Genre;
+package hu.pogany.freshPotato.dto;
 
 import java.time.LocalDate;
 import java.util.Set;
