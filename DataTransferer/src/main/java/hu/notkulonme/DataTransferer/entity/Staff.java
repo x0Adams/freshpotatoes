@@ -17,11 +17,11 @@ public class Staff {
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.MERGE)
     @JoinColumn(name = "gender_id", nullable = false)
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.MERGE)
     @JoinColumn(name = "birth_country", nullable = false)
     private Country birthCountry;
 

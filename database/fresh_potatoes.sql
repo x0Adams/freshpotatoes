@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Mar 09, 2026 at 08:51 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Generation Time: Mar 19, 2026 at 07:03 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -108,12 +108,13 @@ CREATE TABLE `genre_movie` (
 
 CREATE TABLE `movie` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `poster_path` varchar(150) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `poster_path` varchar(150) DEFAULT NULL,
   `duration` int(11) NOT NULL,
-  `release_date` date NOT NULL,
-  `youtube_movie` varchar(200) NOT NULL,
-  `trailer` varchar(200) NOT NULL
+  `release_date` date DEFAULT NULL,
+  `wikipedia_title` varchar(250) DEFAULT NULL,
+  `youtube_movie` varchar(200) DEFAULT NULL,
+  `trailer` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -202,7 +203,7 @@ CREATE TABLE `review` (
 
 CREATE TABLE `staff` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
+  `name` varchar(200) NOT NULL,
   `birthday` date NOT NULL,
   `gender_id` int(11) NOT NULL,
   `birth_country` int(11) NOT NULL
@@ -300,7 +301,8 @@ ALTER TABLE `genre_movie`
 -- Indexes for table `movie`
 --
 ALTER TABLE `movie`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `name` (`name`);
 
 --
 -- Indexes for table `movie_in_playlist`

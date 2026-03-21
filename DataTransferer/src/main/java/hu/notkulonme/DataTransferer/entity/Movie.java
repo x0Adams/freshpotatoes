@@ -13,32 +13,53 @@ public class Movie {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name", nullable = false, length = 200)
     private String name;
 
-    @Column(name = "poster_path", nullable = false, length = 150)
+    @Column(name = "poster_path", nullable = true, length = 150)
     private String posterPath;
 
     @Column(name = "duration", nullable = false)
     private Integer duration;
 
-    @Column(name = "release_date", nullable = false)
+    @Column(name = "release_date", nullable = true)
     private LocalDate releaseDate;
 
-    @Column(name = "youtube_movie", nullable = false, length = 200)
+    @Column(name = "youtube_movie", nullable = true, length = 200)
     private String youtubeMovie;
 
-    @Column(name = "trailer", nullable = false, length = 200)
+    @Column(name = "trailer", nullable = true, length = 200)
     private String trailer;
 
-    @ManyToMany
+    @Column(name = "wikipedia_title", nullable = true, length = 250)
+    private  String wikipediaTitle;
+
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "genre_movie",
+            joinColumns = @JoinColumn(name = "movie"),
+            inverseJoinColumns = @JoinColumn(name = "genre")
+    )
     private Set<Genre> genres = new LinkedHashSet<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "productions_country",
+            joinColumns = @JoinColumn(name = "movie"),
+            inverseJoinColumns = @JoinColumn(name = "country")
+    )
     private Set<Country> countries = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "movie")
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StaffRoleInMovie> staffRoleInMovies = new LinkedHashSet<>();
+
+    public String getWikipediaTitle() {
+        return wikipediaTitle;
+    }
+
+    public void setWikipediaTitle(String wikipediaTitle) {
+        this.wikipediaTitle = wikipediaTitle;
+    }
 
     public Integer getId() {
         return id;

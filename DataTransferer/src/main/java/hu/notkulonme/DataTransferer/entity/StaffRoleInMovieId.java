@@ -2,7 +2,6 @@ package hu.notkulonme.DataTransferer.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Lob;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -10,8 +9,7 @@ import java.util.Objects;
 @Embeddable
 public class StaffRoleInMovieId implements Serializable {
     private static final long serialVersionUID = 8360720891502231089L;
-    @Lob
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, length = 10)
     private String role;
 
     @Column(name = "movie", nullable = false)

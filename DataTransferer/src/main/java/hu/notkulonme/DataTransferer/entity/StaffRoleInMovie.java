@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "staff_role_in_movie")
 public class StaffRoleInMovie {
@@ -17,7 +19,7 @@ public class StaffRoleInMovie {
     private Movie movie;
 
     @MapsId("staff")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.MERGE)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "staff", nullable = false)
     private Staff staff;
@@ -46,4 +48,16 @@ public class StaffRoleInMovie {
         this.staff = staff;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StaffRoleInMovie that = (StaffRoleInMovie) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
