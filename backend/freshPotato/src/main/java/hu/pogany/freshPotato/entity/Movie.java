@@ -60,6 +60,10 @@ public class Movie {
     @OneToMany(mappedBy = "movie")
     private Set<StaffRoleInMovie> staffRoleInMovies = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "movie")
+    private Set<View> views;
+
+
     public Integer getId() {
         return id;
     }
@@ -172,6 +176,14 @@ public class Movie {
         this.staffRoleInMovies = staffRoleInMovies;
     }
 
+    public Set<View> getViews() {
+        return views;
+    }
+
+    public void setViews(Set<View> views) {
+        this.views = views;
+    }
+
     public Set<Staff> getActors() {
         return getStaffWhereRole(StaffRole.ACTOR);
     }
@@ -185,6 +197,12 @@ public class Movie {
                 .filter(it -> it.getId().getRole() == role)
                 .map(it -> it.getStaff())
                 .collect(Collectors.toSet());
+    }
+
+    public double getAverageRate() {
+        return getRates().stream()
+                .mapToDouble(Rate::getRating)
+                .average().orElse(0d);
     }
 
 }

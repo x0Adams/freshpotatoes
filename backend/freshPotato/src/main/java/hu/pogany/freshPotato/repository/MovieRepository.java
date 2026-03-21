@@ -12,6 +12,9 @@ import java.util.Optional;
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
     List<Movie> findTop5ByNameIsLike(String name, Sort sort);
 
-    @Query("SELECT movie FROM Movie movie ORDER BY RAND() LIMIT 30")
+    @Query("SELECT movie FROM Movie movie where movie.name != 'None' and movie.wikipediaTitle != 'None' ORDER BY RAND() LIMIT 30")
     List<Movie> findRandom();
+
+    @Query("select m from Movie m left join m.views v group by m order by count(v) desc ")
+    List<Movie> findByPopularity();
 }

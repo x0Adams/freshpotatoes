@@ -1,5 +1,6 @@
 package hu.pogany.freshPotato.entity;
 
+import hu.pogany.freshPotato.dto.MovieDto;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,8 +15,8 @@ public class View {
     @Column(name = "user_id")
     private Integer userId;
 
-    @Column(name = "movie_id", nullable = false)
-    private Integer movieId;
+    @ManyToOne
+    private Movie movie;
 
     public Integer getId() {
         return id;
@@ -33,12 +34,11 @@ public class View {
         this.userId = userId;
     }
 
-    public Integer getMovieId() {
-        return movieId;
+    public Movie getMovie() {
+        return movie;
     }
 
-    public void setMovieId(Integer movieId) {
-        this.movieId = movieId;
+    public void setMovie(Movie movie) {
+        this.movie = movie;
     }
-
 }

@@ -14,6 +14,7 @@ public interface Mapper {
     @Mapping(target = "actors", source = "actors")
     @Mapping(target = "directors", source = "directors")
     @Mapping(target = "productionCountries", source = "countries")
+    @Mapping(target = "rate", source = "averageRate")
     MovieDto toMovieDto(Movie movie);
     Movie toMovie(MovieDto movieDto);
     @Mapping(target = "birthDay", source = "birthday")

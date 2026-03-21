@@ -2,13 +2,14 @@ package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "user", schema = "fresh_potatoes")
+@Table(name = "users", schema = "fresh_potatoes")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +29,10 @@ public class User {
     @Column(name = "age", nullable = false)
     private Integer age;
 
-    @Column(name = "password_hash", nullable = false, length = 250)
-    private String passwordHash;
+    @Column(name = "password", nullable = false, length = 250)
+    private String password;
 
-    @ColumnDefault("current_timestamp()")
+    @CreationTimestamp
     @Column(name = "creation_date", nullable = false)
     private Instant creationDate;
 
@@ -91,12 +92,12 @@ public class User {
         this.age = age;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Instant getCreationDate() {

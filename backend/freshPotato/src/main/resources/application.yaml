@@ -12,11 +12,15 @@ spring:
       hibernate:
         format_sql: true
 app:
+  jwt:
+    secret: veryLongVeryyysecretServerSecret
+    access-token-ttl: 3m
+    refresh-token-ttl: 10d
   wiki:
     apiUrl: https://en.wikipedia.org/w/api.php
     rateLimit: 200 # per second
     userAgent: freshPotatoBot
-    contactEmail:
+    contactEmail: nricsi006@gmail.com
 
   youtube:
     apiUrl: https://www.googleapis.com/youtube/v3/search
