@@ -12,10 +12,10 @@ public class StaffRoleInMovieId implements Serializable {
     @Column(name = "role", nullable = false, length = 10)
     private String role;
 
-    @Column(name = "movie", nullable = false)
+    @Column(name = "movie_id", nullable = false)
     private Integer movie;
 
-    @Column(name = "staff", nullable = false)
+    @Column(name = "staff_id", nullable = false)
     private Integer staff;
 
     public String getRole() {

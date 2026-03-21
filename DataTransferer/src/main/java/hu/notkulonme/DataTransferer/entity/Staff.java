@@ -11,7 +11,7 @@ public class Staff {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name", nullable = false, length = 200)
     private String name;
 
     @Column(name = "birthday", nullable = false)
