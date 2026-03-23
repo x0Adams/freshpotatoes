@@ -5,6 +5,7 @@ import hu.pogany.freshPotato.mapper.Mapper;
 import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.query.Page;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,11 @@ public class MovieService {
     public MovieDto getMovie(int id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
         return mapper.toMovieDto(movie);
+    }
+
+    public List<SearchMovieDto> findPopularMovies(int page, int size) {
+        List<Movie> movies = movieRepository.findByPopularity(Page.page(30, page));
+        return mapper.toSearchMovieDtoList(movies);
     }
 
     public List<SearchMovieDto> randomMovies() {

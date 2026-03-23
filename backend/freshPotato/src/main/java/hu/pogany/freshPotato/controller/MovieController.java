@@ -5,15 +5,13 @@ import hu.pogany.freshPotato.dto.SearchMovieDto;
 import hu.pogany.freshPotato.service.MovieService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/movie")
 public class MovieController {
     private final MovieService movieService;
 
@@ -21,19 +19,25 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping("/api/movie/search/{name}")
+    @GetMapping("/search/{name}")
     public List<SearchMovieDto> searchMovieName(@PathVariable String name) {
         return movieService.searchForName(name);
     }
 
     @GetMapping("/api/movie/{id}")
     public MovieDto getMovie(@PathVariable int id) {
+        //TODO: implement logic for counting visits
         return movieService.getMovie(id);
     }
 
-    @GetMapping("/api/movie/")
+    @GetMapping("/random")
     public List<SearchMovieDto> randomMovies() {
         return movieService.randomMovies();
+    }
+
+    @GetMapping
+    public List<SearchMovieDto> popularMovies(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "30") int size) {
+        return movieService.findPopularMovies(page, size);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

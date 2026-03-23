@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.repository;
 
 import hu.pogany.freshPotato.entity.Movie;
+import org.hibernate.query.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,5 +17,5 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     List<Movie> findRandom();
 
     @Query("select m from Movie m left join m.views v group by m order by count(v) desc ")
-    List<Movie> findByPopularity();
+    List<Movie> findByPopularity(Page page);
 }
