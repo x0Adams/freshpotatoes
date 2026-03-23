@@ -60,7 +60,7 @@ public class Movie {
     @OneToMany(mappedBy = "movie")
     private Set<StaffRoleInMovie> staffRoleInMovies = new LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "movie")
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
     private Set<View> views;
 
 

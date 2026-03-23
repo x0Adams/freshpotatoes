@@ -1,11 +1,14 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.*;
+import hu.pogany.freshPotato.entity.View;
 import hu.pogany.freshPotato.mapper.Mapper;
 import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.query.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,13 +37,24 @@ public class MovieService {
             throw new EntityNotFoundException("No movies found for name: " + name);
     }
 
+    @Transactional(readOnly = false)
+    public MovieDto getMovieSaveView(int movieId, int userId) {
+        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
+        View view = new View();
+        view.setMovie(movie);
+        view.setUserId(userId);
+        movie.getViews().add(view);
+
+        return mapper.toMovieDto(movie);
+    }
+
     public MovieDto getMovie(int id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
         return mapper.toMovieDto(movie);
     }
 
     public List<SearchMovieDto> findPopularMovies(int page, int size) {
-        List<Movie> movies = movieRepository.findByPopularity(Page.page(30, page));
+        List<Movie> movies = movieRepository.findByPopularity(PageRequest.of(page, size));
         return mapper.toSearchMovieDtoList(movies);
     }
 

@@ -21,7 +21,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http.authorizeHttpRequests(
                 requests ->
-                        requests.requestMatchers("/api/secure/**").authenticated()
+                        requests.requestMatchers("/api/*/secure/**").authenticated()
                                 .anyRequest().permitAll()
         );
         http.httpBasic(Customizer.withDefaults());
