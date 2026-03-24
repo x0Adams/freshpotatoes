@@ -54,7 +54,10 @@ public class MovieController {
     }
 
     @GetMapping
-    public List<SearchMovieDto> popularMovies(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") @Max(100) int size) {
+    public List<SearchMovieDto> popularMovies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") @Max(100) int size)
+    {
         return movieService.findPopularMovies(page, size);
     }
 
