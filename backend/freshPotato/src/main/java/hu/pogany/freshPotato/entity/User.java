@@ -22,7 +22,7 @@ public class User {
     @Column(name = "username", nullable = false, length = 50)
     private String username;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "gender_id", nullable = false)
     private Gender gender;
 

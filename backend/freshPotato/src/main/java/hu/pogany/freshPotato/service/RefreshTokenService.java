@@ -1,5 +1,6 @@
-package hu.pogany.freshPotato.Security;
+package hu.pogany.freshPotato.service;
 
+import hu.pogany.freshPotato.Security.RefreshTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -7,7 +8,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 @Service
-public class RefreshTokenService implements RefreshTokenProvider{
+public class RefreshTokenService implements RefreshTokenProvider {
 
     private final PasswordEncoder encoder;
     private final SecureRandom random;
