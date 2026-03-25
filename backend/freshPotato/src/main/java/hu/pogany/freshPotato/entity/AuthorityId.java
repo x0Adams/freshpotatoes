@@ -2,6 +2,8 @@ package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -13,7 +15,8 @@ public class AuthorityId implements Serializable {
     private String username;
 
     @Column(name = "authority", nullable = false, length = 30)
-    private String authority;
+    @Enumerated(EnumType.STRING)
+    private Authorities authority;
 
     public String getUsername() {
         return username;
@@ -23,11 +26,11 @@ public class AuthorityId implements Serializable {
         this.username = username;
     }
 
-    public String getAuthority() {
+    public Authorities getAuthority() {
         return authority;
     }
 
-    public void setAuthority(String authority) {
+    public void setAuthority(Authorities authority) {
         this.authority = authority;
     }
 
