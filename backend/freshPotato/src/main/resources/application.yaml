@@ -13,7 +13,6 @@ spring:
         format_sql: true
 app:
   jwt:
-    secret: veryLongVeryyysecretServerSecret
     access-token-ttl: 3m
     refresh-token-ttl: 10d
   wiki:
