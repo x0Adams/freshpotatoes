@@ -37,7 +37,8 @@ public class SecurityConfig {
                         requests.requestMatchers("/api/*/secure/**").authenticated()
                                 .anyRequest().permitAll()
         );
-        http.httpBasic(Customizer.withDefaults());
+        //http.httpBasic(Customizer.withDefaults());
+        http.oauth2ResourceServer((buhu) -> buhu.jwt(Customizer.withDefaults()));
         return http.build();
     }
 
