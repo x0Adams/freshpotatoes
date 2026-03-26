@@ -14,6 +14,7 @@ import javax.naming.AuthenticationException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -48,11 +49,16 @@ public class RefreshTokenService implements RefreshTokenProvider {
         return encoder.matches(token, hash);
     }
 
-    public void useToken(String token) throws AuthenticationException {
-        String hash = hashToken(token);
+    public void useToken(String fullToken) throws AuthenticationException {
+        int id = getTokenId(fullToken);
+        String tokenValue = getTokenValue(fullToken);
 
-        if (refreshTokenRepository.updateUsedToFalse(hash) == 0)
-            throw new AuthenticationException("token doesn't exist or it was used");
+        Optional<RefreshToken> tokenOpt = refreshTokenRepository.findByIdWithLock(id);
+
+        if (tokenOpt.isEmpty() || !isHashValid(tokenValue, tokenOpt.get().getToken()))
+            throw new AuthenticationException("Invalid token");
+
+        tokenOpt.get().setUsed(true);
     }
 
     @Override
@@ -63,18 +69,26 @@ public class RefreshTokenService implements RefreshTokenProvider {
         token.setUser(user);
         token.setExpirationDate(Instant.now().plusMillis(tokenConfig.refreshTokenTtl().toMillis()));
         token.setToken(hashToken(base64Token));
-        token.setUsed(0);
+        token.setUsed(false);
 
-        refreshTokenRepository.save(token);
+        token = refreshTokenRepository.save(token);
 
-        return base64Token;
+        return String.format("%d.%s", token.getId(), base64Token);
     }
 
     public RefreshToken getToken(String token) {
-        String hash = hashToken(token);
+        int id = getTokenId(token);
 
         return refreshTokenRepository
-                .findByToken(token)
+                .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("token doesn't exist"));
+    }
+
+    private int getTokenId(String fullToken) {
+        return Integer.parseInt(fullToken.substring(0, fullToken.indexOf(".")));
+    }
+
+    private String getTokenValue(String fullToken) {
+        return fullToken.substring(fullToken.indexOf(".") + 1);
     }
 }

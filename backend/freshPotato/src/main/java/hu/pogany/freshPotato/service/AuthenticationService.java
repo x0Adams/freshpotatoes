@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.TokensDto;
+import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.AuthenticationException;
+import java.time.Instant;
 import java.util.Optional;
 
 @Transactional
@@ -39,8 +41,7 @@ public class AuthenticationService {
         if (!user.getUsername().equals(username))
             return false;
 
-        String passHash = passwordEncoder.encode(password);
-        return user.getPassword().equals(passHash);
+        return passwordEncoder.matches(password, user.getPassword());
 
     }
 
@@ -58,6 +59,10 @@ public class AuthenticationService {
 
     public TokensDto refresh(String refreshToken) throws AuthenticationException {
         refreshTokenService.useToken(refreshToken);
+
+        RefreshToken tokenObj = refreshTokenService.getToken(refreshToken);
+        if (tokenObj.getExpirationDate().isBefore(Instant.now()))
+            throw new AuthenticationException("Invalid token");
 
         User issuer = refreshTokenService.getToken(refreshToken).getUser();
 

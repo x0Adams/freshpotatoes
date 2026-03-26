@@ -32,7 +32,7 @@ public class RefreshToken {
     private Instant expirationDate;
 
     @Column(name = "used", nullable = false)
-    private Integer used;
+    private Boolean used;
 
     public Integer getId() {
         return id;
@@ -74,11 +74,11 @@ public class RefreshToken {
         this.expirationDate = expirationDate;
     }
 
-    public Integer getUsed() {
+    public boolean getUsed() {
         return used;
     }
 
-    public void setUsed(Integer used) {
+    public void setUsed(boolean used) {
         this.used = used;
     }
 

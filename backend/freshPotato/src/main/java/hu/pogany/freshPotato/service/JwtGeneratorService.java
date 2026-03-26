@@ -29,7 +29,7 @@ public class JwtGeneratorService implements TokenProvider {
     @Override
     public String issueToken(User user) {
         Instant issued = Instant.now();
-        Instant expires = issued.plusNanos(config.refreshTokenTtl().toNanos());
+        Instant expires = issued.plusNanos(config.accessTokenTtl().toNanos());
 
         List<String> authorities = authorityService.findAuthorityByUser(user.getUsername());
 

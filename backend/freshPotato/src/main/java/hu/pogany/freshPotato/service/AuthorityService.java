@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.entity.Authorities;
+import hu.pogany.freshPotato.entity.Authority;
 import hu.pogany.freshPotato.repository.AuthorityRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ public class AuthorityService {
     public List<String> findAuthorityByUser(String username) {
         return authorityRepository.findByUsername(username)
                 .stream()
+                .map(Authority::getAuthority)
                 .map(Authorities::toString)
                 .toList();
     }
