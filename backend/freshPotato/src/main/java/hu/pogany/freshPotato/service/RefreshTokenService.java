@@ -5,7 +5,7 @@ import hu.pogany.freshPotato.config.TokenConfig;
 import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.RefreshTokenRepository;
-import org.antlr.v4.runtime.Token;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,14 +48,15 @@ public class RefreshTokenService implements RefreshTokenProvider {
         return encoder.matches(token, hash);
     }
 
-    public void useToken(int userId, String token) throws AuthenticationException {
+    public void useToken(String token) throws AuthenticationException {
         String hash = hashToken(token);
 
-        if (refreshTokenRepository.updateUsedToFalse(userId, hash) == 0)
+        if (refreshTokenRepository.updateUsedToFalse(hash) == 0)
             throw new AuthenticationException("token doesn't exist or it was used");
     }
 
-    public String generateTokenForUser(User user) {
+    @Override
+    public String issueToken(User user) {
         String base64Token = getBase64Token();
 
         RefreshToken token = new RefreshToken();
@@ -67,5 +68,13 @@ public class RefreshTokenService implements RefreshTokenProvider {
         refreshTokenRepository.save(token);
 
         return base64Token;
+    }
+
+    public RefreshToken getToken(String token) {
+        String hash = hashToken(token);
+
+        return refreshTokenRepository
+                .findByToken(token)
+                .orElseThrow(() -> new EntityNotFoundException("token doesn't exist"));
     }
 }

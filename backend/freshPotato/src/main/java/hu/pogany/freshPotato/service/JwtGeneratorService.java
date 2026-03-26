@@ -1,5 +1,6 @@
 package hu.pogany.freshPotato.service;
 
+import hu.pogany.freshPotato.Security.TokenProvider;
 import hu.pogany.freshPotato.config.TokenConfig;
 import hu.pogany.freshPotato.entity.User;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
-public class JwtGeneratorService {
+public class JwtGeneratorService implements TokenProvider {
     NimbusJwtEncoder encoder;
     TokenConfig config;
     AuthorityService authorityService;
@@ -25,7 +26,8 @@ public class JwtGeneratorService {
         this.authorityService = authorityService;
     }
 
-    String issueToken(User user) {
+    @Override
+    public String issueToken(User user) {
         Instant issued = Instant.now();
         Instant expires = issued.plusNanos(config.refreshTokenTtl().toNanos());
 

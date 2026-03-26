@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.AuthenticationException;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @Transactional
 @Service
@@ -53,7 +52,22 @@ public class AuthenticationService {
 
         return new TokensDto(
                 jwtService.issueToken(user),
-                refreshTokenService.generateTokenForUser(user)
+                refreshTokenService.issueToken(user)
         );
+    }
+
+    public TokensDto refresh(String refreshToken) throws AuthenticationException {
+        refreshTokenService.useToken(refreshToken);
+
+        User issuer = refreshTokenService.getToken(refreshToken).getUser();
+
+        return new TokensDto(
+                jwtService.issueToken(issuer),
+                refreshTokenService.issueToken(issuer)
+        );
+    }
+
+    public void logout(String token) throws AuthenticationException {
+        refreshTokenService.useToken(token);
     }
 }
