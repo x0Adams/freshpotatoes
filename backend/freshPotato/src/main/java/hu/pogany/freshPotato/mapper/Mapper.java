@@ -1,10 +1,7 @@
 package hu.pogany.freshPotato.mapper;
 
 import hu.pogany.freshPotato.dto.*;
-import hu.pogany.freshPotato.entity.Country;
-import hu.pogany.freshPotato.entity.Gender;
-import hu.pogany.freshPotato.entity.Movie;
-import hu.pogany.freshPotato.entity.Staff;
+import hu.pogany.freshPotato.entity.*;
 import org.mapstruct.Mapping;
 
 import java.util.List;
@@ -24,4 +21,7 @@ public interface Mapper {
     List<MovieDto> toMovieDtoList(List<Movie> movies);
     List<SearchMovieDto> toSearchMovieDtoList(List<Movie> movies);
     SearchMovieDto toSearchMovieDto(Movie movie);
+
+
+    User toUser(RegisterUserDto userDto);
 }

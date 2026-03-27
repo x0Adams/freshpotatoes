@@ -1,6 +1,8 @@
 package hu.pogany.freshPotato.service;
 
+import hu.pogany.freshPotato.dto.RegisterUserDto;
 import hu.pogany.freshPotato.dto.TokensDto;
+import hu.pogany.freshPotato.entity.Gender;
 import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.UserRepository;
@@ -19,12 +21,14 @@ public class AuthenticationService {
     RefreshTokenService refreshTokenService;
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
+    GenderService genderService;
 
-    public AuthenticationService(JwtGeneratorService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthenticationService(JwtGeneratorService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository, PasswordEncoder passwordEncoder, GenderService genderService) {
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.genderService = genderService;
     }
 
     boolean validateUserCredentials(String username, String password){
@@ -74,5 +78,23 @@ public class AuthenticationService {
 
     public void logout(String token) throws AuthenticationException {
         refreshTokenService.useToken(token);
+    }
+
+    public void register(RegisterUserDto registerUserDto) {
+        Gender gender = genderService.findByName(registerUserDto.genderName());
+        User newUser = fromRegisterUserDto(registerUserDto, gender);
+
+        userRepository.save(newUser);
+    }
+
+    private User fromRegisterUserDto(RegisterUserDto registerer, Gender gender) {
+        return User.builder()
+                .username(registerer.username())
+                .email(registerer.email())
+                .gender(gender)
+                .age(registerer.age())
+                .password(passwordEncoder.encode(registerer.password()))
+                .enabled(true)
+                .build();
     }
 }

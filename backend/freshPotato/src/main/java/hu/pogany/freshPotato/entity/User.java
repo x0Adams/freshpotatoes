@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users", schema = "fresh_potatoes")
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -148,4 +150,6 @@ public class User {
         this.reviews = reviews;
     }
 
+    public User() {
+    }
 }
