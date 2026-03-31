@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Min;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-public record RateRequestDto(
+public record RateDto(
         int userId,
         int movieId,
         @Max(5)

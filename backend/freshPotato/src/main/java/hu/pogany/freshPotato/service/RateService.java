@@ -1,9 +1,8 @@
 package hu.pogany.freshPotato.service;
 
-import hu.pogany.freshPotato.dto.RateRequestDto;
+import hu.pogany.freshPotato.dto.RateDto;
 import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.entity.Rate;
-import hu.pogany.freshPotato.entity.RateId;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.repository.RateRepository;
@@ -27,13 +26,13 @@ public class RateService {
     }
 
     @Transactional(readOnly = false)
-    public void saveRating(RateRequestDto rateRequestDto) {
+    public void saveRating(RateDto rateDto) {
         User user = userRepository
-                .findById(rateRequestDto.userId())
+                .findById(rateDto.userId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Movie movie = movieRepository
-                .findById(rateRequestDto.movieId())
+                .findById(rateDto.movieId())
                 .orElseThrow(() -> new EntityNotFoundException("Movie not found"));
 
         Rate rate = new Rate();

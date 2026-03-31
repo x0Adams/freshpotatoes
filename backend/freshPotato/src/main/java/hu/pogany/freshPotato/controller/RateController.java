@@ -1,6 +1,6 @@
 package hu.pogany.freshPotato.controller;
 
-import hu.pogany.freshPotato.dto.RateRequestDto;
+import hu.pogany.freshPotato.dto.RateDto;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.service.RateService;
 import jakarta.persistence.EntityExistsException;
@@ -23,7 +23,7 @@ public class RateController {
     }
 
     @PostMapping("/secure/rate")
-    public ResponseEntity<String> rateMovie(@RequestBody RateRequestDto rate, @AuthenticationPrincipal User user) {
+    public ResponseEntity<String> rateMovie(@RequestBody RateDto rate, @AuthenticationPrincipal User user) {
         ResponseEntity<String> response;
         try {
             rateService.saveRating(rate);
