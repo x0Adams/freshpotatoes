@@ -6,6 +6,7 @@ import hu.pogany.freshPotato.entity.Gender;
 import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.UserRepository;
+import jakarta.persistence.EntityExistsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +85,14 @@ public class AuthenticationService {
         Gender gender = genderService.findByName(registerUserDto.genderName());
         User newUser = fromRegisterUserDto(registerUserDto, gender);
 
+        if (!isNewUserValid(newUser.getUsername(), newUser.getEmail()))
+            throw new EntityExistsException("Username or Email is already in use");
+
         userRepository.save(newUser);
+    }
+
+    public boolean isNewUserValid(String username, String email) {
+        return !userRepository.existsByUsername(username) && !userRepository.existsByEmail(email);
     }
 
     private User fromRegisterUserDto(RegisterUserDto registerer, Gender gender) {

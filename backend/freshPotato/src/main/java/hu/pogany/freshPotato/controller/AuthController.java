@@ -1,0 +1,42 @@
+package hu.pogany.freshPotato.controller;
+
+import hu.pogany.freshPotato.dto.LoginDto;
+import hu.pogany.freshPotato.dto.RegisterUserDto;
+import hu.pogany.freshPotato.dto.TokensDto;
+import hu.pogany.freshPotato.service.AuthenticationService;
+import jakarta.persistence.EntityExistsException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.naming.AuthenticationException;
+
+@Controller
+@RequestMapping("/api/auth")
+public class AuthController {
+    private final AuthenticationService authService;
+
+    public AuthController(AuthenticationService authService) {
+        this.authService = authService;
+    }
+
+    @PostMapping("/login")
+    public TokensDto login(@RequestBody LoginDto loginData) throws AuthenticationException {
+        TokensDto tokens = authService.login(loginData.username(), loginData.password());
+        return tokens;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody RegisterUserDto userData) {
+        try {
+            authService.register(userData);
+        } catch (EntityExistsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok().body("User is created");
+    }
+
+
+}
