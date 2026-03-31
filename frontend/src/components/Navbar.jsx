@@ -43,9 +43,6 @@ function Navbar({ onLoginClick }) {
 
         </div>
       </nav>
-
-      {/* Spacer */}
-      {/* <div style={{ height: '64px' }} /> */}
     </>
   )
 }

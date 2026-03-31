@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 const MOCK_MOVIES = [
-  { id: 1,  title: "Dune: Part Two",        year: 2024, genre: "Sci-Fi",    posterUrl: "upload.wikimedia.org/wikipedia/en/5/52/Dune_Part_Two_poster.jpeg" },
+  { id: 1,  title: "Dune: Part Two",        year: 2024, genre: "Sci-Fi",    posterUrl: "https://upload.wikimedia.org/wikipedia/en/5/52/Dune_Part_Two_poster.jpeg" },
   { id: 2,  title: "The Brutalist",         year: 2024, genre: "Drama",     posterUrl: "https://upload.wikimedia.org/wikipedia/en/7/7c/TheBrutalist2024.png" },
   { id: 3,  title: "Nosferatu",             year: 2024, genre: "Horror",    posterUrl: "https://bendblockbuster.com/wp-content/uploads/2025/02/nosferatu-cover.jpg" },
   { id: 4,  title: "Anora",                 year: 2024, genre: "Romance",   posterUrl: "https://upload.wikimedia.org/wikipedia/en/2/2b/Anora_%282024_film%29_poster.jpg" },
@@ -13,7 +13,6 @@ const MOCK_MOVIES = [
   { id: 10, title: "Longlegs",              year: 2024, genre: "Thriller",  posterUrl: "https://m.media-amazon.com/images/M/MV5BMmJkNGNiNjgtMzFlYy00ZDI5LWI2YzktZGVjYjI5MjQyMGU3XkEyXkFqcGc@._V1_.jpg" },
 ]
 
-// ── Single Slide ───────────────────────────────────────────────────────────────
 function HeroSlide({ movie, isActive }) {
   return (
     <div className={`carousel-item h-100 ${isActive ? 'active' : ''}`}>
@@ -21,11 +20,11 @@ function HeroSlide({ movie, isActive }) {
         <div className="container-fluid h-100">
           <div className="row h-100 align-items-center">
 
-            {/* LEFT — poster with edge glow */}
+            {/* poster-frame */}
             <div className="col-12 col-md-5 hero-poster-wrap">
               <div className="poster-frame">
 
-                {/* Blurred duplicate — creates the glow */}
+                {/* background cust */}
                 <img
                   src={movie.posterUrl}
                   alt=""
@@ -33,7 +32,7 @@ function HeroSlide({ movie, isActive }) {
                   className="poster-glow"
                 />
 
-                {/* Real poster on top */}
+                {/* poster */}
                 <img
                   src={movie.posterUrl}
                   alt={movie.title}
@@ -43,15 +42,13 @@ function HeroSlide({ movie, isActive }) {
               </div>
             </div>
 
-            {/* RIGHT — info */}
+            {/* describtion */}
             <div className="col-12 col-md-7 hero-info">
               <p className="hero-genre">{movie.genre}</p>
               <h1 className="hero-title">{movie.title}</h1>
               <p className="hero-year">{movie.year}</p>
-              <Link
-                to={`/movie/${movie.id}`}
-                className="btn btn-warning fw-semibold px-4 py-2 text-dark"
-              >
+              <Link to={`/movie/${movie.id}`}
+                className="btn btn-warning fw-semibold px-4 py-2 text-dark">
                 View Movie →
               </Link>
             </div>
@@ -63,7 +60,6 @@ function HeroSlide({ movie, isActive }) {
   )
 }
 
-// ── Carousel ───────────────────────────────────────────────────────────────────
 function HeroCarousel() {
   return (
     <div className="hero-carousel">
@@ -71,12 +67,10 @@ function HeroCarousel() {
         id="heroCarousel"
         className="carousel slide h-100"
         data-bs-ride="carousel"
-        data-bs-interval="6000"
-      >
+        data-bs-interval="6000">
         <div className="carousel-indicators">
           {MOCK_MOVIES.map((_, i) => (
-            <button
-              key={i}
+            <button key={i}
               type="button"
               data-bs-target="#heroCarousel"
               data-bs-slide-to={i}

@@ -1,4 +1,5 @@
-/* Navbar scroll effect */
+/* NAVBAR */
+/* navbar scroll effect */
 .cv-nav {
   transition: background 0.35s ease,
               border-color 0.35s ease,
@@ -14,20 +15,20 @@
   border-bottom-color: rgba(255, 193, 7, 0.18) !important;
 }
 
-/* Search bar width */
+/* search bar width */
 .cv-search {
   width: 36%;
 }
 
-/* Search focus ring */
+/* search focus ring */
 .form-control:focus {
   box-shadow: none;
   border-color: rgba(255, 193, 7, 0.5) !important;
 }
-
-/* ── Hero Carousel ───────────────────────────────── */
+/* CAROUSEL */
+/* hero Carousel */
 .hero-carousel {
-  height: 100vh;
+  height: 75vh;
 }
 
 .hero-carousel .carousel,
@@ -41,12 +42,11 @@
   display: flex;
   align-items: center;
   padding: 0 6%;
-  /* Each slide has its own subtle gradient background */
   background: radial-gradient(ellipse at 30% 50%, var(--slide-glow) 0%, #0a0a0f 65%);
   transition: background 0.6s ease;
 }
 
-/* ── Poster wrapper — positions glow behind the image ── */
+/* poster */
 .hero-poster-wrap {
   display: flex;
   justify-content: center;
@@ -59,7 +59,7 @@
   max-width: 250px;
 }
 
-/* The blurred duplicate — this IS the glow */
+/* cust background */
 .poster-glow {
   position: absolute;
   inset: -18%;
@@ -73,7 +73,6 @@
   pointer-events: none;
 }
 
-/* The real poster on top */
 .hero-poster {
   position: relative;
   z-index: 1;
@@ -85,7 +84,7 @@
   display: block;
 }
 
-/* ── Right side — info ───────────────────────────── */
+/* describ */
 .hero-info {
   padding-left: 5%;
 }
@@ -113,7 +112,7 @@
   letter-spacing: 0.05em;
 }
 
-/* ── Carousel controls ───────────────────────────── */
+/* carousel cntrl */
 .hero-carousel .carousel-control-prev,
 .hero-carousel .carousel-control-next {
   width: 5%;
@@ -138,4 +137,175 @@
 .hero-carousel .carousel-indicators .active {
   background-color: #ffc107;
   width: 40px;
+}
+
+/* POSTERCARD */
+.coming-section {
+  padding: 5rem 0 4rem;
+  overflow: hidden;
+}
+
+.coming-section {
+  position: relative;
+}
+
+.coming-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffc107;
+  box-shadow: 0 4px 50px 6px rgba(255, 193, 7, 1);
+}
+
+.coming-heading {
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 900;
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  padding: 0 4rem;
+  margin-bottom: 3rem;
+  /* Outlined text effect */
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+  /* Solid word on top via a second layer */
+  background:
+    linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.55) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/*scroll track */
+.coming-track-wrap {
+  position: relative;
+  padding: 0 4rem;
+}
+/*buttons*/
+.coming-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.07);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  font-size: 1.1rem;
+}
+.coming-nav-btn:hover {
+  background: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.5);
+}
+.coming-nav-btn.prev { left: 0.5rem; }
+.coming-nav-btn.next { right: 0.5rem; }
+
+.coming-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1rem;
+  cursor: grab;
+}
+.coming-track:active {
+  cursor: grabbing;
+}
+/* hide scrollbar */
+.coming-track::-webkit-scrollbar { display: none; }
+.coming-track { scrollbar-width: none; }
+
+/* poster*/
+.coming-card {
+  flex: 0 0 calc(20% - 0.8rem);
+  scroll-snap-align: start;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 2 / 3;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+}
+
+/*poster image */
+.coming-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+/*hover overlay*/
+.coming-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(1rem);
+  -webkit-backdrop-filter: blur(1rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.4rem;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.coming-card:hover .coming-card-overlay {
+  opacity: 1;
+}
+
+.coming-card:hover .coming-card-img {
+  transform: scale(1.05);
+  filter: brightness(0.55);
+}
+
+/**/
+.coming-card-genre {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffc107;
+  margin-bottom: 0.4rem;
+}
+
+.coming-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.coming-card-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/*repsonsive*/
+@media (max-width: 1200px) {
+  .coming-card { flex: 0 0 calc(25% - 0.75rem); }
+}
+@media (max-width: 900px) {
+  .coming-card { flex: 0 0 calc(33% - 0.67rem); }
+  .coming-heading { padding: 0 1.5rem; }
+  .coming-track-wrap { padding: 0 1.5rem; }
+}
+@media (max-width: 600px) {
+  .coming-card { flex: 0 0 calc(55% - 0.5rem); }
 }
