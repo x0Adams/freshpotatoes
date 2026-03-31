@@ -1,7 +1,9 @@
 package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -12,6 +14,8 @@ import java.util.Set;
 @Entity
 @Table(name = "users", schema = "fresh_potatoes")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -150,6 +154,4 @@ public class User {
         this.reviews = reviews;
     }
 
-    public User() {
-    }
 }

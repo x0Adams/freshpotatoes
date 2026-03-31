@@ -16,7 +16,7 @@ public class AuthorityService {
     }
 
     public List<String> findAuthorityByUser(String username) {
-        return authorityRepository.findByUsername(username)
+        return authorityRepository.findByIdUsername(username)
                 .stream()
                 .map(Authority::getAuthority)
                 .map(Authorities::toString)
