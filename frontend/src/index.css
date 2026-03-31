@@ -1,0 +1,141 @@
+/* Navbar scroll effect */
+.cv-nav {
+  transition: background 0.35s ease,
+              border-color 0.35s ease,
+              backdrop-filter 0.35s ease;
+  background: transparent !important;
+  border-bottom: 1px solid transparent;
+}
+
+.cv-nav--scrolled {
+  background: rgba(13, 17, 23, 0.78) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom-color: rgba(255, 193, 7, 0.18) !important;
+}
+
+/* Search bar width */
+.cv-search {
+  width: 36%;
+}
+
+/* Search focus ring */
+.form-control:focus {
+  box-shadow: none;
+  border-color: rgba(255, 193, 7, 0.5) !important;
+}
+
+/* ── Hero Carousel ───────────────────────────────── */
+.hero-carousel {
+  height: 100vh;
+}
+
+.hero-carousel .carousel,
+.hero-carousel .carousel-inner,
+.hero-carousel .carousel-item {
+  height: 100%;
+}
+
+.hero-slide {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 6%;
+  /* Each slide has its own subtle gradient background */
+  background: radial-gradient(ellipse at 30% 50%, var(--slide-glow) 0%, #0a0a0f 65%);
+  transition: background 0.6s ease;
+}
+
+/* ── Poster wrapper — positions glow behind the image ── */
+.hero-poster-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.poster-frame {
+  position: relative;
+  width: 100%;
+  max-width: 250px;
+}
+
+/* The blurred duplicate — this IS the glow */
+.poster-glow {
+  position: absolute;
+  inset: -18%;
+  width: 250%;
+  height: 250%;
+  object-fit: cover;
+  border-radius: 16px;
+  filter: blur(10rem) saturate(1.6);
+  opacity: 0.82;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* The real poster on top */
+.hero-poster {
+  position: relative;
+  z-index: 1;
+  width: 125%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 32px 60px rgba(0, 0, 0, 0.6);
+  display: block;
+}
+
+/* ── Right side — info ───────────────────────────── */
+.hero-info {
+  padding-left: 5%;
+}
+
+.hero-genre {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffc107;
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: 0.75rem;
+}
+
+.hero-year {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 2.2rem;
+  letter-spacing: 0.05em;
+}
+
+/* ── Carousel controls ───────────────────────────── */
+.hero-carousel .carousel-control-prev,
+.hero-carousel .carousel-control-next {
+  width: 5%;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.hero-carousel .carousel-control-prev:hover,
+.hero-carousel .carousel-control-next:hover {
+  opacity: 1;
+}
+
+.hero-carousel .carousel-indicators [data-bs-target] {
+  width: 24px;
+  height: 3px;
+  border-radius: 2px;
+  background-color: rgba(255, 193, 7, 0.5);
+  border: none;
+  transition: all 0.3s;
+}
+
+.hero-carousel .carousel-indicators .active {
+  background-color: #ffc107;
+  width: 40px;
+}
