@@ -39,6 +39,26 @@ public class AuthController {
         return ResponseEntity.ok().body("User is created");
     }
 
+    @PostMapping("/admin/register")
+    public ResponseEntity<String> registerAdmin(@RequestBody RegisterUserDto userData) {
+        try {
+            authService.registerAdmin(userData);
+        } catch (EntityExistsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok().body("Admin is created");
+    }
+
+    @PostMapping("/refresh")
+    public TokensDto refresh(@RequestBody String refreshToken) throws AuthenticationException {
+        return authService.refresh(refreshToken);
+    }
+
+    @PostMapping("/logout")
+    public void logout(@RequestBody String refreshToken) throws AuthenticationException {
+        authService.logout(refreshToken);
+    }
+
     @GetMapping("/me")
     public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
         return jwt.getClaims();
