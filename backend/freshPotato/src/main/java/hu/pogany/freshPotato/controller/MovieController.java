@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Max;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,16 +34,12 @@ public class MovieController {
     }
 
     @GetMapping("/{id}")
-    public MovieDto getMovie(@PathVariable int id, @AuthenticationPrincipal UserDetails user) {
+    public MovieDto getMovie(@PathVariable int id, @AuthenticationPrincipal Jwt token) {
         int userId;
-        if (user == null) {
+        if (token == null) {
             userId = -1;
         } else {
-            try {
-                userId = userService.getIdByUserName(user.getUsername());
-            } catch (EntityNotFoundException e) {
-                userId = -1;
-            }
+            userId = Integer.parseInt(token.getClaimAsString("id"));
         }
 
         return movieService.getMovieSaveView(id, userId);

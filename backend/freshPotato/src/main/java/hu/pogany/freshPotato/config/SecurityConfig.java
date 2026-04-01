@@ -42,6 +42,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         requests ->
                                 requests.requestMatchers("/api/*/secure/**").authenticated()
+                                        .requestMatchers("/api/auth/me").authenticated()
+                                        .requestMatchers("/api/*/admin/**").hasRole("ADMIN")
                                         .anyRequest().permitAll()
                 );
 
@@ -80,12 +82,6 @@ public class SecurityConfig {
     @Bean
     public NimbusJwtDecoder jwtDecoder(RSAPublicKey publicKey) {
         return NimbusJwtDecoder.withPublicKey(publicKey).build();
-    }
-
-
-    @Bean
-    public UserDetailsService userDetailsService(DataSource source) {
-        return new JdbcUserDetailsManager(source);
     }
 
     @Bean

@@ -13,7 +13,7 @@ spring:
         format_sql: ${SHOW_SQL:false}
 app:
   jwt:
-    access-token-ttl: ${ACCESS_TOKEN_TTL:3m}
+    access-token-ttl: ${ACCESS_TOKEN_TTL:10m}
     refresh-token-ttl: ${REFRESH_TOKEN_TTL:10d}
   wiki:
     apiUrl: https://en.wikipedia.org/w/api.php

@@ -6,14 +6,15 @@ import hu.pogany.freshPotato.dto.TokensDto;
 import hu.pogany.freshPotato.service.AuthenticationService;
 import jakarta.persistence.EntityExistsException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
+import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthenticationService authService;
@@ -36,6 +37,11 @@ public class AuthController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok().body("User is created");
+    }
+
+    @GetMapping("/me")
+    public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
+        return jwt.getClaims();
     }
 
 

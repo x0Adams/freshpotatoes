@@ -18,18 +18,20 @@ import java.util.Optional;
 @Transactional
 @Service
 public class AuthenticationService {
-    JwtGeneratorService jwtService;
-    RefreshTokenService refreshTokenService;
-    UserRepository userRepository;
-    PasswordEncoder passwordEncoder;
-    GenderService genderService;
+    private final JwtGeneratorService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final GenderService genderService;
+    private final UserService userService;
 
-    public AuthenticationService(JwtGeneratorService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository, PasswordEncoder passwordEncoder, GenderService genderService) {
+    public AuthenticationService(JwtGeneratorService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository, PasswordEncoder passwordEncoder, GenderService genderService, UserService userService) {
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.genderService = genderService;
+        this.userService = userService;
     }
 
     boolean validateUserCredentials(String username, String password){
@@ -85,15 +87,17 @@ public class AuthenticationService {
         Gender gender = genderService.findByName(registerUserDto.genderName());
         User newUser = fromRegisterUserDto(registerUserDto, gender);
 
-        if (!isNewUserValid(newUser.getUsername(), newUser.getEmail()))
-            throw new EntityExistsException("Username or Email is already in use");
-
-        userRepository.save(newUser);
+        userService.save(newUser);
     }
 
-    public boolean isNewUserValid(String username, String email) {
-        return !userRepository.existsByUsername(username) && !userRepository.existsByEmail(email);
+    public void registerAdmin(RegisterUserDto registerUserDto) {
+        Gender gender = genderService.findByName(registerUserDto.genderName());
+        User newUser = fromRegisterUserDto(registerUserDto, gender);
+
+        userService.saveAsAdmin(newUser);
     }
+
+
 
     private User fromRegisterUserDto(RegisterUserDto registerer, Gender gender) {
         return User.builder()
