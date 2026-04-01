@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.controller;
 
 import hu.pogany.freshPotato.dto.LoginDto;
+import hu.pogany.freshPotato.dto.RefreshTokenDto;
 import hu.pogany.freshPotato.dto.RegisterUserDto;
 import hu.pogany.freshPotato.dto.TokensDto;
 import hu.pogany.freshPotato.service.AuthenticationService;
@@ -50,13 +51,13 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public TokensDto refresh(@RequestBody String refreshToken) throws AuthenticationException {
-        return authService.refresh(refreshToken);
+    public TokensDto refresh(@RequestBody RefreshTokenDto refreshToken) throws AuthenticationException {
+        return authService.refresh(refreshToken.refreshToken());
     }
 
     @PostMapping("/logout")
-    public void logout(@RequestBody String refreshToken) throws AuthenticationException {
-        authService.logout(refreshToken);
+    public void logout(@RequestBody RefreshTokenDto refreshToken) throws AuthenticationException {
+        authService.logout(refreshToken.refreshToken());
     }
 
     @GetMapping("/me")

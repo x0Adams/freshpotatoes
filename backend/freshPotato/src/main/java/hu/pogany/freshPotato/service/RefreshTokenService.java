@@ -6,8 +6,9 @@ import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.RefreshTokenRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.codec.EncodingException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
 @Transactional
 public class RefreshTokenService implements RefreshTokenProvider {
 
+    private static final Logger log = LoggerFactory.getLogger(RefreshTokenService.class);
     private final SecureRandom random;
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenConfig tokenConfig;
@@ -59,7 +61,7 @@ public class RefreshTokenService implements RefreshTokenProvider {
         int id = getTokenId(fullToken);
         String tokenValue = getTokenValue(fullToken);
 
-        Optional<RefreshToken> tokenOpt = refreshTokenRepository.findByIdWithLock(id);
+        Optional<RefreshToken> tokenOpt = refreshTokenRepository.findNotUsedByIdWithLock(id);
 
         if (tokenOpt.isEmpty() || !isHashValid(tokenValue, tokenOpt.get().getToken()))
             throw new AuthenticationException("Invalid token");
@@ -93,6 +95,7 @@ public class RefreshTokenService implements RefreshTokenProvider {
         try {
             return Integer.parseInt(fullToken.substring(0, fullToken.indexOf(".")));
         } catch (Exception e) {
+            log.error("token is malformed: {}", fullToken);
             throw new AuthenticationException("malformed token");
         }
     }
@@ -101,6 +104,7 @@ public class RefreshTokenService implements RefreshTokenProvider {
         try {
             return fullToken.substring(fullToken.indexOf(".") + 1);
         } catch (Exception e) {
+            log.error("token is malformed: {}", fullToken);
             throw new AuthenticationException("malformed token");
         }
 

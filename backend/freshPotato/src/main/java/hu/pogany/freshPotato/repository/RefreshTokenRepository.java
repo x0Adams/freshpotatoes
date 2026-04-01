@@ -13,7 +13,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Inte
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from RefreshToken t where t.id = :id and t.used = false")
-    Optional<RefreshToken> findByIdWithLock(@Param("id") int id);
+    Optional<RefreshToken> findNotUsedByIdWithLock(@Param("id") int id);
 
 
     Optional<RefreshToken> findByToken(String hash);

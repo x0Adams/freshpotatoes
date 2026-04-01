@@ -69,7 +69,7 @@ public class AuthenticationService {
 
         RefreshToken tokenObj = refreshTokenService.getToken(refreshToken);
         if (tokenObj.getExpirationDate().isBefore(Instant.now()))
-            throw new AuthenticationException("Invalid token");
+            throw new AuthenticationException("Expired token");
 
         User issuer = refreshTokenService.getToken(refreshToken).getUser();
 
