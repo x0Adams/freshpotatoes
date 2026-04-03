@@ -14,7 +14,7 @@ public record RegisterUserDto(
         String genderName,
         @NotNull
         @Min(1)
-        @Max(60)
+        @Max(120)
         int age,
         @NotBlank
         String password
