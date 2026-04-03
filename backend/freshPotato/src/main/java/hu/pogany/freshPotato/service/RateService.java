@@ -45,4 +45,7 @@ public class RateService {
         rateRepository.save(rate);
     }
 
+    @Transactional(readOnly = false)
+    public void deleteRating(){}
+
 }

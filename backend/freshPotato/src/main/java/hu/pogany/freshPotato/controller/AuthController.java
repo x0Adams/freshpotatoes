@@ -6,10 +6,12 @@ import hu.pogany.freshPotato.dto.RegisterUserDto;
 import hu.pogany.freshPotato.dto.TokensDto;
 import hu.pogany.freshPotato.service.AuthenticationService;
 import jakarta.persistence.EntityExistsException;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
@@ -25,13 +27,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public TokensDto login(@RequestBody LoginDto loginData) throws AuthenticationException {
+    public TokensDto login(@RequestBody @Valid LoginDto loginData) throws AuthenticationException {
         TokensDto tokens = authService.login(loginData.username(), loginData.password());
         return tokens;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody RegisterUserDto userData) {
+    public ResponseEntity<String> registerUser(@RequestBody @Valid RegisterUserDto userData) {
         try {
             authService.register(userData);
         } catch (EntityExistsException e) {
@@ -41,7 +43,7 @@ public class AuthController {
     }
 
     @PostMapping("/admin/register")
-    public ResponseEntity<String> registerAdmin(@RequestBody RegisterUserDto userData) {
+    public ResponseEntity<String> registerAdmin(@RequestBody @Valid RegisterUserDto userData) {
         try {
             authService.registerAdmin(userData);
         } catch (EntityExistsException e) {
@@ -51,12 +53,12 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public TokensDto refresh(@RequestBody RefreshTokenDto refreshToken) throws AuthenticationException {
+    public TokensDto refresh(@RequestBody @Valid RefreshTokenDto refreshToken) throws AuthenticationException {
         return authService.refresh(refreshToken.refreshToken());
     }
 
     @PostMapping("/logout")
-    public void logout(@RequestBody RefreshTokenDto refreshToken) throws AuthenticationException {
+    public void logout(@RequestBody @Valid RefreshTokenDto refreshToken) throws AuthenticationException {
         authService.logout(refreshToken.refreshToken());
     }
 

@@ -1,13 +1,11 @@
 package hu.pogany.freshPotato.dto;
 
-import jakarta.validation.constraints.NotEmpty;
-import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.NotBlank;
 
-@Validated
 public record LoginDto(
-        @NotEmpty
+        @NotBlank
         String username,
-        @NotEmpty
+        @NotBlank
         String password
 ) {
 }
