@@ -447,3 +447,262 @@
 @media (max-width: 600px) {
   .coming-card { flex: 0 0 calc(55% - 0.5rem); }
 }
+/*movie page*/
+/* ── Movie Page ──────────────────────────────────── */
+.movie-page {
+  min-height: 100vh;
+}
+
+/* Hero area */
+.movie-hero {
+  position: relative;
+  padding: 4rem 4rem 3rem;
+  display: flex;
+  gap: 3.5rem;
+  align-items: flex-start;
+}
+
+.movie-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10,10,15,0.55) 0%, #0a0a0f 100%);
+  z-index: 0;
+}
+
+/* Poster */
+.movie-poster-frame {
+  position: relative;
+  flex-shrink: 0;
+  width: 260px;
+  z-index: 1;
+}
+
+.movie-poster-glow {
+  position: absolute;
+  inset: -15%;
+  width: 130%;
+  height: 130%;
+  object-fit: cover;
+  border-radius: 16px;
+  filter: blur(5rem) saturate(1.8);
+  opacity: 0.75;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.movie-poster-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 24px 50px rgba(0,0,0,0.7);
+  display: block;
+}
+
+/* Info */
+.movie-info {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding-top: 0.5rem;
+}
+
+.movie-genres {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.movie-genre-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffc107;
+  border: 1px solid rgba(255,193,7,0.4);
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+}
+
+.movie-title {
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: 0.5rem;
+}
+
+.movie-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.85rem;
+  margin-bottom: 1.8rem;
+  flex-wrap: wrap;
+}
+
+.movie-meta-row span {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Potato rating */
+.potato-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 1.8rem;
+}
+
+.potato {
+  font-size: 1.5rem;
+  line-height: 1;
+  opacity: 0.2;
+  transition: opacity 0.15s, transform 0.15s;
+  cursor: default;
+}
+
+.potato.lit {
+  opacity: 1;
+}
+
+.potato.half {
+  opacity: 0.55;
+}
+
+.potato-score {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.4);
+  margin-left: 0.4rem;
+}
+
+/* Links */
+.movie-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+/* Credits */
+.movie-credits {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.8rem;
+}
+
+.movie-credit-group h6 {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 0.45rem;
+}
+
+.movie-credit-group p {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.75);
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* Description */
+.movie-description {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.6);
+  max-width: 640px;
+  font-style: italic;
+  border-left: 2px solid rgba(255,193,7,0.4);
+  padding-left: 1rem;
+}
+
+/* Recommendations */
+.movie-section {
+  padding: 3rem 4rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.movie-section-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 1.8rem;
+}
+
+.movie-section-title span {
+  color: #ffc107;
+}
+
+/* Comments */
+.comment-form {
+  margin-bottom: 2.5rem;
+}
+
+.comment-input {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  resize: none;
+  transition: border-color 0.2s;
+}
+
+.comment-input:focus {
+  border-color: rgba(255,193,7,0.5) !important;
+  box-shadow: none !important;
+}
+
+.comment-input::placeholder {
+  color: rgba(255,255,255,0.2) !important;
+}
+
+.comment-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 1.1rem 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.comment-author {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffc107;
+  margin-bottom: 0.2rem;
+}
+
+.comment-date {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 0.6rem;
+}
+
+.comment-text {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .movie-hero {
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    align-items: center;
+    text-align: center;
+  }
+  .movie-poster-frame { width: 180px; }
+  .movie-genres { justify-content: center; }
+  .movie-meta-row { justify-content: center; }
+  .potato-rating { justify-content: center; }
+  .movie-links { justify-content: center; }
+  .movie-credits { justify-content: center; }
+  .movie-section { padding: 2rem 1.5rem; }
+}
