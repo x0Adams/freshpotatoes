@@ -8,17 +8,17 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refresh_token", schema = "fresh_potato")
+@Table(name = "refresh_token", schema = "fresh_potatoes")
 public class RefreshToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "uuid", nullable = false, length = 36)
-    private String uuid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_uuid", nullable = false)
-    private User userUuid;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "token", nullable = false, length = 64)
     private String token;
@@ -34,20 +34,20 @@ public class RefreshToken {
     @Column(name = "used", nullable = false)
     private Boolean used;
 
-    public String getUuid() {
-        return uuid;
+    public Integer getId() {
+        return id;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public User getUserUuid() {
-        return userUuid;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserUuid(User userUuid) {
-        this.userUuid = userUuid;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getToken() {
@@ -74,11 +74,11 @@ public class RefreshToken {
         this.expirationDate = expirationDate;
     }
 
-    public Boolean getUsed() {
+    public boolean getUsed() {
         return used;
     }
 
-    public void setUsed(Boolean used) {
+    public void setUsed(boolean used) {
         this.used = used;
     }
 

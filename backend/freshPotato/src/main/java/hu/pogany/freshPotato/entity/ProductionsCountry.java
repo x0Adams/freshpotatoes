@@ -5,10 +5,10 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "genre_movie", schema = "fresh_potatoes")
-public class GenreMovie {
+@Table(name = "productions_country", schema = "fresh_potatoes")
+public class ProductionsCountry {
     @EmbeddedId
-    private GenreMovieId id;
+    private ProductionsCountryId id;
 
     @MapsId("movieId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -16,17 +16,17 @@ public class GenreMovie {
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @MapsId("genreId")
+    @MapsId("countryId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "genre_id", nullable = false)
-    private Genre genre;
+    @JoinColumn(name = "country_id", nullable = false)
+    private Country country;
 
-    public GenreMovieId getId() {
+    public ProductionsCountryId getId() {
         return id;
     }
 
-    public void setId(GenreMovieId id) {
+    public void setId(ProductionsCountryId id) {
         this.id = id;
     }
 
@@ -38,12 +38,12 @@ public class GenreMovie {
         this.movie = movie;
     }
 
-    public Genre getGenre() {
-        return genre;
+    public Country getCountry() {
+        return country;
     }
 
-    public void setGenre(Genre genre) {
-        this.genre = genre;
+    public void setCountry(Country country) {
+        this.country = country;
     }
 
 }

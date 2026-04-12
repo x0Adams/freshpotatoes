@@ -6,13 +6,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "genre", schema = "fresh_potatoes")
-public class Genre {
+@Table(name = "continent", schema = "fresh_potatoes")
+public class Continent {
     @Id
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name", nullable = false, length = 40)
     private String name;
 
     public Integer getId() {

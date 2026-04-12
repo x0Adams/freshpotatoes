@@ -5,28 +5,32 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "genre_movie", schema = "fresh_potatoes")
-public class GenreMovie {
+@Table(name = "staff_role_in_movie", schema = "fresh_potatoes", indexes = {
+        @Index(name = "movie",
+                columnList = "movie_id"),
+        @Index(name = "staff",
+                columnList = "staff_id")})
+public class StaffRoleInMovie {
     @EmbeddedId
-    private GenreMovieId id;
+    private StaffRoleInMovieId id;
 
-    @MapsId("movieId")
+    @MapsId("movie")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @MapsId("genreId")
+    @MapsId("staff")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "genre_id", nullable = false)
-    private Genre genre;
+    @JoinColumn(name = "staff_id", nullable = false)
+    private Staff staff;
 
-    public GenreMovieId getId() {
+    public StaffRoleInMovieId getId() {
         return id;
     }
 
-    public void setId(GenreMovieId id) {
+    public void setId(StaffRoleInMovieId id) {
         this.id = id;
     }
 
@@ -38,12 +42,12 @@ public class GenreMovie {
         this.movie = movie;
     }
 
-    public Genre getGenre() {
-        return genre;
+    public Staff getStaff() {
+        return staff;
     }
 
-    public void setGenre(Genre genre) {
-        this.genre = genre;
+    public void setStaff(Staff staff) {
+        this.staff = staff;
     }
 
 }

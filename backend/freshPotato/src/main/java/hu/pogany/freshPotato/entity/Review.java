@@ -8,35 +8,36 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 
 @Entity
-@Table(name = "rate", schema = "fresh_potatoes")
-public class Rate {
+@Table(name = "review", schema = "fresh_potatoes")
+public class Review {
     @EmbeddedId
-    private RateId id;
+    private ReviewId id;
 
-    @MapsId("userId")
+    @MapsId("user")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @MapsId("movieId")
+    @MapsId("movie")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @Column(name = "rating", nullable = false)
-    private Byte rating;
+    @Lob
+    @Column(name = "review", nullable = false)
+    private String review;
 
     @ColumnDefault("current_timestamp()")
     @Column(name = "time", nullable = false)
     private Instant time;
 
-    public RateId getId() {
+    public ReviewId getId() {
         return id;
     }
 
-    public void setId(RateId id) {
+    public void setId(ReviewId id) {
         this.id = id;
     }
 
@@ -56,12 +57,12 @@ public class Rate {
         this.movie = movie;
     }
 
-    public Byte getRating() {
-        return rating;
+    public String getReview() {
+        return review;
     }
 
-    public void setRating(Byte rating) {
-        this.rating = rating;
+    public void setReview(String review) {
+        this.review = review;
     }
 
     public Instant getTime() {

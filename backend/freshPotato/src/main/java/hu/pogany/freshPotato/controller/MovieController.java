@@ -1,44 +1,66 @@
 package hu.pogany.freshPotato.controller;
 
-import hu.pogany.freshPotato.dto.entity.MovieDto;
-import hu.pogany.freshPotato.dto.entity.SearchMovieDto;
-import hu.pogany.freshPotato.dto.service.MovieService;
+import hu.pogany.freshPotato.dto.MovieDto;
+import hu.pogany.freshPotato.dto.SearchMovieDto;
+import hu.pogany.freshPotato.service.MovieService;
+import hu.pogany.freshPotato.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.Max;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/movie")
+@Validated
 public class MovieController {
     private final MovieService movieService;
+    private final UserService userService;
 
-    public MovieController(MovieService movieService) {
+    public MovieController(MovieService movieService, UserService userService) {
         this.movieService = movieService;
+        this.userService = userService;
     }
 
-    @GetMapping("/api/movie/search/{name}")
+    @GetMapping("/search/{name}")
     public List<SearchMovieDto> searchMovieName(@PathVariable String name) {
         return movieService.searchForName(name);
     }
 
-    @GetMapping("/api/movie/{uuid}")
-    public MovieDto getMovie(@PathVariable String uuid) {
-        return movieService.getMovie(uuid);
+    @GetMapping("/{id}")
+    public MovieDto getMovie(@PathVariable int id, @AuthenticationPrincipal Jwt token) {
+        int userId;
+        if (token == null) {
+            userId = -1;
+        } else {
+            userId = Integer.parseInt(token.getClaimAsString("id"));
+        }
+
+        return movieService.getMovieSaveView(id, userId);
     }
 
-    @GetMapping("/api/movie/")
+    @GetMapping("/random")
     public List<SearchMovieDto> randomMovies() {
         return movieService.randomMovies();
     }
 
+    @GetMapping
+    public List<SearchMovieDto> popularMovies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") @Max(100) int size)
+    {
+        return movieService.findPopularMovies(page, size);
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity handleExcpetion(EntityNotFoundException e){
-        return ResponseEntity.status(404).build();
+    public ResponseEntity handleExcpetion(EntityNotFoundException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
     }
 
     @ExceptionHandler(SQLException.class)
