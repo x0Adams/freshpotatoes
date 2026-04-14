@@ -1,6 +1,5 @@
 package hu.pogany.freshPotato.entity;
 
-import hu.pogany.freshPotato.dto.MovieDto;
 import jakarta.persistence.*;
 
 @Entity

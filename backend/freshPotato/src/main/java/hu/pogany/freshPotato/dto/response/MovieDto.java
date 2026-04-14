@@ -1,4 +1,4 @@
-package hu.pogany.freshPotato.dto;
+package hu.pogany.freshPotato.dto.response;
 
 import java.time.LocalDate;
 import java.util.Set;

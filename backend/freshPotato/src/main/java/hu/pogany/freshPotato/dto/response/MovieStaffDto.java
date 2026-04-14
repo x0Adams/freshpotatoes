@@ -1,6 +1,4 @@
-package hu.pogany.freshPotato.dto;
-
-import hu.pogany.freshPotato.entity.Gender;
+package hu.pogany.freshPotato.dto.response;
 
 import java.time.LocalDate;
 

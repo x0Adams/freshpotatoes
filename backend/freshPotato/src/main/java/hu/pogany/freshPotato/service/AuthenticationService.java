@@ -1,12 +1,11 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.RegisterUserDto;
-import hu.pogany.freshPotato.dto.TokensDto;
+import hu.pogany.freshPotato.dto.response.TokensDto;
 import hu.pogany.freshPotato.entity.Gender;
 import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.UserRepository;
-import jakarta.persistence.EntityExistsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

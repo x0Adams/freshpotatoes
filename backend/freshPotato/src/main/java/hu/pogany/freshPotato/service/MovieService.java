@@ -1,22 +1,18 @@
 package hu.pogany.freshPotato.service;
 
-import hu.pogany.freshPotato.dto.*;
+import hu.pogany.freshPotato.dto.response.MovieDto;
+import hu.pogany.freshPotato.dto.response.SearchMovieDto;
 import hu.pogany.freshPotato.entity.View;
 import hu.pogany.freshPotato.mapper.Mapper;
 import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.query.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)

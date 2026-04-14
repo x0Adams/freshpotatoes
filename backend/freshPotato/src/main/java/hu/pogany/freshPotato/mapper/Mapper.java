@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.mapper;
 
 import hu.pogany.freshPotato.dto.*;
+import hu.pogany.freshPotato.dto.response.*;
 import hu.pogany.freshPotato.entity.*;
 import org.mapstruct.Mapping;
 
@@ -24,4 +25,5 @@ public interface Mapper {
 
 
     User toUser(RegisterUserDto userDto);
+    UserDto toUserDto(User user);
 }

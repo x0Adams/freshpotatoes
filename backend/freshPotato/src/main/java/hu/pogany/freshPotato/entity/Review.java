@@ -11,15 +11,15 @@ import java.time.Instant;
 @Table(name = "review", schema = "fresh_potatoes")
 public class Review {
     @EmbeddedId
-    private ReviewId id;
+    private RateId id;
 
-    @MapsId("user")
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @MapsId("movie")
+    @MapsId("movieId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "movie_id", nullable = false)
@@ -33,11 +33,11 @@ public class Review {
     @Column(name = "time", nullable = false)
     private Instant time;
 
-    public ReviewId getId() {
+    public RateId getId() {
         return id;
     }
 
-    public void setId(ReviewId id) {
+    public void setId(RateId id) {
         this.id = id;
     }
 
