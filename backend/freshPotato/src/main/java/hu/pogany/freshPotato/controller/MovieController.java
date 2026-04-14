@@ -6,6 +6,7 @@ import hu.pogany.freshPotato.service.MovieService;
 import hu.pogany.freshPotato.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,7 +36,7 @@ public class MovieController {
     @GetMapping("/search/{name}")
     @Operation(summary = "Search movie by name prefix", description = "Returns up to 5 movies where name starts with the provided value, preferring shorter name matches")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Matching movies returned", content = @Content(schema = @Schema(implementation = SearchMovieDto.class))),
+            @ApiResponse(responseCode = "200", description = "Matching movies returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchMovieDto.class)))),
             @ApiResponse(responseCode = "404", description = "No movies found for the given prefix", content = @Content(schema = @Schema(type = "string", example = "No movies found for name: The")))
     })
     public List<SearchMovieDto> searchMovieName(@Parameter(description = "Movie name prefix", example = "The") @PathVariable String name) {
@@ -61,7 +62,7 @@ public class MovieController {
 
     @GetMapping("/random")
     @Operation(summary = "Get random movies", description = "Returns a random selection of movies for discovery")
-    @ApiResponse(responseCode = "200", description = "Random movies returned", content = @Content(schema = @Schema(implementation = SearchMovieDto.class)))
+    @ApiResponse(responseCode = "200", description = "Random movies returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchMovieDto.class))))
     public List<SearchMovieDto> randomMovies() {
         return movieService.randomMovies();
     }
@@ -69,7 +70,7 @@ public class MovieController {
     @GetMapping
     @Operation(summary = "Get popular movies", description = "Returns movies sorted by popularity in a paginated form")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Popular movies returned", content = @Content(schema = @Schema(implementation = SearchMovieDto.class))),
+            @ApiResponse(responseCode = "200", description = "Popular movies returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchMovieDto.class)))),
             @ApiResponse(responseCode = "400", description = "Invalid paging parameters", content = @Content(schema = @Schema(type = "string", example = "size must be less than or equal to 100")))
     })
     public List<SearchMovieDto> popularMovies(
