@@ -2,10 +2,12 @@ package hu.pogany.freshPotato.dto.rate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "Base request payload for movie rating operations")
 public class GenericRateRequestDto<T> {
 
+    @NotNull(message = "rating is required")
     @Schema(description = "Rating value. Concrete subclasses define allowed range.", requiredMode = Schema.RequiredMode.REQUIRED)
     private T rate;
     @Min(0)
@@ -32,7 +34,15 @@ public class GenericRateRequestDto<T> {
         return rate;
     }
 
+    public T getRate() {
+        return rate;
+    }
+
     public int movieId() {
+        return movieId;
+    }
+
+    public int getMovieId() {
         return movieId;
     }
 }
