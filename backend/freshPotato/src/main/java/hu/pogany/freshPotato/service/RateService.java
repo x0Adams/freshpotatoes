@@ -41,8 +41,8 @@ public class RateService extends AbstractRateService<Integer, Rate> {
 
     @Override
     protected void validateRating(Integer rating) {
-        if (rating == null || rating < 1 || rating > 10) {
-            throw new ValidationException("Rate value must be between 1 and 10");
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new ValidationException("Rate value must be between 1 and 5");
         }
     }
 

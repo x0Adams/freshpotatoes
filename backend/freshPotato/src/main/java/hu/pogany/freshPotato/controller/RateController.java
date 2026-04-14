@@ -60,7 +60,7 @@ public class RateController extends AbstractRateController<Integer, Rate> {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Rating saved"),
-            @ApiResponse(responseCode = "400", description = "Invalid rating payload", content = @Content(schema = @Schema(type = "string", example = "Rate value must be between 1 and 10"))),
+            @ApiResponse(responseCode = "400", description = "Invalid rating payload", content = @Content(schema = @Schema(type = "string", example = "Rate value must be between 1 and 5"))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid JWT", content = @Content(schema = @Schema(type = "string", example = "Unauthorized"))),
             @ApiResponse(responseCode = "404", description = "User or movie not found", content = @Content(schema = @Schema(type = "string", example = "Movie not found")))
     })
