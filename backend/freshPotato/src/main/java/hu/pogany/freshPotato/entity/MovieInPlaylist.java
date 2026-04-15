@@ -1,6 +1,8 @@
 package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "movie_in_playlist", schema = "fresh_potatoes")
@@ -15,6 +17,7 @@ public class MovieInPlaylist {
     private Movie movie;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;
 

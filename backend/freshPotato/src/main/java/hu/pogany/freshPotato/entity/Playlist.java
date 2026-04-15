@@ -22,8 +22,8 @@ public class Playlist {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @Column(name = "name", nullable = false)
-    private Integer name;
+    @Column(name = "name", nullable = false, length = 500)
+    private String name;
 
     @Column(name = "is_private", nullable = false)
     private Boolean isPrivate;
@@ -32,7 +32,8 @@ public class Playlist {
     @Column(name = "creation_time", nullable = false)
     private Instant creationTime;
 
-    @OneToMany(mappedBy = "playlist")
+    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
     private Set<MovieInPlaylist> movieInPlaylists = new LinkedHashSet<>();
 
     public Integer getId() {
@@ -51,11 +52,11 @@ public class Playlist {
         this.owner = owner;
     }
 
-    public Integer getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(Integer name) {
+    public void setName(String name) {
         this.name = name;
     }
 
