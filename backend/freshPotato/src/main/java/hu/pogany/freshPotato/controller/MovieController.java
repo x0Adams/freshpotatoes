@@ -49,7 +49,7 @@ public class MovieController {
             @ApiResponse(responseCode = "200", description = "Movie found", content = @Content(schema = @Schema(implementation = MovieDto.class))),
             @ApiResponse(responseCode = "404", description = "Movie not found", content = @Content(schema = @Schema(type = "string", example = "Movie not found")))
     })
-    public MovieDto getMovie(@Parameter(description = "Movie id", example = "42") @PathVariable int id, @AuthenticationPrincipal Jwt token) {
+    public MovieDto getMovie(@Parameter(description = "Movie id", example = "13417189") @PathVariable int id, @AuthenticationPrincipal Jwt token) {
         int userId;
         if (token == null) {
             userId = -1;

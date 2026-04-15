@@ -1,5 +1,7 @@
 package hu.pogany.freshPotato.config;
 
+import io.github.bucket4j.BlockingBucket;
+import io.github.bucket4j.Bucket;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -8,9 +10,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import static java.time.Duration.ofSeconds;
 
 @Import(SecurityConfig.class)
 @Configuration
@@ -30,5 +30,17 @@ public class Config {
                                         .scheme("bearer")
                                         .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+    }
+
+    @Bean
+    public BlockingBucket rateLimiter(WikiConfig config){
+        return Bucket.builder()
+                .addLimit(limit -> limit
+                        .capacity(config.rateLimit())
+                        .refillGreedy(config.rateLimit(), ofSeconds(1))
+                        .initialTokens(config.rateLimit())
+                )
+                .build()
+                .asBlocking();
     }
 }

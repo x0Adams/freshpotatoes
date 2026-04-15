@@ -16,7 +16,7 @@ app:
     access-token-ttl: ${ACCESS_TOKEN_TTL:10m}
     refresh-token-ttl: ${REFRESH_TOKEN_TTL:10d}
   wiki:
-    apiUrl: https://en.wikipedia.org/w/api.php
+    apiUrl: https://en.wikipedia.org/api/rest_v1/page/media-list/
     rateLimit: 200 # per second
     userAgent: ${WIKI_USER_AGENT:freshPotatoBot}
     contactEmail: ${CONTACT_EMAIL}
