@@ -51,6 +51,8 @@ public class PosterService {
 
     @Transactional
     public void fetchPoster(Movie movie) throws NotContextException, InterruptedException, TimeLimitExceededException {
+        log.info("fetching title for {}", movie.getWikipediaTitle());
+
         if (movie.getWikipediaTitle() == null || movie.getWikipediaTitle().isBlank())
             throw new NotContextException("There is no Wikipedia title for this movie");
 

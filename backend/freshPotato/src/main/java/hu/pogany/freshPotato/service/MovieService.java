@@ -93,6 +93,9 @@ public class MovieService {
         if (movie.getWikipediaTitle() == null)
             return;
 
+        if (!movie.getPosterPath().trim().equalsIgnoreCase("not fetched"))
+            return;
+
         try {
             posterService.fetchPoster(movie);
         } catch (NotContextException | InterruptedException | TimeLimitExceededException e) {
