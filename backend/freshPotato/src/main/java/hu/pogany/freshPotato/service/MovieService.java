@@ -5,10 +5,13 @@ import hu.pogany.freshPotato.dto.response.SearchMovieDto;
 import hu.pogany.freshPotato.entity.View;
 import hu.pogany.freshPotato.mapper.Mapper;
 import hu.pogany.freshPotato.repository.MovieRepository;
+import hu.pogany.freshPotato.specification.MovieSpecification;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.JpaSort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,5 +59,24 @@ public class MovieService {
 
     public List<SearchMovieDto> randomMovies() {
         return mapper.toSearchMovieDtoList(movieRepository.findRandom());
+    }
+
+    public List<SearchMovieDto> advancedSearch(String title, List<String> staff, List<String> genres, int page, int size) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new ValidationException("Title must not be empty");
+        }
+
+        Specification<Movie> specification = Specification
+                .where(MovieSpecification.titleExactOrPrefix(title))
+                .and(MovieSpecification.hasStaff(staff))
+                .and(MovieSpecification.hasGenres(genres))
+                .and(MovieSpecification.orderByExactMatchThenPopularity(title));
+
+        List<Movie> movies = movieRepository.findAll(specification, PageRequest.of(page, size)).getContent();
+        if (movies.isEmpty()) {
+            throw new EntityNotFoundException("No movies found for the given search criteria");
+        }
+
+        return mapper.toSearchMovieDtoList(movies);
     }
 }

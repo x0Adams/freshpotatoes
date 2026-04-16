@@ -22,6 +22,7 @@ public interface Mapper {
     List<MovieDto> toMovieDtoList(List<Movie> movies);
     List<SearchMovieDto> toSearchMovieDtoList(List<Movie> movies);
     SearchMovieDto toSearchMovieDto(Movie movie);
+    List<GenreDto> toGenreDtoList(List<Genre> genres);
 
 
     User toUser(RegisterUserDto userDto);

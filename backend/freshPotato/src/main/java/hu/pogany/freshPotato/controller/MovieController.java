@@ -43,6 +43,29 @@ public class MovieController {
         return movieService.searchForName(name);
     }
 
+    @GetMapping("/search")
+    @Operation(
+            summary = "Advanced movie search",
+            description = "Searches movies by title relevance and optional staff/genre filters. Exact title matches come first, then prefix matches sorted by popularity."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Matching movies returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchMovieDto.class)))),
+            @ApiResponse(responseCode = "400", description = "Invalid search parameters", content = @Content(schema = @Schema(type = "string", example = "Title must not be empty"))),
+            @ApiResponse(responseCode = "404", description = "No movies found for search criteria", content = @Content(schema = @Schema(type = "string", example = "No movies found for the given search criteria")))
+    })
+    public List<SearchMovieDto> advancedSearch(
+            @Parameter(description = "Movie title used for exact or prefix search", example = "The Matrix")
+            @RequestParam String title,
+            @Parameter(description = "Filter by staff names (repeat or comma-separated)", example = "Keanu Reeves")
+            @RequestParam(required = false) List<String> staff,
+            @Parameter(description = "Filter by genre names (repeat or comma-separated)", example = "Action")
+            @RequestParam(required = false) List<String> genre,
+            @Parameter(description = "Zero-based page index", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (max 100)", example = "30") @RequestParam(defaultValue = "30") @Max(100) int size
+    ) {
+        return movieService.advancedSearch(title, staff, genre, page, size);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get movie details", description = "Returns movie details and records a view event for the authenticated user or anonymous visitor")
     @ApiResponses({
