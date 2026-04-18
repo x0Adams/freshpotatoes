@@ -2,11 +2,8 @@ package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.config.WikiConfig;
 import hu.pogany.freshPotato.entity.Movie;
-import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.MovieRepository;
-import hu.pogany.freshPotato.repository.UserRepository;
 import io.github.bucket4j.BlockingBucket;
-import io.swagger.v3.core.util.Json;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +18,6 @@ import tools.jackson.databind.ObjectMapper;
 import javax.naming.NotContextException;
 import javax.naming.TimeLimitExceededException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
