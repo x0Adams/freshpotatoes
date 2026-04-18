@@ -4,7 +4,9 @@ import hu.pogany.freshPotato.dto.response.LoginDto;
 import hu.pogany.freshPotato.dto.response.RefreshTokenDto;
 import hu.pogany.freshPotato.dto.RegisterUserDto;
 import hu.pogany.freshPotato.dto.response.TokensDto;
+import hu.pogany.freshPotato.dto.response.UserDto;
 import hu.pogany.freshPotato.service.AuthenticationService;
+import hu.pogany.freshPotato.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,16 +22,17 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication", description = "Login, registration and token lifecycle endpoints")
 public class AuthController {
     private final AuthenticationService authService;
+    private final UserService userService;
 
-    public AuthController(AuthenticationService authService) {
+    public AuthController(AuthenticationService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     @PostMapping("/login")
@@ -94,14 +97,14 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Current principal claims", description = "Returns claims from the authenticated JWT")
+    @Operation(summary = "Current user profile", description = "Returns persisted profile data for the authenticated user (excluding password)")
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Claims returned"),
+            @ApiResponse(responseCode = "200", description = "Profile returned", content = @Content(schema = @Schema(implementation = UserDto.class))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid JWT", content = @Content(schema = @Schema(type = "string", example = "Unauthorized")))
     })
-    public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
-        return jwt.getClaims();
+    public UserDto me(@AuthenticationPrincipal Jwt jwt) {
+        return userService.getByUserName(jwt.getSubject());
     }
 
 

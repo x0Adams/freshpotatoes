@@ -38,5 +38,4 @@ public interface Mapper {
     @Mapping(target = "age", source = "age")
     @Mapping(target = "password", source = "password")
     User toUser(RegisterUserDto userDto);
-    UserDto toUserDto(User user);
 }

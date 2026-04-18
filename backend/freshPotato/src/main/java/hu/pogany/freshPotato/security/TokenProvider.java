@@ -1,4 +1,4 @@
-package hu.pogany.freshPotato.Security;
+package hu.pogany.freshPotato.security;
 
 import hu.pogany.freshPotato.entity.User;
 

@@ -1,6 +1,6 @@
 package hu.pogany.freshPotato.service;
 
-import hu.pogany.freshPotato.Security.TokenProvider;
+import hu.pogany.freshPotato.security.TokenProvider;
 import hu.pogany.freshPotato.config.TokenConfig;
 import hu.pogany.freshPotato.entity.User;
 import org.springframework.security.oauth2.jwt.Jwt;

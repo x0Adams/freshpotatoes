@@ -1,4 +1,4 @@
-package hu.pogany.freshPotato.Security;
+package hu.pogany.freshPotato.security;
 
 public interface RefreshTokenProvider extends TokenProvider{
     String getBase64Token(byte[] token);
