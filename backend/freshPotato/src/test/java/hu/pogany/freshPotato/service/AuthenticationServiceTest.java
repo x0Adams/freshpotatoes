@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 class AuthenticationServiceTest {
 
     @Mock
-    private JwtGeneratorService jwtService;
+    private JwtService jwtService;
 
     @Mock
     private RefreshTokenService refreshTokenService;

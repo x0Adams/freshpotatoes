@@ -5,6 +5,7 @@ import hu.pogany.freshPotato.dto.rate.DeleteRateRequestDto;
 import hu.pogany.freshPotato.dto.rate.GenericRateDto;
 import hu.pogany.freshPotato.dto.rate.GenericRateRequestDto;
 import hu.pogany.freshPotato.service.AbstractRateService;
+import hu.pogany.freshPotato.service.JwtService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,7 @@ public abstract class AbstractRateController<T, S> {
     }
 
     public int getUserId(Jwt jwt) {
-        return Integer.parseInt(jwt.getClaim("uid"));
+        return JwtService.getUserId(jwt);
     }
 
     public List<GenericRateDto<T>> getAllByUser(int userid) {

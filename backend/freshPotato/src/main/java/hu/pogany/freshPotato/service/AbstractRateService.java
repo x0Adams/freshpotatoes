@@ -9,6 +9,8 @@ import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.Optional;
 
 @Transactional(readOnly = true)
 public abstract class AbstractRateService<T, S> {
+    private static final Logger log = LoggerFactory.getLogger(AbstractRateService.class);
     private final GenericRateRepository<S> rateRepository;
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
@@ -70,7 +73,6 @@ public abstract class AbstractRateService<T, S> {
         Optional<Movie> movie = movieRepository.findById(movieId);
         if (movie.isEmpty())
             throw new EntityNotFoundException("no movie with this id in the database");
-
         return mapToDto(rateRepository.findByMovie(movie.get()));
     }
 

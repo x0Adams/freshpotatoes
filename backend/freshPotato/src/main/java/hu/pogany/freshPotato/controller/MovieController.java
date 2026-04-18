@@ -2,6 +2,7 @@ package hu.pogany.freshPotato.controller;
 
 import hu.pogany.freshPotato.dto.response.MovieDto;
 import hu.pogany.freshPotato.dto.response.SearchMovieDto;
+import hu.pogany.freshPotato.service.JwtService;
 import hu.pogany.freshPotato.service.MovieService;
 import hu.pogany.freshPotato.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,7 +78,7 @@ public class MovieController {
         if (token == null) {
             userId = -1;
         } else {
-            userId = Integer.parseInt(token.getClaimAsString("id"));
+            userId = JwtService.getUserId(token);
         }
 
         return movieService.getMovieSaveView(id, userId);

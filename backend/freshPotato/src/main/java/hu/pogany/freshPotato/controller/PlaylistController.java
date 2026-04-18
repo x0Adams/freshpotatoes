@@ -6,6 +6,7 @@ import hu.pogany.freshPotato.dto.playlist.request.CreatePlaylistRequestDto;
 import hu.pogany.freshPotato.dto.playlist.request.RenamePlaylistRequestDto;
 import hu.pogany.freshPotato.dto.playlist.response.PlaylistDetailsDto;
 import hu.pogany.freshPotato.dto.playlist.response.PlaylistOwnerNameDto;
+import hu.pogany.freshPotato.service.JwtService;
 import hu.pogany.freshPotato.service.PlaylistService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -140,11 +141,7 @@ public class PlaylistController {
     }
 
     private int getUserId(Jwt jwt) {
-        Object uid = jwt.getClaim("uid");
-        if (uid instanceof Number number) {
-            return number.intValue();
-        }
-        return Integer.parseInt(String.valueOf(uid));
+        return JwtService.getUserId(jwt);
     }
 
     private boolean isAdmin(Jwt jwt) {
