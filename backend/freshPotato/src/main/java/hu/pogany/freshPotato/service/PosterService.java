@@ -10,6 +10,7 @@ import io.swagger.v3.core.util.Json;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +35,8 @@ public class PosterService {
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
-    public PosterService(BlockingBucket bucket, MovieRepository movieRepository, WikiConfig wikiConfig, ObjectMapper objectMapper) {
-        this.bucket = bucket;
+    public PosterService(@Qualifier("wikiLimiter") BlockingBucket wikiLimiter, MovieRepository movieRepository, WikiConfig wikiConfig, ObjectMapper objectMapper) {
+        this.bucket = wikiLimiter;
         this.movieRepository = movieRepository;
         this.wikiConfig = wikiConfig;
         this.objectMapper = objectMapper;
@@ -51,7 +52,7 @@ public class PosterService {
 
     @Transactional
     public void fetchPoster(Movie movie) throws NotContextException, InterruptedException, TimeLimitExceededException {
-        log.info("fetching title for {}", movie.getWikipediaTitle());
+        log.debug("fetching poster for {}", movie.getWikipediaTitle());
 
         if (movie.getWikipediaTitle() == null || movie.getWikipediaTitle().isBlank())
             throw new NotContextException("There is no Wikipedia title for this movie");

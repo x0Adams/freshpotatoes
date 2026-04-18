@@ -23,4 +23,6 @@ app:
 
   youtube:
     apiUrl: https://www.googleapis.com/youtube/v3/search
-    apiKey: ${GOOGLE_API_KEY:}
+    apiKey: ${GOOGLE_API_KEY:NO}
+    dailyLimit: ${LIMIT:10000}
+    queryCost: ${QUERY_COST:100}

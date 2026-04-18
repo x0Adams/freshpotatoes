@@ -10,6 +10,12 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import static java.time.Duration.ofSeconds;
 
 @Import(SecurityConfig.class)
@@ -32,7 +38,7 @@ public class Config {
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 
-    @Bean
+    @Bean("wikiLimiter")
     public BlockingBucket rateLimiter(WikiConfig config){
         return Bucket.builder()
                 .addLimit(limit -> limit
@@ -42,5 +48,28 @@ public class Config {
                 )
                 .build()
                 .asBlocking();
+    }
+
+    @Bean("youtubeLimiter")
+    public BlockingBucket youtubeLimiter(YoutubeConfig youtubeConfig) {
+        ZoneId pacific = ZoneId.of("America/Los_Angeles");
+
+        // Next midnight in Pacific Time (handles DST correctly)
+        Instant nextPacificMidnight = ZonedDateTime.now(pacific)
+                .toLocalDate()
+                .plusDays(1)
+                .atStartOfDay(pacific)
+                .toInstant();
+
+
+        return Bucket.builder().addLimit( limit -> limit
+                .capacity(youtubeConfig.dailyLimit())
+                .refillIntervallyAligned(
+                        youtubeConfig.dailyLimit(),
+                        Duration.ofDays(1),
+                        nextPacificMidnight
+                )
+                .initialTokens(youtubeConfig.dailyLimit())
+        ).build().asBlocking();
     }
 }

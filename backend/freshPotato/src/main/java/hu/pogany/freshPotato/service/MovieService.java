@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.NotContextException;
 import javax.naming.TimeLimitExceededException;
+import javax.security.auth.login.CredentialException;
 import java.util.List;
 
 @Service
@@ -28,11 +29,13 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final Mapper mapper;
     private final PosterService posterService;
+    private final TrailerService trailerService;
 
-    public MovieService(MovieRepository movieRepository, Mapper mapper, PosterService posterService) {
+    public MovieService(MovieRepository movieRepository, Mapper mapper, PosterService posterService, TrailerService trailerService) {
         this.movieRepository = movieRepository;
         this.mapper = mapper;
         this.posterService = posterService;
+        this.trailerService = trailerService;
     }
 
     public List<SearchMovieDto> searchForName(String name) {
@@ -46,7 +49,7 @@ public class MovieService {
     @Transactional(readOnly = false)
     public MovieDto getMovieSaveView(int movieId, int userId) {
         Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
-        fetchPoster(movie);
+        fetchTrailerAndPoster(movie);
         View view = new View();
         view.setMovie(movie);
         view.setUserId(userId);
@@ -57,7 +60,7 @@ public class MovieService {
 
     public MovieDto getMovie(int id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
-        fetchPoster(movie);
+        fetchTrailerAndPoster(movie);
         return mapper.toMovieDto(movie);
     }
 
@@ -89,6 +92,11 @@ public class MovieService {
         return mapper.toSearchMovieDtoList(movies);
     }
 
+    private void fetchTrailerAndPoster(Movie movie) {
+        fetchTrailer(movie);
+        fetchPoster(movie);
+    }
+
     private void fetchPoster(Movie movie) {
         if (movie.getWikipediaTitle() == null)
             return;
@@ -98,7 +106,18 @@ public class MovieService {
 
         try {
             posterService.fetchPoster(movie);
-        } catch (NotContextException | InterruptedException | TimeLimitExceededException e) {
+        } catch (NotContextException | InterruptedException | TimeLimitExceededException | RuntimeException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void fetchTrailer(Movie movie) {
+        if (!movie.getTrailer().trim().equalsIgnoreCase("not fetched"))
+            return;
+
+        try {
+            trailerService.fetchTrailer(movie);
+        } catch (NotContextException | CredentialException | TimeLimitExceededException | InterruptedException | RuntimeException e) {
             log.error(e.getMessage());
         }
     }
