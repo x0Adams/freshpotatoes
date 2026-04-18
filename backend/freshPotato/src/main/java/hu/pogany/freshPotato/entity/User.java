@@ -46,15 +46,19 @@ public class User {
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
 
+    @Builder.Default
     @OneToMany(mappedBy = "owner")
     private Set<Playlist> playlists = new LinkedHashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private Set<Rate> rates = new LinkedHashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private Set<RefreshToken> refreshTokens = new LinkedHashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user")
     private Set<Review> reviews = new LinkedHashSet<>();
 
