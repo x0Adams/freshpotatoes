@@ -3,7 +3,7 @@ package hu.pogany.freshPotato.dto.response;
 import java.time.LocalDate;
 import java.util.Set;
 
-public record MovieDto(String id,
+public record MovieDto(int id,
                        String name,
                        String posterPath,
                        Integer duration,

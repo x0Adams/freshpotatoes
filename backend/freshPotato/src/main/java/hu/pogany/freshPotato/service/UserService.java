@@ -3,6 +3,7 @@ package hu.pogany.freshPotato.service;
 import hu.pogany.freshPotato.dto.playlist.response.PlaylistDetailsDto;
 import hu.pogany.freshPotato.dto.response.SearchMovieDto;
 import hu.pogany.freshPotato.dto.response.UserDto;
+import hu.pogany.freshPotato.dto.response.UserDtoPublic;
 import hu.pogany.freshPotato.entity.MovieInPlaylist;
 import hu.pogany.freshPotato.entity.Playlist;
 import hu.pogany.freshPotato.entity.User;
@@ -23,11 +24,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthorityService authorityService;
     private final Mapper mapper;
+    private final RateService rateService;
+    private final ReviewService reviewService;
 
-    public UserService(UserRepository userRepository, AuthorityService authorityService, Mapper mapper) {
+    public UserService(UserRepository userRepository, AuthorityService authorityService, Mapper mapper, RateService rateService, ReviewService reviewService) {
         this.userRepository = userRepository;
         this.authorityService = authorityService;
         this.mapper = mapper;
+        this.rateService = rateService;
+        this.reviewService = reviewService;
     }
 
     public int getIdByUserName(String username) {
@@ -39,22 +44,12 @@ public class UserService {
 
     }
 
-    public UserDto getByUserName(String username) {
-        User user = userRepository.findByUsername(username)
+    public UserDto getByUserid(int uid) {
+        User user = userRepository.findById(uid)
                 .orElseThrow(() -> new EntityNotFoundException("no user with this name"));
 
         List<PlaylistDetailsDto> playlists = user.getPlaylists().stream()
                 .map(this::toPlaylistDetailsDto)
-                .toList();
-        List<SearchMovieDto> ratedMovies = user.getRates().stream()
-                .map(it -> it.getMovie())
-                .distinct()
-                .map(mapper::toSearchMovieDto)
-                .toList();
-        List<SearchMovieDto> reviewedMovies = user.getReviews().stream()
-                .map(it -> it.getMovie())
-                .distinct()
-                .map(mapper::toSearchMovieDto)
                 .toList();
 
         return UserDto.builder()
@@ -64,8 +59,8 @@ public class UserService {
                 .gender(user.getGender().getName())
                 .age(user.getAge())
                 .playlists(playlists)
-                .ratedMovies(ratedMovies)
-                .reviewedMovies(reviewedMovies)
+                .ratedMovies(rateService.getAllByUser(user.getId()))
+                .reviewedMovies(reviewService.getAllByUser(user.getId()))
                 .build();
     }
 
@@ -103,6 +98,15 @@ public class UserService {
 
     public boolean isNewUserValid(String username, String email) {
         return !userRepository.existsByUsername(username) && !userRepository.existsByEmail(email);
+    }
+
+    public UserDtoPublic getByUserIdPublic(int id) {
+        UserDto user = getByUserid(id);
+        var publicPlayLists = user.playlists().stream().filter(it -> !it.isPrivate()).toList();
+        user.playlists().removeAll(user.playlists());
+        user.playlists().addAll(publicPlayLists);
+
+        return mapper.toPublicDto(user);
     }
 
 

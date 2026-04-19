@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Transactional(readOnly = true)
+@Transactional
 public abstract class AbstractRateService<T, S> {
     private static final Logger log = LoggerFactory.getLogger(AbstractRateService.class);
     private final GenericRateRepository<S> rateRepository;
@@ -29,30 +29,29 @@ public abstract class AbstractRateService<T, S> {
         this.movieRepository = movieRepository;
     }
 
-    @Transactional
+
     public void saveRating(@Valid GenericRateDto<T> genericRateDto) {
         User user = userRepository
-                .findById(genericRateDto.userId())
+                .findById(genericRateDto.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         Movie movie = movieRepository
-                .findById(genericRateDto.movieId())
+                .findById(genericRateDto.getMovieId())
                 .orElseThrow(() -> new EntityNotFoundException("Movie not found"));
 
-        validateRating(genericRateDto.rating());
+        validateRating(genericRateDto.getRating());
 
         S entity = rateRepository
                 .findByUserIdAndMovieId(user.getId(), movie.getId())
                 .map(existing -> {
-                    updateEntity(existing, genericRateDto.rating());
+                    updateEntity(existing, genericRateDto.getRating());
                     return existing;
                 })
-                .orElseGet(() -> createEntity(user, movie, genericRateDto.rating()));
+                .orElseGet(() -> createEntity(user, movie, genericRateDto.getRating()));
 
         rateRepository.save(entity);
     }
 
-    @Transactional
     public void deleteRating(@Valid DeleteRateDto rateDto) {
         rateRepository.deleteRateByUserIdAndMovieId(rateDto.userId(), rateDto.movieId());
     }

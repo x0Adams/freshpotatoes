@@ -1,6 +1,9 @@
 package hu.pogany.freshPotato.controller;
 
-import hu.pogany.freshPotato.dto.rate.*;
+import hu.pogany.freshPotato.dto.rate.DeleteRateDto;
+import hu.pogany.freshPotato.dto.rate.DeleteRateRequestDto;
+import hu.pogany.freshPotato.dto.rate.GenericRateDto;
+import hu.pogany.freshPotato.dto.rate.RateRequestDto;
 import hu.pogany.freshPotato.entity.Rate;
 import hu.pogany.freshPotato.service.RateService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,7 +76,7 @@ public class RateController extends AbstractRateController<Integer, Rate> {
     @Override
     @Operation(summary = "List ratings by user", description = "Returns all ratings created by the specified user")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ratings returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RateDto.class)))),
+            @ApiResponse(responseCode = "200", description = "Ratings returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GenericRateDto.class)))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string", example = "User doesn't exists")))
     })
     public List<GenericRateDto<Integer>> getAllByUser(@Parameter(description = "User id", example = "12") @RequestParam int userid) {
@@ -84,7 +87,7 @@ public class RateController extends AbstractRateController<Integer, Rate> {
     @Override
     @Operation(summary = "List ratings for movie", description = "Returns all ratings for the specified movie")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ratings returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RateDto.class)))),
+            @ApiResponse(responseCode = "200", description = "Ratings returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = GenericRateDto.class)))),
             @ApiResponse(responseCode = "404", description = "Movie not found", content = @Content(schema = @Schema(type = "string", example = "no movie with this id in the database")))
     })
     public List<GenericRateDto<Integer>> getAllByMovie(@Parameter(description = "Movie id", example = "42") @PathVariable int movieId) {

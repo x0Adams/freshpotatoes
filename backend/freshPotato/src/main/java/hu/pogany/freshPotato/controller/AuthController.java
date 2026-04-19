@@ -5,7 +5,9 @@ import hu.pogany.freshPotato.dto.response.RefreshTokenDto;
 import hu.pogany.freshPotato.dto.RegisterUserDto;
 import hu.pogany.freshPotato.dto.response.TokensDto;
 import hu.pogany.freshPotato.dto.response.UserDto;
+import hu.pogany.freshPotato.dto.response.UserDtoPublic;
 import hu.pogany.freshPotato.service.AuthenticationService;
+import hu.pogany.freshPotato.service.JwtService;
 import hu.pogany.freshPotato.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -104,7 +106,17 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Missing or invalid JWT", content = @Content(schema = @Schema(type = "string", example = "Unauthorized")))
     })
     public UserDto me(@AuthenticationPrincipal Jwt jwt) {
-        return userService.getByUserName(jwt.getSubject());
+        return userService.getByUserid(JwtService.getUserId(jwt));
+    }
+
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "Public user profile by id", description = "Returns public user profile data and only public playlists for the requested user id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Public profile returned", content = @Content(schema = @Schema(implementation = UserDtoPublic.class))),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(type = "string", example = "no user with this name")))
+    })
+    public UserDtoPublic getUserPublicById(@PathVariable int userId) {
+        return userService.getByUserIdPublic(userId);
     }
 
 

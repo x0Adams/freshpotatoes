@@ -58,6 +58,7 @@ public class MovieService {
         return mapper.toMovieDto(movie);
     }
 
+    @Transactional(readOnly = false)
     public MovieDto getMovie(int id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
         fetchTrailerAndPoster(movie);

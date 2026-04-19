@@ -14,8 +14,11 @@ import java.util.List;
 @Service
 public class RateService extends AbstractRateService<Integer, Rate> {
 
-    public RateService(RateRepository rateRepository, UserRepository userRepository, MovieRepository movieRepository) {
+    private final MovieService movieService;
+
+    public RateService(RateRepository rateRepository, UserRepository userRepository, MovieRepository movieRepository, MovieService movieService) {
         super(rateRepository, userRepository, movieRepository);
+        this.movieService = movieService;
     }
 
     @Override
@@ -48,12 +51,20 @@ public class RateService extends AbstractRateService<Integer, Rate> {
 
     @Override
     protected List<GenericRateDto<Integer>> mapToDto(List<Rate> entities) {
-        return entities.stream().map(it -> GenericRateDto
-                .<Integer>builder()
-                .movieId(it.getId().getMovieId())
-                .userId(it.getId().getUserId())
-                .rating(Integer.valueOf(it.getRating()))
-                .build()
+        return entities.stream().map(it -> {
+                    var movie = movieService.getMovie(it.getId().getMovieId());
+                    return GenericRateDto
+                            .<Integer>builder()
+                            .movieId(movie.id())
+                            .userId(it.getId().getUserId())
+                            .rating(Integer.valueOf(it.getRating()))
+                            .name(movie.name())
+                            .posterPath(movie.posterPath())
+                            .releaseDate(movie.releaseDate())
+                            .genres(movie.genres())
+                            .username(it.getUser().getUsername())
+                            .build();
+                }
         ).toList();
     }
 }

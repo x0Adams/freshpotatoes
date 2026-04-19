@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.rate.GenericRateDto;
+import hu.pogany.freshPotato.dto.response.MovieDto;
 import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.entity.Rate;
 import hu.pogany.freshPotato.entity.RateId;
@@ -21,8 +22,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -39,6 +42,9 @@ class RateServiceTest {
     @Mock
     private MovieRepository movieRepository;
 
+    @Mock
+    private MovieService movieService;
+
     @InjectMocks
     private RateService rateService;
 
@@ -48,7 +54,7 @@ class RateServiceTest {
 
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> rateService.saveRating(new GenericRateDto<>(1, 2, 5))
+                () -> rateService.saveRating(createRateDto(1, 2, 5))
         );
 
         assertEquals("User not found", exception.getMessage());
@@ -61,7 +67,7 @@ class RateServiceTest {
 
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> rateService.saveRating(new GenericRateDto<>(1, 2, 5))
+                () -> rateService.saveRating(createRateDto(1, 2, 5))
         );
 
         assertEquals("Movie not found", exception.getMessage());
@@ -76,7 +82,7 @@ class RateServiceTest {
 
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> rateService.saveRating(new GenericRateDto<>(1, 2, invalidRating))
+                () -> rateService.saveRating(createRateDto(1, 2, invalidRating))
         );
 
         assertEquals("Rate value must be between 1 and 5", exception.getMessage());
@@ -90,7 +96,7 @@ class RateServiceTest {
         when(movieRepository.findById(2)).thenReturn(Optional.of(movie));
         when(rateRepository.findByUserIdAndMovieId(1, 2)).thenReturn(Optional.empty());
 
-        rateService.saveRating(new GenericRateDto<>(1, 2, 4));
+        rateService.saveRating(createRateDto(1, 2, 4));
 
         ArgumentCaptor<Rate> captor = ArgumentCaptor.forClass(Rate.class);
         verify(rateRepository).save(captor.capture());
@@ -118,7 +124,7 @@ class RateServiceTest {
         when(movieRepository.findById(2)).thenReturn(Optional.of(movie));
         when(rateRepository.findByUserIdAndMovieId(1, 2)).thenReturn(Optional.of(existing));
 
-        rateService.saveRating(new GenericRateDto<>(1, 2, 5));
+        rateService.saveRating(createRateDto(1, 2, 5));
 
         verify(rateRepository).save(existing);
         assertEquals(Byte.valueOf((byte) 5), existing.getRating());
@@ -145,14 +151,16 @@ class RateServiceTest {
         Rate rate = new Rate();
         rate.setId(createRateId(1, 2));
         rate.setRating((byte) 3);
+        rate.setUser(user);
         when(rateRepository.findByUser(user)).thenReturn(List.of(rate));
+        when(movieService.getMovie(2)).thenReturn(createMovieDto(2));
 
         List<GenericRateDto<Integer>> result = rateService.getAllByUser(1);
 
         assertEquals(1, result.size());
-        assertEquals(1, result.getFirst().userId());
-        assertEquals(2, result.getFirst().movieId());
-        assertEquals(3, result.getFirst().rating());
+        assertEquals(1, result.getFirst().getUserId());
+        assertEquals(2, result.getFirst().getMovieId());
+        assertEquals(3, result.getFirst().getRating());
     }
 
     @Test
@@ -181,6 +189,32 @@ class RateServiceTest {
         rateId.setUserId(userId);
         rateId.setMovieId(movieId);
         return rateId;
+    }
+
+    private GenericRateDto<Integer> createRateDto(int userId, int movieId, Integer rating) {
+        return GenericRateDto.<Integer>builder()
+                .userId(userId)
+                .movieId(movieId)
+                .rating(rating)
+                .build();
+    }
+
+    private MovieDto createMovieDto(int id) {
+        return new MovieDto(
+                id,
+                "test",
+                "poster.jpg",
+                120,
+                LocalDate.of(2020, 1, 1),
+                "yt",
+                "wiki",
+                "trailer",
+                4.0,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                Set.of()
+        );
     }
 }
 

@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.rate.GenericRateDto;
+import hu.pogany.freshPotato.dto.response.MovieDto;
 import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.entity.RateId;
 import hu.pogany.freshPotato.entity.Review;
@@ -18,8 +19,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -37,6 +40,9 @@ class ReviewServiceTest {
     @Mock
     private MovieRepository movieRepository;
 
+    @Mock
+    private MovieService movieService;
+
     @InjectMocks
     private ReviewService reviewService;
 
@@ -45,9 +51,9 @@ class ReviewServiceTest {
         when(userRepository.findById(1)).thenReturn(Optional.of(createUser(1)));
         when(movieRepository.findById(2)).thenReturn(Optional.of(createMovie(2)));
 
-        assertThrows(ValidationException.class, () -> reviewService.saveRating(new GenericRateDto<>(1, 2, null)));
-        assertThrows(ValidationException.class, () -> reviewService.saveRating(new GenericRateDto<>(1, 2, "   ")));
-        assertThrows(ValidationException.class, () -> reviewService.saveRating(new GenericRateDto<>(1, 2, "a".repeat(4001))));
+        assertThrows(ValidationException.class, () -> reviewService.saveRating(createRateDto(1, 2, null)));
+        assertThrows(ValidationException.class, () -> reviewService.saveRating(createRateDto(1, 2, "   ")));
+        assertThrows(ValidationException.class, () -> reviewService.saveRating(createRateDto(1, 2, "a".repeat(4001))));
     }
 
     @Test
@@ -58,7 +64,7 @@ class ReviewServiceTest {
         when(movieRepository.findById(2)).thenReturn(Optional.of(movie));
         when(reviewRepository.findByUserIdAndMovieId(1, 2)).thenReturn(Optional.empty());
 
-        reviewService.saveRating(new GenericRateDto<>(1, 2, "great movie"));
+        reviewService.saveRating(createRateDto(1, 2, "great movie"));
 
         ArgumentCaptor<Review> captor = ArgumentCaptor.forClass(Review.class);
         verify(reviewRepository).save(captor.capture());
@@ -86,7 +92,7 @@ class ReviewServiceTest {
         when(movieRepository.findById(2)).thenReturn(Optional.of(movie));
         when(reviewRepository.findByUserIdAndMovieId(1, 2)).thenReturn(Optional.of(existing));
 
-        reviewService.saveRating(new GenericRateDto<>(1, 2, "updated review"));
+        reviewService.saveRating(createRateDto(1, 2, "updated review"));
 
         verify(reviewRepository).save(existing);
         assertEquals("updated review", existing.getReview());
@@ -113,14 +119,16 @@ class ReviewServiceTest {
         Review review = new Review();
         review.setId(createRateId(1, 2));
         review.setReview("solid");
+        review.setUser(createUser(1));
         when(reviewRepository.findByMovie(movie)).thenReturn(List.of(review));
+        when(movieService.getMovie(2)).thenReturn(createMovieDto(2));
 
         List<GenericRateDto<String>> result = reviewService.getAllByMovie(2);
 
         assertEquals(1, result.size());
-        assertEquals(1, result.getFirst().userId());
-        assertEquals(2, result.getFirst().movieId());
-        assertEquals("solid", result.getFirst().rating());
+        assertEquals(1, result.getFirst().getUserId());
+        assertEquals(2, result.getFirst().getMovieId());
+        assertEquals("solid", result.getFirst().getRating());
     }
 
     private User createUser(int id) {
@@ -140,6 +148,32 @@ class ReviewServiceTest {
         rateId.setUserId(userId);
         rateId.setMovieId(movieId);
         return rateId;
+    }
+
+    private GenericRateDto<String> createRateDto(int userId, int movieId, String rating) {
+        return GenericRateDto.<String>builder()
+                .userId(userId)
+                .movieId(movieId)
+                .rating(rating)
+                .build();
+    }
+
+    private MovieDto createMovieDto(int id) {
+        return new MovieDto(
+                id,
+                "test",
+                "poster.jpg",
+                120,
+                LocalDate.of(2020, 1, 1),
+                "yt",
+                "wiki",
+                "trailer",
+                4.0,
+                Set.of(),
+                Set.of(),
+                Set.of(),
+                Set.of()
+        );
     }
 }
 
