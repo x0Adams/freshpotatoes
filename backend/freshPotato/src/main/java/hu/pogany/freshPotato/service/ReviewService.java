@@ -1,6 +1,7 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.rate.GenericRateDto;
+import hu.pogany.freshPotato.dto.response.GenreDto;
 import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.entity.RateId;
 import hu.pogany.freshPotato.entity.Review;
@@ -13,14 +14,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService extends AbstractRateService<String, Review> {
-    private final MovieService movieService;
-
-    public ReviewService(ReviewRepository rateRepository, UserRepository userRepository, MovieRepository movieRepository, MovieService movieService) {
+    public ReviewService(ReviewRepository rateRepository, UserRepository userRepository, MovieRepository movieRepository) {
         super(rateRepository, userRepository, movieRepository);
-        this.movieService = movieService;
     }
 
     @Override
@@ -58,16 +57,18 @@ public class ReviewService extends AbstractRateService<String, Review> {
     @Override
     protected List<GenericRateDto<String>> mapToDto(List<Review> entities) {
         return entities.stream().map(it -> {
-            var movie = movieService.getMovie(it.getId().getMovieId());
+                    var movie = it.getMovie();
                     return GenericRateDto
                             .<String>builder()
-                            .movieId(movie.id())
-                            .userId(it.getId().getUserId())
+                            .movieId(movie.getId())
+                            .userId(it.getUser().getId())
                             .rating(it.getReview())
-                            .name(movie.name())
-                            .posterPath(movie.posterPath())
-                            .releaseDate(movie.releaseDate())
-                            .genres(movie.genres())
+                            .name(movie.getName())
+                            .posterPath(movie.getPosterPath())
+                            .releaseDate(movie.getReleaseDate())
+                            .genres(movie.getGenres().stream()
+                                    .map(genre -> new GenreDto(genre.getName()))
+                                    .collect(Collectors.toSet()))
                             .username(it.getUser().getUsername())
                             .build();
                 }

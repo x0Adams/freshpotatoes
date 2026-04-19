@@ -65,6 +65,11 @@ public class MovieService {
         return mapper.toMovieDto(movie);
     }
 
+    public MovieDto getMovieNotFetchExternal(int id) {
+        Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
+        return mapper.toMovieDto(movie);
+    }
+
     public List<SearchMovieDto> findPopularMovies(int page, int size) {
         List<Movie> movies = movieRepository.findByPopularity(PageRequest.of(page, size));
         return mapper.toSearchMovieDtoList(movies);

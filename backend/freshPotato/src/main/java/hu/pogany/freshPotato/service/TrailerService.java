@@ -82,7 +82,7 @@ public class TrailerService {
                         .queryParam("part", "snippet")
                         .queryParam("type", "video")
                         .queryParam("maxResults", 1)
-                        .queryParam("q", String.format("%s %d trailer", movie.getName(), movie.getReleaseDate().getYear()))
+                        .queryParam("q", String.format("%s %s trailer", movie.getName(), getMovieReleaseYear(movie)))
                         .queryParam("relevanceLanguage", "en")
                         .queryParam("key", youtubeConfig.apiKey())
                         .build()
@@ -117,6 +117,14 @@ public class TrailerService {
         JsonNode items = root.get("items");
 
         return items.get(0).get("id").get("videoId").asString();
+    }
+
+    private String getMovieReleaseYear(Movie movie) {
+        try {
+            return "" + movie.getReleaseDate().getYear();
+        } catch (RuntimeException e) {
+            return "";
+        }
     }
 
 
