@@ -1,6 +1,6 @@
 package hu.pogany.freshPotato.service;
 
-import hu.pogany.freshPotato.Security.RefreshTokenProvider;
+import hu.pogany.freshPotato.security.RefreshTokenProvider;
 import hu.pogany.freshPotato.config.TokenConfig;
 import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;

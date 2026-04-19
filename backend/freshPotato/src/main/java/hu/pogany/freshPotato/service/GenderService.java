@@ -14,8 +14,13 @@ public class GenderService {
     }
 
     Gender findByName(String name) {
-        return genderRepository
+        Gender gender = genderRepository
                 .findByName(name)
-                .orElseThrow(() -> new EntityNotFoundException("no gender with this name"));
+                .getFirst();
+
+        if (gender == null)
+            throw new EntityNotFoundException("No gender with this name");
+
+        return gender;
     }
 }

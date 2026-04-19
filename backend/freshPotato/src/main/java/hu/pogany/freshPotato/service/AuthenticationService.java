@@ -1,12 +1,11 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.RegisterUserDto;
-import hu.pogany.freshPotato.dto.TokensDto;
+import hu.pogany.freshPotato.dto.response.TokensDto;
 import hu.pogany.freshPotato.entity.Gender;
 import hu.pogany.freshPotato.entity.RefreshToken;
 import hu.pogany.freshPotato.entity.User;
 import hu.pogany.freshPotato.repository.UserRepository;
-import jakarta.persistence.EntityExistsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,14 +17,14 @@ import java.util.Optional;
 @Transactional
 @Service
 public class AuthenticationService {
-    private final JwtGeneratorService jwtService;
+    private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final GenderService genderService;
     private final UserService userService;
 
-    public AuthenticationService(JwtGeneratorService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository, PasswordEncoder passwordEncoder, GenderService genderService, UserService userService) {
+    public AuthenticationService(JwtService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository, PasswordEncoder passwordEncoder, GenderService genderService, UserService userService) {
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
         this.userRepository = userRepository;

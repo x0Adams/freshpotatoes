@@ -1,6 +1,6 @@
 package hu.pogany.freshPotato.service;
 
-import hu.pogany.freshPotato.Security.TokenProvider;
+import hu.pogany.freshPotato.security.TokenProvider;
 import hu.pogany.freshPotato.config.TokenConfig;
 import hu.pogany.freshPotato.entity.User;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,12 +15,12 @@ import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
-public class JwtGeneratorService implements TokenProvider {
+public class JwtService implements TokenProvider {
     NimbusJwtEncoder encoder;
     TokenConfig config;
     AuthorityService authorityService;
 
-    public JwtGeneratorService(NimbusJwtEncoder encoder, TokenConfig config, AuthorityService authorityService) {
+    public JwtService(NimbusJwtEncoder encoder, TokenConfig config, AuthorityService authorityService) {
         this.encoder = encoder;
         this.config = config;
         this.authorityService = authorityService;
@@ -47,5 +47,19 @@ public class JwtGeneratorService implements TokenProvider {
         Jwt jwt = encoder.encode(JwtEncoderParameters.from(claims));
 
         return jwt.getTokenValue();
+    }
+
+    public static int getUserId(Jwt jwt) {
+        Object uidClaim = jwt.getClaim("uid");
+
+        if (uidClaim instanceof Number number) {
+            return number.intValue();
+        }
+
+        if (uidClaim instanceof String text) {
+            return Integer.parseInt(text);
+        }
+
+        throw new IllegalArgumentException("Invalid uid claim type");
     }
 }
