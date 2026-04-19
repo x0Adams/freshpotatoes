@@ -1,7 +1,7 @@
 package hu.pogany.freshPotato.service;
 
 import hu.pogany.freshPotato.dto.rate.GenericRateDto;
-import hu.pogany.freshPotato.dto.response.MovieDto;
+import hu.pogany.freshPotato.entity.Genre;
 import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.entity.RateId;
 import hu.pogany.freshPotato.entity.Review;
@@ -19,10 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -39,9 +38,6 @@ class ReviewServiceTest {
 
     @Mock
     private MovieRepository movieRepository;
-
-    @Mock
-    private MovieService movieService;
 
     @InjectMocks
     private ReviewService reviewService;
@@ -101,7 +97,7 @@ class ReviewServiceTest {
 
     @Test
     void getAllByMovie_shouldThrowEntityNotFoundException_whenMovieIdDoesNotExist() {
-        when(movieRepository.findById(99)).thenReturn(Optional.empty());
+        when(movieRepository.existsById(99)).thenReturn(false);
 
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
@@ -114,14 +110,21 @@ class ReviewServiceTest {
     @Test
     void getAllByMovie_shouldReturnMappedReviewDtos_whenMovieExistsAndReviewsArePresent() {
         Movie movie = createMovie(2);
-        when(movieRepository.findById(2)).thenReturn(Optional.of(movie));
+        movie.setName("Movie 2");
+        movie.setPosterPath("poster.jpg");
+        Genre genre = new Genre();
+        genre.setName("Drama");
+        movie.setGenres(new LinkedHashSet<>(List.of(genre)));
+        when(movieRepository.existsById(2)).thenReturn(true);
 
         Review review = new Review();
         review.setId(createRateId(1, 2));
         review.setReview("solid");
-        review.setUser(createUser(1));
-        when(reviewRepository.findByMovie(movie)).thenReturn(List.of(review));
-        when(movieService.getMovie(2)).thenReturn(createMovieDto(2));
+        User user = createUser(1);
+        user.setUsername("tester");
+        review.setUser(user);
+        review.setMovie(movie);
+        when(reviewRepository.findByMovieId(2)).thenReturn(List.of(review));
 
         List<GenericRateDto<String>> result = reviewService.getAllByMovie(2);
 
@@ -129,6 +132,8 @@ class ReviewServiceTest {
         assertEquals(1, result.getFirst().getUserId());
         assertEquals(2, result.getFirst().getMovieId());
         assertEquals("solid", result.getFirst().getRating());
+        assertEquals("tester", result.getFirst().getUsername());
+        assertEquals("Movie 2", result.getFirst().getName());
     }
 
     private User createUser(int id) {
@@ -158,22 +163,5 @@ class ReviewServiceTest {
                 .build();
     }
 
-    private MovieDto createMovieDto(int id) {
-        return new MovieDto(
-                id,
-                "test",
-                "poster.jpg",
-                120,
-                LocalDate.of(2020, 1, 1),
-                "yt",
-                "wiki",
-                "trailer",
-                4.0,
-                Set.of(),
-                Set.of(),
-                Set.of(),
-                Set.of()
-        );
-    }
 }
 

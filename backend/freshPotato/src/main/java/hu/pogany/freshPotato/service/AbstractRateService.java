@@ -9,16 +9,12 @@ import hu.pogany.freshPotato.repository.MovieRepository;
 import hu.pogany.freshPotato.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Transactional
 public abstract class AbstractRateService<T, S> {
-    private static final Logger log = LoggerFactory.getLogger(AbstractRateService.class);
     private final GenericRateRepository<S> rateRepository;
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
@@ -61,18 +57,16 @@ public abstract class AbstractRateService<T, S> {
     }
 
     public List<GenericRateDto<T>> getAllByUser(int userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if (user.isEmpty())
+        if (!userRepository.existsById(userId))
             throw new EntityNotFoundException("User doesn't exists");
 
-        return mapToDto(rateRepository.findByUser(user.get()));
+        return mapToDto(rateRepository.findByUserId(userId));
     }
 
     public List<GenericRateDto<T>> getAllByMovie(int movieId) {
-        Optional<Movie> movie = movieRepository.findById(movieId);
-        if (movie.isEmpty())
+        if (!movieRepository.existsById(movieId))
             throw new EntityNotFoundException("no movie with this id in the database");
-        return mapToDto(rateRepository.findByMovie(movie.get()));
+        return mapToDto(rateRepository.findByMovieId(movieId));
     }
 
     protected abstract S createEntity(User user, Movie movie, T rating);
