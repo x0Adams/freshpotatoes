@@ -11,6 +11,8 @@ import hu.pogany.freshPotato.mapper.Mapper;
 import hu.pogany.freshPotato.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,10 +104,11 @@ public class UserService {
 
     public UserDtoPublic getByUserIdPublic(int id) {
         UserDto user = getByUserid(id);
-        var publicPlayLists = user.playlists().stream().filter(it -> !it.isPrivate()).toList();
-        user.playlists().removeAll(user.playlists());
-        user.playlists().addAll(publicPlayLists);
-
+        if (user.playlists() != null && !user.playlists().isEmpty()) {
+            var publicPlayLists = user.playlists().stream().filter(it -> !it.isPrivate()).toList();
+            user.playlists().removeAll(user.playlists());
+            user.playlists().addAll(publicPlayLists);
+        }
         return mapper.toPublicDto(user);
     }
 
