@@ -6,6 +6,7 @@ import hu.pogany.freshPotato.dto.rate.GenericRateDto;
 import hu.pogany.freshPotato.dto.rate.RateRequestDto;
 import hu.pogany.freshPotato.entity.Rate;
 import hu.pogany.freshPotato.service.RateService;
+import hu.pogany.freshPotato.service.RatingEventPublisher;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -27,8 +28,11 @@ import java.util.List;
 @RequestMapping("/api/rate")
 @Tag(name = "Ratings", description = "Create, delete and list movie ratings")
 public class RateController extends AbstractRateController<Integer, Rate> {
-    public RateController(RateService rateService) {
+    private final RatingEventPublisher ratingEventPublisher;
+
+    public RateController(RateService rateService, RatingEventPublisher ratingEventPublisher) {
         super(rateService);
+        this.ratingEventPublisher = ratingEventPublisher;
     }
 
 
@@ -69,7 +73,12 @@ public class RateController extends AbstractRateController<Integer, Rate> {
             @ApiResponse(responseCode = "404", description = "User or movie not found", content = @Content(schema = @Schema(type = "string", example = "Movie not found")))
     })
     public ResponseEntity<String> rateMovie(@Valid @RequestBody RateRequestDto rate, @AuthenticationPrincipal Jwt jwt) {
-        return super.rateMovie(rate, jwt);
+        ResponseEntity<String> response = super.rateMovie(rate, jwt);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            ratingEventPublisher.publishRateChanged(getUserId(jwt), rate.getMovieId(), rate.getRate());
+        }
+
+        return response;
     }
 
     @GetMapping
