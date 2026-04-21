@@ -17,6 +17,8 @@ import hu.pogany.freshPotato.repository.PlaylistRepository;
 import hu.pogany.freshPotato.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ import java.util.Objects;
 @Service
 @Transactional(readOnly = true)
 public class PlaylistService {
+    private static final Logger log = LoggerFactory.getLogger(PlaylistService.class);
     private final PlaylistRepository playlistRepository;
     private final MovieInPlaylistRepository movieInPlaylistRepository;
     private final MovieRepository movieRepository;
@@ -127,10 +130,8 @@ public class PlaylistService {
         relation.setPlaylist(playlist);
         relation.setMovie(movie);
         movieInPlaylistRepository.save(relation);
-
-        Playlist updated = playlistRepository.findWithDetailsById(playlistId)
-                .orElseThrow(() -> new EntityNotFoundException("Playlist not found"));
-        return toDetailsDto(updated);
+        playlist.getMovieInPlaylists().add(relation);
+        return toDetailsDto(playlist);
     }
 
     @Transactional
@@ -143,6 +144,7 @@ public class PlaylistService {
                 .orElseThrow(() -> new ValidationException("Movie is not in the playlist"));
 
         movieInPlaylistRepository.delete(relation);
+        playlist.getMovieInPlaylists().removeIf(item -> Objects.equals(item.getId(), relation.getId()));
 
         Playlist updated = playlistRepository.findWithDetailsById(playlistId)
                 .orElseThrow(() -> new EntityNotFoundException("Playlist not found"));
@@ -207,4 +209,3 @@ public class PlaylistService {
         );
     }
 }
-
