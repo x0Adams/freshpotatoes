@@ -1,89 +1,43 @@
 import { useParams, Link } from 'react-router-dom'
-import { useState } from 'react'
-import { MOCK_MOVIES } from '../data/mockMovies'
+import { useState, useEffect } from 'react'
+import { movieApi } from '../services/api'
+import { useAuth } from '../context/AuthContext'
+import MoviePoster from '../components/MoviePoster'
+import DiscoverMovies from '../components/DiscoverMovies'
 
 //potato rating display
-function PotatoRating({ rating }) {
+function PotatoRating({ rating, userRating, onRate, isSubmitting }) {
+  const [hover, setHover] = useState(0)
+  
   return (
-    <div className="potato-rating">
-      {[1, 2, 3, 4, 5].map(n => {
-        const full = rating >= n
-        const half = !full && rating >= n - 0.5
-        return (
-          <span
-            key={n}
-            className={`potato ${full ? 'lit' : half ? 'half' : ''}`}
-          >
-            🥔
-          </span>
-        )
-      })}
-      <span className="potato-score">{rating} / 5</span>
-    </div>
-  )
-}
-
-//recommendation strip design
-function RecommendationStrip({ currentMovie }) {
-  const recs = MOCK_MOVIES
-    .filter(m =>
-      m.id !== currentMovie.id &&
-      Array.isArray(m.genre) &&
-      m.genre.some(g => currentMovie.genre.includes(g))
-    )
-    .slice(0, 10)
-
-  if (recs.length === 0) return null
-
-  return (
-    <div className="movie-section">
-      <h2 className="movie-section-title">
-        More like this — <span>{currentMovie.genre[0]}</span>
-      </h2>
-      <div className="coming-track" style={{ overflowX: 'auto' }}>
-        {recs.map(movie => (
-          <Link key={movie.id} to={`/movie/${movie.id}`} className="coming-card">
-            <img src={movie.posterUrl} alt={movie.title} className="coming-card-img" />
-            <div className="coming-card-overlay">
-              <p className="coming-card-genre">
-                {Array.isArray(movie.genre) ? movie.genre[0] : movie.genre}
-              </p>
-              <p className="coming-card-title">{movie.title}</p>
-              <p className="coming-card-date">
-                <i className="bi bi-calendar3" /> {movie.year}
-              </p>
-            </div>
-          </Link>
-        ))}
+    <div className="potato-rating-container">
+      <div className="potato-rating">
+        {[1, 2, 3, 4, 5].map(n => {
+          const displayRating = hover || userRating || rating
+          const full = displayRating >= n
+          const half = !full && displayRating >= n - 0.5
+          
+          return (
+            <span
+              key={n}
+              className={`potato ${full ? 'lit' : half ? 'half' : ''} ${onRate ? 'clickable' : ''} ${isSubmitting ? 'opacity-50' : ''}`}
+              onMouseEnter={() => onRate && setHover(n)}
+              onMouseLeave={() => onRate && setHover(0)}
+              onClick={() => onRate && !isSubmitting && onRate(n)}
+            >
+              🥔
+            </span>
+          )
+        })}
+        <span className="potato-score">{userRating ? `Your rating: ${userRating}` : `${rating || 'No'} / 5`}</span>
       </div>
+      {onRate && !userRating && <small className="text-secondary">Click a potato to rate!</small>}
     </div>
   )
 }
-
-//comment
-const MOCK_COMMENTS = [
-  { id: 1, author: "MovieBuff42",   date: "2024-03-12", text: "One of the best films of the year. Absolutely stunning." },
-  { id: 2, author: "CinemaLover",   date: "2024-03-15", text: "The cinematography alone is worth the price of admission." },
-  { id: 3, author: "PotatoCritic",  date: "2024-03-18", text: "A slow burn but deeply rewarding. Not for everyone." },
-]
 
 function CommentsSection() {
-  const [comments, setComments] = useState(MOCK_COMMENTS)
-  const [text, setText]         = useState('')
-
-  function handleSubmit() {
-    if (!text.trim()) return
-    setComments(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        author: "Guest",
-        date: new Date().toISOString().slice(0, 10),
-        text: text.trim(),
-      }
-    ])
-    setText('')
-  }
+  const [comments] = useState([]) // Placeholder as there is no comments API yet
 
   return (
     <div className="movie-section">
@@ -91,50 +45,119 @@ function CommentsSection() {
         Comments <span>({comments.length})</span>
       </h2>
 
-      {/* form */}
-      <div className="comment-form">
+      <div className="comment-form opacity-50">
         <textarea
           className="form-control comment-input mb-2"
           rows={3}
-          placeholder="Leave a comment… (logged in users only in the future)"
-          value={text}
-          onChange={e => setText(e.target.value)}
+          placeholder="Comments are coming soon!"
+          disabled
         />
-        <button
-          className="btn btn-warning btn-sm fw-semibold px-4 text-dark"
-          onClick={handleSubmit}
-          disabled={!text.trim()}
-        >
+        <button className="btn btn-warning btn-sm fw-semibold px-4 text-dark" disabled>
           Post Comment
         </button>
       </div>
-
-      {/* list */}
-      {comments.map(c => (
-        <div key={c.id} className="comment-card">
-          <div className="comment-author">{c.author}</div>
-          <div className="comment-date">{c.date}</div>
-          <p className="comment-text">{c.text}</p>
-        </div>
-      ))}
     </div>
   )
 }
 
 //main page
 function MoviePage() {
-  const { id }  = useParams()
-  const movie   = MOCK_MOVIES.find(m => m.id === parseInt(id))
+  const { id } = useParams()
+  const { user } = useAuth()
+  const [movie, setMovie] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [userRating, setUserRating] = useState(0)
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false)
 
-  if (!movie) return (
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    movieApi.getById(id)
+      .then(data => {
+        setMovie(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        // If it's a 404 or looks like a missing movie, we show the "No Info" state
+        if (err.message.includes('404') || err.message.toLowerCase().includes('not found')) {
+          setMovie({ id, title: 'Unknown Movie', genres: [], actors: [] })
+        } else {
+          setError("Movie not found or server error.")
+        }
+        setLoading(false)
+      })
+  }, [id])
+
+  const handleRate = async (rating) => {
+    if (!user) {
+      alert("Please log in to rate movies!")
+      return
+    }
+    
+    setIsSubmittingRating(true)
+    try {
+      const token = localStorage.getItem('accessToken')
+      await movieApi.rate(id, rating, token)
+      setUserRating(rating)
+      // Refresh movie data to see updated average
+      const updatedMovie = await movieApi.getById(id)
+      setMovie(updatedMovie)
+    } catch (err) {
+      alert(err.message || "Failed to submit rating")
+    } finally {
+      setIsSubmittingRating(false)
+    }
+  }
+
+  if (loading) return (
     <div className="text-center py-5 mt-5">
-      <p className="text-secondary">Movie not found.</p>
+      <div className="spinner-border text-warning" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  )
+
+  if (error || !movie) return (
+    <div className="text-center py-5 mt-5">
+      <p className="text-secondary">{error || "Movie not found."}</p>
       <Link to="/" className="btn btn-outline-warning btn-sm mt-3">← Back to Home</Link>
     </div>
   )
 
-  // only fully detailed movies
-  const hasDetails = !!movie.directors
+  // Check if movie has "no information"
+  const isPlaceholderDescription = !movie.description || movie.description === movie.title || movie.description === 'Not Fetched';
+  const hasNoInfo = !movie.title || movie.title === 'Unknown' || (isPlaceholderDescription && !movie.posterUrl);
+
+  if (hasNoInfo) {
+    return (
+      <div className="movie-page">
+        <div className="container py-5 text-center">
+          <div className="py-5 bg-dark border border-secondary rounded-4 opacity-75" style={{ marginTop: '24px' }}>
+            <h1 className="display-1 mb-4">🥔</h1>
+            <h2 className="fw-bold text-white mb-3">{movie.title || 'No Information Available'}</h2>
+            <p className="text-secondary fs-5 mb-4 mx-auto" style={{ maxWidth: '600px' }}>
+              We're sorry, but we don't have enough details about this movie in our database yet. 
+              Our movie miners are working hard to gather posters, ratings, and descriptions!
+            </p>
+            <div className="d-flex justify-content-center gap-3">
+              <Link to="/" className="btn btn-warning px-4 fw-semibold text-dark">
+                Explore Other Movies
+              </Link>
+              <button onClick={() => window.location.reload()} className="btn btn-outline-secondary px-4">
+                <i className="bi bi-arrow-clockwise me-1" /> Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-5">
+          <DiscoverMovies />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="movie-page">
@@ -145,15 +168,23 @@ function MoviePage() {
 
         {/* poster */}
         <div className="movie-poster-frame">
-          <img src={movie.posterUrl} alt="" aria-hidden className="movie-poster-glow" />
-          <img src={movie.posterUrl} alt={movie.title} className="movie-poster-img" />
+          {movie.posterUrl ? (
+            <img src={movie.posterUrl} alt="" aria-hidden className="movie-poster-glow" />
+          ) : (
+            <div className="movie-poster-glow bg-dark opacity-50" aria-hidden />
+          )}
+          <MoviePoster
+            posterUrl={movie.posterUrl}
+            title={movie.title}
+            className="movie-poster-img"
+          />
         </div>
 
         {/* info */}
         <div className="movie-info">
 
           <div className="movie-genres">
-            {(Array.isArray(movie.genre) ? movie.genre : [movie.genre]).map(g => (
+            {movie.genres && movie.genres.map(g => (
               <span key={g} className="movie-genre-badge">{g}</span>
             ))}
           </div>
@@ -168,45 +199,50 @@ function MoviePage() {
           </div>
 
           {/* potato rating */}
-          {movie.rating && <PotatoRating rating={movie.rating} />}
+          <PotatoRating 
+            rating={movie.rating} 
+            userRating={userRating}
+            onRate={user ? handleRate : null}
+            isSubmitting={isSubmittingRating}
+          />
 
           {/* Links */}
-          {hasDetails && (
-            <div className="movie-links">
-              {movie.trailerUrl && (
-                <a
-                  href={movie.trailerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-warning btn-sm fw-semibold text-dark px-3" >
-                  <i className="bi bi-play-fill me-1" /> Watch Trailer
-                </a>
-              )}
-              {movie.youtubeUrl && (
-                <a
-                  href={movie.youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline-secondary btn-sm px-3">
-                  <i className="bi bi-youtube me-1" /> YouTube Page
-                </a>
-              )}
-            </div>
-          )}
+          <div className="movie-links">
+            {movie.trailerUrl && (
+              <a
+                href={movie.trailerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-warning btn-sm fw-semibold text-dark px-3" >
+                <i className="bi bi-play-fill me-1" /> Watch Trailer
+              </a>
+            )}
+            {movie.youtubeUrl && (
+              <a
+                href={movie.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline-secondary btn-sm px-3">
+                <i className="bi bi-youtube me-1" /> YouTube Page
+              </a>
+            )}
+          </div>
 
           {/* credits */}
-          {hasDetails && (
-            <div className="movie-credits">
+          <div className="movie-credits">
+            {movie.directors && movie.directors.length > 0 && (
               <div className="movie-credit-group">
                 <h6>Directed by</h6>
                 <p>{movie.directors.join(', ')}</p>
               </div>
+            )}
+            {movie.actors && movie.actors.length > 0 && (
               <div className="movie-credit-group">
                 <h6>Starring</h6>
                 <p>{movie.actors.join(', ')}</p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* description */}
           {movie.description && (
@@ -217,10 +253,10 @@ function MoviePage() {
       </div>
 
       {/* recom */}
-      {hasDetails && <RecommendationStrip currentMovie={movie} />}
+      <DiscoverMovies />
 
       {/*comments*/}
-      {hasDetails && <CommentsSection />}
+      <CommentsSection />
 
     </div>
   )
