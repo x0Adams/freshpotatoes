@@ -15,13 +15,14 @@ import java.util.List;
 public interface MovieRepository extends JpaRepository<Movie, Integer>, JpaSpecificationExecutor<Movie> {
     List<Movie> findTop5ByNameIsLike(String name, Sort sort);
 
+    @EntityGraph(attributePaths = {"genres"})
     @Query("SELECT movie FROM Movie movie where movie.name != 'None' and movie.wikipediaTitle != 'None' ORDER BY RAND() LIMIT 30")
     List<Movie> findRandom();
 
-    @Query("select m from Movie m left join m.views v group by m order by count(v) desc")
-    List<Movie> findByPopularity(Pageable pageable);
+    @Query("select m.id from Movie m left join m.views v group by m.id order by count(v) desc, m.id asc")
+    List<Integer> findPopularMovieIds(Pageable pageable);
 
-    @Query("select distinct m from Movie m join m.staffRoleInMovies srm where srm.staff.id = :staffId and srm.id.role = :role")
+    @Query("select distinct m from Movie m join m.staffRoleInMovies srm join m.genres where srm.staff.id = :staffId and srm.id.role = :role")
     List<Movie> findByStaffAndRole(@Param("staffId") Integer staffId, @Param("role") StaffRole role);
 
     @EntityGraph(attributePaths = {"genres"})
