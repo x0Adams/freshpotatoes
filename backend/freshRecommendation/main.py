@@ -75,7 +75,7 @@ class Settings:
                 return default
 
         return cls(
-            db_url=os.getenv("DB_URL", ""),
+            db_url=os.getenv("PY_DB_URL", "mysql+pymysql://localhost/fresh_potatoes"),
             db_pass=os.getenv("DB_PASS", ""),
             rabbitmq_url=os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost/"),
             rabbitmq_queue=os.getenv("RABBITMQ_QUEUE", "movie_ratings"),
