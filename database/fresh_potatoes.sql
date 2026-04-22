@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: mariadb:3306
--- Generation Time: Mar 21, 2026 at 08:20 AM
+-- Generation Time: Apr 22, 2026 at 02:58 PM
 -- Server version: 11.8.6-MariaDB-ubu2404
 -- PHP Version: 8.3.30
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `fresh_potatoes`
 --
-CREATE DATABASE IF NOT EXISTS `fresh_potatoes` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `fresh_potatoes`;
 
 -- --------------------------------------------------------
 
@@ -138,7 +136,7 @@ CREATE TABLE `movie_in_playlist` (
 CREATE TABLE `playlist` (
   `id` int(11) NOT NULL,
   `owner_id` int(11) NOT NULL,
-  `name` int(11) NOT NULL,
+  `name` varchar(500) NOT NULL,
   `is_private` tinyint(1) NOT NULL,
   `creation_time` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -369,6 +367,8 @@ ALTER TABLE `staff_role_in_movie`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `username` (`username`),
   ADD KEY `user_gender` (`gender_id`);
 
 --
@@ -440,8 +440,8 @@ ALTER TABLE `genre_movie`
 -- Constraints for table `movie_in_playlist`
 --
 ALTER TABLE `movie_in_playlist`
-  ADD CONSTRAINT `movie_playlist` FOREIGN KEY (`playlist_id`) REFERENCES `playlist` (`id`),
-  ADD CONSTRAINT `playlist_movie` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+  ADD CONSTRAINT `movie_playlist` FOREIGN KEY (`playlist_id`) REFERENCES `playlist` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `playlist_movie` FOREIGN KEY (`movie_id`) REFERENCES `movie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `playlist`
