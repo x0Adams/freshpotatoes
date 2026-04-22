@@ -1,44 +1,56 @@
-import { useSearchParams } from 'react-router-dom'
-import { Link } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { movieApi, staffApi } from '../services/api'
+import { movieApi } from '../services/api'
 import MoviePoster from '../components/MoviePoster'
 
 function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryParam = searchParams.get('q') || ''
-  const typeParam = searchParams.get('type') || 'movie'
   
   const [localQuery, setLocalQuery] = useState(queryParam)
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // 1. URL -> State (Synchronize when navigating back/forward)
   useEffect(() => {
     setLocalQuery(queryParam)
-    if (queryParam.trim().length >= 3) {
+  }, [queryParam])
+
+  // 2. State -> Fetching (The core search logic)
+  useEffect(() => {
+    const query = queryParam.trim()
+    if (query.length >= 3) {
       setLoading(true)
       setError(null)
-      const api = typeParam === 'movie' ? movieApi : staffApi
-      api.search(queryParam)
-        .then(data => setResults(data))
-        .catch(err => setError(err.message))
-        .finally(() => setLoading(false))
+      movieApi.advancedSearch({ title: query, size: 30 })
+        .then(data => {
+          setResults(data)
+          setLoading(false)
+        })
+        .catch(err => {
+          setError(err.message)
+          setLoading(false)
+        })
     } else {
       setResults([])
+      setLoading(false)
     }
-  }, [queryParam, typeParam])
+  }, [queryParam])
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (localQuery.trim().length >= 3) {
-      setSearchParams({ q: localQuery.trim(), type: typeParam })
+  const handleLocalSearchSubmit = (e) => {
+    if (e) e.preventDefault()
+    const trimmed = localQuery.trim()
+    if (trimmed.length >= 3) {
+      setSearchParams({ q: trimmed })
+    } else if (trimmed === '') {
+      setSearchParams({})
     }
   }
 
   return (
     <div className="search-page">
-    <div style={{ height: '64px' }} />
+      <div style={{ height: '64px' }} />
       <div className="search-page-header">
         <h1 className="search-page-title">
           {queryParam.trim().length >= 3
@@ -46,12 +58,12 @@ function SearchPage() {
             : `Search freshPotatoes`}
         </h1>
         
-        <form onSubmit={handleSearch} className="search-page-input-wrap mt-4">
+        <form onSubmit={handleLocalSearchSubmit} className="search-page-input-wrap mt-4 d-lg-none">
           <div className="input-group">
             <input 
               type="text" 
               className="form-control bg-dark text-white border-secondary"
-              placeholder={`Search ${typeParam === 'movie' ? 'movies' : 'actors'}...`}
+              placeholder="Search movies..."
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
             />
@@ -59,37 +71,26 @@ function SearchPage() {
               Search
             </button>
           </div>
-          <div className="mt-2 d-flex gap-3">
-             <div className="form-check">
-                <input className="form-check-input" type="radio" name="searchType" id="typeMovie" 
-                  checked={typeParam === 'movie'} onChange={() => setSearchParams({ q: localQuery, type: 'movie' })} />
-                <label className="form-check-label text-secondary small" htmlFor="typeMovie">Movies</label>
-             </div>
-             <div className="form-check">
-                <input className="form-check-input" type="radio" name="searchType" id="typeActor" 
-                  checked={typeParam === 'actor'} onChange={() => setSearchParams({ q: localQuery, type: 'actor' })} />
-                <label className="form-check-label text-secondary small" htmlFor="typeActor">Actors</label>
-             </div>
-          </div>
         </form>
 
         {!loading && queryParam.trim().length >= 3 && (
           <p className="search-page-count">
-            {results.length} result{results.length !== 1 ? 's' : ''} found in {typeParam === 'movie' ? 'Movies' : 'Actors'}
+            {results.length} result{results.length !== 1 ? 's' : ''} found
           </p>
         )}
       </div>
 
-      {queryParam.trim().length < 3 ? (
-        <div className="search-page-empty">
-          <i className="bi bi-search" />
-          <p>Type at least 3 characters in the search bar above</p>
-        </div>
-      ) : loading ? (
+      {loading ? (
         <div className="search-page-empty">
           <div className="spinner-border text-warning" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
+          <p className="mt-3 text-secondary">Finding movies...</p>
+        </div>
+      ) : queryParam.trim().length < 3 ? (
+        <div className="search-page-empty">
+          <i className="bi bi-search text-secondary opacity-25" />
+          <p>Type at least 3 characters to start searching</p>
         </div>
       ) : error ? (
         <div className="search-page-empty">
@@ -98,45 +99,36 @@ function SearchPage() {
         </div>
       ) : results.length === 0 ? (
         <div className="search-page-empty">
-          <i className={typeParam === 'movie' ? "bi bi-film" : "bi bi-person-x"} />
-          <p>No {typeParam === 'movie' ? 'movies' : 'actors'} found for "{queryParam}"</p>
+          <i className="bi bi-film text-secondary opacity-25" />
+          <p>No movies found for "{queryParam}"</p>
         </div>
       ) : (
         <div className="search-page-grid">
-          {results.map(item => (
+          {results.map((item, idx) => (
             <Link
-              key={item.id}
-              to={typeParam === 'movie' ? `/movie/${item.id}` : `/staff/${item.id}`}
+              key={`${item.id}-${idx}`}
+              to={`/movie/${item.id}`}
               className="coming-card"
             >
-              {typeParam === 'movie' ? (
-                <MoviePoster
-                  posterUrl={item.posterUrl}
-                  title={item.title}
-                  className="coming-card-img"
-                />
-              ) : (
-                <div className="coming-card-img d-flex align-items-center justify-content-center bg-secondary text-dark" style={{ fontSize: '4rem' }}>
-                  <i className="bi bi-person-fill" />
-                </div>
-              )}
+              <MoviePoster
+                posterUrl={item.posterUrl}
+                title={item.title}
+                className="coming-card-img"
+              />
               <div className="coming-card-overlay">
                 <p className="coming-card-genre">
-                  {typeParam === 'movie' 
-                    ? (Array.isArray(item.genre) ? item.genre[0] : item.genre)
-                    : (item.gender || 'Person')}
+                  {(Array.isArray(item.genre) ? item.genre[0] : item.genre)}
                 </p>
-                <p className="coming-card-title">{typeParam === 'movie' ? item.title : item.name}</p>
+                <p className="coming-card-title">{item.title}</p>
                 <p className="coming-card-date">
-                  <i className={typeParam === 'movie' ? "bi bi-calendar3" : "bi bi-geo-alt"} />
-                  {typeParam === 'movie' ? item.year : (item.birthCountry || 'Unknown')}
+                  <i className="bi bi-calendar3" />
+                  {item.year}
                 </p>
               </div>
             </Link>
           ))}
         </div>
       )}
-
     </div>
   )
 }

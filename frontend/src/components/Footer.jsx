@@ -2,7 +2,7 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-5 py-4 border-top border-secondary" style={{ backgroundColor: '#0a0a0f' }}>
+    <footer className="mt-5 py-4 border-top border-secondary" style={{ backgroundColor: '#0a0a0f', position: 'relative', zIndex: 10 }}>
       <div className="container text-center">
         <div className="mb-3">
           <span className="fw-bold fs-5 text-light">

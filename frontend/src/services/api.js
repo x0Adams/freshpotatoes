@@ -25,7 +25,7 @@ function formatPosterUrl(path) {
 function formatBasicMovie(movie) {
   const posterPath = movie.posterPath || movie.poster_path || movie.posterUrl;
   return {
-    id: movie.id,
+    id: Number(movie.id),
     title: movie.name || movie.title,
     posterUrl: formatPosterUrl(posterPath),
     year: movie.releaseDate ? movie.releaseDate.substring(0, 4) : (movie.year || 'Unknown'),
@@ -37,6 +37,21 @@ export const movieApi = {
   async search(query, signal) {
     const res = await fetch(`${BASE_URL}/movie/search/${encodeURIComponent(query)}`, { signal });
     if (!res.ok) throw new Error(`Search failed`);
+    const data = await res.json();
+    return data.map(formatBasicMovie);
+  },
+
+  async advancedSearch(params = {}, signal) {
+    const { title, genre, staff, page = 0, size = 30 } = params;
+    let url = `${BASE_URL}/movie/search?title=${encodeURIComponent(title || '')}&page=${page}&size=${size}`;
+    if (genre) url += `&genre=${encodeURIComponent(genre)}`;
+    if (staff) url += `&staff=${encodeURIComponent(staff)}`;
+
+    const res = await fetch(url, { signal });
+    if (!res.ok) {
+      if (res.status === 404) return [];
+      throw new Error(`Advanced search failed`);
+    }
     const data = await res.json();
     return data.map(formatBasicMovie);
   },
@@ -81,10 +96,10 @@ export const movieApi = {
       duration: m.duration,
       trailerUrl: m.trailer && m.trailer !== "Not Fetched" ? m.trailer : null,
       youtubeUrl: m.youtubeMovie && m.youtubeMovie !== "Not Fetched" ? `https://www.youtube.com/watch?v=${m.youtubeMovie}` : null,
-      // Map nested arrays to flat string arrays
+      // Map nested arrays to flat string arrays or simple objects
       genres: m.genres ? m.genres.map(g => g.name).sort() : [],
-      actors: m.actors ? m.actors.map(a => a.name).sort() : [],
-      directors: m.directors ? m.directors.map(d => d.name).sort() : [],
+      actors: m.actors ? m.actors.sort((a, b) => a.name.localeCompare(b.name)) : [],
+      directors: m.directors ? m.directors.sort((a, b) => a.name.localeCompare(b.name)) : [],
       description: m.description,
       country: m.productionCountries && m.productionCountries.length > 0 
         ? m.productionCountries.map(c => c.name).sort().join(', ') 
@@ -95,13 +110,13 @@ export const movieApi = {
   },
 
   async rate(movieId, rating, token) {
-    const res = await fetch(`${BASE_URL}/rate/secure/rate`, {
+    const res = await fetch(`${BASE_URL}/rate/secure`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ movieId, rating: Number(rating) })
+      body: JSON.stringify({ movieId, rate: Number(rating) })
     });
     if (!res.ok) {
       const errText = await res.text().catch(() => 'Unknown error');
@@ -109,12 +124,36 @@ export const movieApi = {
       throw new Error(errText || 'Failed to save rating');
     }
     return res.text();
+  },
+
+  async getUserRating(userId, movieId) {
+    const res = await fetch(`${BASE_URL}/rate?userid=${userId}`);
+    if (!res.ok) return 0;
+    const ratings = await res.json();
+    const movieRating = ratings.find(r => r.movieId === Number(movieId));
+    return movieRating ? movieRating.rating : 0;
+  },
+
+  async deleteRate(movieId, token) {
+    const res = await fetch(`${BASE_URL}/rate/secure`, {
+      method: 'DELETE',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ movieId: Number(movieId) })
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => 'Unknown error');
+      throw new Error(errText || 'Failed to delete rating');
+    }
+    return true;
   }
 };
 
 export const staffApi = {
-  async search(name, signal) {
-    // Backend search endpoint removed as per user instruction to not modify backend
+  async search() {
+    // Search by actor name is not supported by the current backend API.
     return [];
   },
 
@@ -125,7 +164,9 @@ export const staffApi = {
     return {
       ...s,
       birthCountry: s.birthCountry ? s.birthCountry.name : null,
-      gender: s.gender ? s.gender.name : null
+      gender: s.gender ? s.gender.name : null,
+      playedMovies: s.playedMovies ? s.playedMovies.map(formatBasicMovie) : [],
+      directedMovies: s.directedMovies ? s.directedMovies.map(formatBasicMovie) : []
     };
   }
 };
@@ -175,14 +216,14 @@ export const authApi = {
     });
     if (!res.ok) throw new Error('Could not fetch user profile');
     const data = await res.json();
-    // Map backend JWT claims to our frontend-friendly user object
+    // Map backend UserDto to our frontend-friendly user object
     return {
-      id: data.uid,
-      username: data.sub, // 'sub' is standard for username/subject in JWT
+      id: data.id,
+      username: data.username,
       email: data.email,
       age: data.age,
       genderName: data.gender,
-      roles: data.authorities || []
+      roles: [] // UserDto doesn't currently provide roles
     };
   }
 };
@@ -192,5 +233,162 @@ export const genreApi = {
     const res = await fetch(`${BASE_URL}/genre`);
     if (!res.ok) throw new Error('Failed to fetch genres');
     return res.json();
+  }
+};
+
+export const playlistApi = {
+  async getByOwner(ownerId, token) {
+    const res = await fetch(`${BASE_URL}/playlist?ownerId=${ownerId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch playlists');
+    return res.json();
+  },
+
+  async getById(playlistId, token) {
+    const res = await fetch(`${BASE_URL}/playlist/${playlistId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch playlist details');
+    const data = await res.json();
+    return {
+      ...data,
+      movies: data.movies ? data.movies.map(formatBasicMovie) : []
+    };
+  },
+
+  async create(name, isPublic, token) {
+    const res = await fetch(`${BASE_URL}/playlist/secure`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ name, isPrivate: !isPublic })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || errData.error || `Failed to create playlist: ${res.status}`);
+    }
+    return res.json();
+  },
+
+  async delete(playlistId, token) {
+    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to delete playlist');
+  },
+
+  async rename(playlistId, name, token) {
+    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}/name`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ name })
+    });
+    if (!res.ok) throw new Error('Failed to rename playlist');
+    return res.json();
+  },
+
+  async changeVisibility(playlistId, isPublic, token) {
+    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}/visibility`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ isPrivate: !isPublic })
+    });
+    if (!res.ok) throw new Error('Failed to change visibility');
+    return res.json();
+  },
+
+  async addMovie(playlistId, movieId, token) {
+    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}/movies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ movieId: Number(movieId) })
+    });
+    if (!res.ok) throw new Error('Failed to add movie');
+    return res.json();
+  },
+
+  async removeMovie(playlistId, movieId, token) {
+    const pId = Number(playlistId);
+    const mId = Number(movieId);
+    const url = `${BASE_URL}/playlist/secure/${pId}/movies/${mId}`;
+    
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => 'No error body');
+      let message = errBody;
+      try {
+        const json = JSON.parse(errBody);
+        message = json.message || message;
+      } catch { /* not json */ }
+      
+      throw new Error(`Server Error (${res.status}): ${message}`);
+    }
+
+    try {
+      const data = await res.json();
+      return {
+        ...data,
+        movies: data.movies ? data.movies.map(formatBasicMovie) : []
+      };
+    } catch {
+      return null;
+    }
+  }
+};
+
+export const reviewApi = {
+  async getAllByMovie(movieId) {
+    const res = await fetch(`${BASE_URL}/review/${movieId}`);
+    if (!res.ok) throw new Error('Failed to fetch reviews');
+    return res.json();
+  },
+
+  async postReview(movieId, reviewText, token) {
+    const res = await fetch(`${BASE_URL}/review/secure`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ movieId: Number(movieId), rate: reviewText })
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => 'Unknown error');
+      throw new Error(errText || 'Failed to save review');
+    }
+    return res.text();
+  },
+
+  async deleteReview(movieId, token) {
+    const res = await fetch(`${BASE_URL}/review/secure`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ movieId: Number(movieId) })
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => 'Unknown error');
+      throw new Error(errText || 'Failed to delete review');
+    }
+    return true;
   }
 };
