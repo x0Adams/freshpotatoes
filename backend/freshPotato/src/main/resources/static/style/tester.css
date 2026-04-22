@@ -1,0 +1,15 @@
+body {
+    background-color: #f4f6f9;
+}
+
+.response-box {
+    min-height: 260px;
+    max-height: 520px;
+    overflow: auto;
+    background: #111827;
+    color: #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.9rem;
+    margin: 0;
+}
+

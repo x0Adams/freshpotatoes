@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>hu.pogany</groupId>
 	<artifactId>freshPotato</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>dev</version>
 	<name>freshPotato</name>
 	<description>Movie rater site</description>
 	<url/>
