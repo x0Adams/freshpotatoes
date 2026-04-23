@@ -15,13 +15,13 @@ public class StaffRoleInMovie {
     @MapsId("movie")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "movie", nullable = false)
+    @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
     @MapsId("staff")
     @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.MERGE)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "staff", nullable = false)
+    @JoinColumn(name = "staff_id", nullable = false)
     private Staff staff;
 
     public StaffRoleInMovieId getId() {

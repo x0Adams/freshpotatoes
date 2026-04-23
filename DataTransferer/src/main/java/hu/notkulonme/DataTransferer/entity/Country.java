@@ -18,8 +18,8 @@ public class Country {
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(
             name = "country_continent",
-            joinColumns = @JoinColumn(name = "country"),
-            inverseJoinColumns = @JoinColumn(name = "continent")
+            joinColumns = @JoinColumn(name = "country_id"),
+            inverseJoinColumns = @JoinColumn(name = "continent_id")
     )
     private Set<Continent> continents = new LinkedHashSet<>();
 

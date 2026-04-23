@@ -37,16 +37,16 @@ public class Movie {
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(
             name = "genre_movie",
-            joinColumns = @JoinColumn(name = "movie"),
-            inverseJoinColumns = @JoinColumn(name = "genre")
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     private Set<Genre> genres = new LinkedHashSet<>();
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinTable(
             name = "productions_country",
-            joinColumns = @JoinColumn(name = "movie"),
-            inverseJoinColumns = @JoinColumn(name = "country")
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "country_id")
     )
     private Set<Country> countries = new LinkedHashSet<>();
 
