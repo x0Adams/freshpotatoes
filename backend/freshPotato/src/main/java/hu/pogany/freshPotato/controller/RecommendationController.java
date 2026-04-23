@@ -1,6 +1,8 @@
 package hu.pogany.freshPotato.controller;
 
 import hu.pogany.freshPotato.dto.response.SearchMovieDto;
+import hu.pogany.freshPotato.service.JwtService;
+import hu.pogany.freshPotato.service.RecommendationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -10,12 +12,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -24,6 +25,12 @@ import java.util.List;
 @RequestMapping("/api/recommend")
 @Tag(name = "Recommendations", description = "Personalized movie recommendations")
 public class RecommendationController {
+
+    private final RecommendationService recommendationService;
+
+    public RecommendationController(RecommendationService recommendationService) {
+        this.recommendationService = recommendationService;
+    }
 
     @GetMapping("/secure/me")
     @Operation(
@@ -38,7 +45,7 @@ public class RecommendationController {
             @ApiResponse(responseCode = "500", description = "Recommendation microservice is currently down", content = @Content(schema = @Schema(type = "string", example = "Recommendation service unavailable")))
     })
     public List<SearchMovieDto> recommendForMe(@AuthenticationPrincipal Jwt jwt) {
-        throw new NotImplementedException("This method is not yet implemented");
+        return recommendationService.getRecommendations(JwtService.getUserId(jwt));
     }
 
     @GetMapping("/admin/{userid}")
@@ -55,9 +62,8 @@ public class RecommendationController {
             @ApiResponse(responseCode = "500", description = "Recommendation microservice is currently down", content = @Content(schema = @Schema(type = "string", example = "Recommendation service unavailable")))
     })
     public List<SearchMovieDto> adminRecommender(
-            @AuthenticationPrincipal Jwt jwt,
-            @Parameter(description = "Target user id", example = "42") @RequestParam int userid
+            @Parameter(description = "Target user id", example = "42") @PathVariable int userid
     ) {
-        throw new NotImplementedException("This method is not yet implemented");
+        return recommendationService.getRecommendations(userid);
     }
 }

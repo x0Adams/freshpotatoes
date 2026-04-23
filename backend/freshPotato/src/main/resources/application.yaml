@@ -1,6 +1,8 @@
 spring:
   application:
     name: freshPotato
+  rabbitmq:
+    uri: ${SPRING_RABBITMQ_URI:${RABBITMQ_URL:amqp://guest:guest@localhost:5672/}}
   datasource:
     url: ${DB_URL:jdbc:mariadb://localhost:3306/fresh_potatoes}
     username: ${DB_USER:root}
@@ -26,3 +28,11 @@ app:
     apiKey: ${GOOGLE_API_KEY:NO}
     dailyLimit: ${LIMIT:10000}
     queryCost: ${QUERY_COST:100}
+
+  recommendation:
+    apiUrl: ${RECOMMENDATION_API_URL:http://localhost:8090}
+    defaultCount: ${RECOMMENDATION_COUNT:10}
+
+  rabbitmq:
+    ratingQueue: ${RABBITMQ_QUEUE:movie_ratings}
+

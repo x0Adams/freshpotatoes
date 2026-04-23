@@ -20,7 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.naming.NotContextException;
 import javax.naming.TimeLimitExceededException;
 import javax.security.auth.login.CredentialException;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -71,12 +74,45 @@ public class MovieService {
     }
 
     public List<SearchMovieDto> findPopularMovies(int page, int size) {
-        List<Movie> movies = movieRepository.findByPopularity(PageRequest.of(page, size));
-        return mapper.toSearchMovieDtoList(movies);
+        long totalStartedAt = System.nanoTime();
+
+        long queryStartedAt = System.nanoTime();
+        List<Integer> movieIds = movieRepository.findPopularMovieIds(PageRequest.of(page, size));
+        List<Movie> movies = movieIds.isEmpty() ? List.of() : movieRepository.findByIdIn(movieIds);
+        long queryMs = (System.nanoTime() - queryStartedAt) / 1_000_000;
+
+        if (!movieIds.isEmpty()) {
+            Map<Integer, Integer> positionById = new HashMap<>(movieIds.size());
+            for (int i = 0; i < movieIds.size(); i++) {
+                positionById.put(movieIds.get(i), i);
+            }
+            movies.sort(Comparator.comparingInt(movie -> positionById.getOrDefault(movie.getId(), Integer.MAX_VALUE)));
+        }
+
+        long mappingStartedAt = System.nanoTime();
+        List<SearchMovieDto> result = mapper.toSearchMovieDtoList(movies);
+        long mappingMs = (System.nanoTime() - mappingStartedAt) / 1_000_000;
+        long totalMs = (System.nanoTime() - totalStartedAt) / 1_000_000;
+
+        log.debug("findPopularMovies took {} ms (query={} ms, mapping={} ms, page={}, size={}, rows={})",
+                totalMs, queryMs, mappingMs, page, size, result.size());
+        return result;
     }
 
     public List<SearchMovieDto> randomMovies() {
-        return mapper.toSearchMovieDtoList(movieRepository.findRandom());
+        long totalStartedAt = System.nanoTime();
+
+        long queryStartedAt = System.nanoTime();
+        List<Movie> movies = movieRepository.findRandom();
+        long queryMs = (System.nanoTime() - queryStartedAt) / 1_000_000;
+
+        long mappingStartedAt = System.nanoTime();
+        List<SearchMovieDto> result = mapper.toSearchMovieDtoList(movies);
+        long mappingMs = (System.nanoTime() - mappingStartedAt) / 1_000_000;
+        long totalMs = (System.nanoTime() - totalStartedAt) / 1_000_000;
+
+        log.debug("randomMovies took {} ms (query={} ms, mapping={} ms, rows={})", totalMs, queryMs, mappingMs, result.size());
+        return result;
     }
 
     public List<SearchMovieDto> advancedSearch(String title, List<String> staff, List<String> genres, int page, int size) {

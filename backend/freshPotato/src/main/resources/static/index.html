@@ -3,20 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>freshPotatoes</title>
-    <!-- Bootstrap and JavaScript -->
+    <title>freshPotato API Tester</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/style/style.css">
-    <link rel="stylesheet" href="/style/nav.css">
+    <link rel="stylesheet" href="/style/tester.css">
 </head>
 <body>
-    <header>
-        <nav class="navbar bg-body-tertiary opacity-75">
-            <div class="container-fluid">
-                <span class="navbar-brand mb-0 h1">freshPotatoes</span>
+<main class="container py-4">
+    <h1 class="mb-3">freshPotato API Tester</h1>
+    <p class="text-secondary mb-4">Send requests and inspect JSON responses. JWT refresh is handled automatically on 401.</p>
+
+    <section class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Authentication</h2>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="username">Username</label>
+                    <input class="form-control" id="username" type="text" placeholder="username">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" id="password" type="password" placeholder="password">
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-primary" id="loginBtn" type="button">Login</button>
+                    <button class="btn btn-outline-secondary" id="logoutBtn" type="button">Logout</button>
+                </div>
             </div>
-        </nav>
-    </header>
+            <div class="mt-3">
+                <strong>Token state:</strong>
+                <span id="tokenState" class="badge text-bg-secondary">Not logged in</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Request</h2>
+            <div class="row g-2 mb-2">
+                <div class="col-md-2">
+                    <label class="form-label" for="method">Method</label>
+                    <select class="form-select" id="method">
+                        <option>GET</option>
+                        <option>POST</option>
+                        <option>PUT</option>
+                        <option>PATCH</option>
+                        <option>DELETE</option>
+                    </select>
+                </div>
+                <div class="col-md-10">
+                    <label class="form-label" for="endpoint">Endpoint (relative path)</label>
+                    <input class="form-control" id="endpoint" type="text" value="/api/auth/me">
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="endpointSelect">Endpoint from OpenAPI (/v3/api-docs)</label>
+                <select class="form-select" id="endpointSelect">
+                    <option value="">Loading endpoints...</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="requestBody">Body (JSON)</label>
+                <textarea class="form-control font-monospace" id="requestBody" rows="8" placeholder='{"example":"value"}'></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" id="sendBtn" type="button">Send Request</button>
+                <button class="btn btn-outline-dark" id="formatBodyBtn" type="button">Format Body</button>
+                <button class="btn btn-outline-danger" id="clearBtn" type="button">Clear Response</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-body">
+            <h2 class="h5">Response</h2>
+            <div class="mb-2" id="responseMeta">No response yet.</div>
+            <pre id="responseOutput" class="response-box">{}</pre>
+        </div>
+    </section>
+</main>
+
+<script src="/js/api-tester.js"></script>
 </body>
 </html>

@@ -8,4 +8,3 @@ import java.util.Optional;
 public interface MovieInPlaylistRepository extends JpaRepository<MovieInPlaylist, Integer> {
     Optional<MovieInPlaylist> findFirstByPlaylist_IdAndMovie_IdOrderByIdAsc(Integer playlistId, Integer movieId);
 }
-
