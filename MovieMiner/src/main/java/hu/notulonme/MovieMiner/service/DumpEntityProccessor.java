@@ -66,8 +66,6 @@ class DumpEntityProccessor implements Runnable {
     }
 
     private void proccessMovieData() {
-        String qid = read("$.extraction_paths.common.entity_id", String.class);
-        String title = read("$.extraction_paths.common.english_label", String.class);
         int duration = 0;
         String durationStr = read("$.extraction_paths.specific_schemas.film.duration_minutes", String.class);
         if (durationStr != null) {
@@ -78,11 +76,17 @@ class DumpEntityProccessor implements Runnable {
                 // Ignore if parsing fails, duration remains 0
             }
         }
+        List<String> productionCountries = readList("$.extraction_paths.specific_schemas.film.production_country_ids");
+
+        if (duration == 0 && productionCountries.contains("Q668"))
+            return;
+
         String releaseDate = getDate("$.extraction_paths.specific_schemas.film.release_date_time");
         List<String> genres = readList("$.extraction_paths.specific_schemas.film.genre_ids");
         List<String> actors = readList("$.extraction_paths.specific_schemas.film.actor_ids");
         List<String> directors = readList("$.extraction_paths.specific_schemas.film.director_ids");
-        List<String> productionCountries = readList("$.extraction_paths.specific_schemas.film.production_country_ids");
+        String qid = read("$.extraction_paths.common.entity_id", String.class);
+        String title = read("$.extraction_paths.common.english_label", String.class);
         String youtubeId = read("$.extraction_paths.specific_schemas.film.youtube_video_id", String.class);
         String wikipediaTitle = read("$.extraction_paths.specific_schemas.film.wikipedia_title_api", String.class);
 
