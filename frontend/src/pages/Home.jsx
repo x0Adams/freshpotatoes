@@ -1,12 +1,13 @@
 import HeroCarousel from "../components/HeroCarousel"
-import ComingAttractions from '../components/ComingAttractions'
+import DiscoverMovies from '../components/DiscoverMovies'
+import { MultiGenreMovies } from '../components/GenreMovies'
 
 function Home() {
   return (
     <>
         <HeroCarousel/>
-        <ComingAttractions />
-        <div style={{ height: '512px' }} />
+        <DiscoverMovies />
+        <MultiGenreMovies />
     </>
   )
 }

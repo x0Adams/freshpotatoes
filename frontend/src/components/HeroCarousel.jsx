@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { MOCK_MOVIES } from '../data/mockMovies'
-
-const CAROUSEL_MOVIES = MOCK_MOVIES.filter(m => m.id <= 10)
+import { useState, useEffect } from 'react'
+import { movieApi } from '../services/api'
+import MoviePoster from './MoviePoster'
 
 function HeroSlide({ movie, isActive }) {
   return (
@@ -15,17 +15,21 @@ function HeroSlide({ movie, isActive }) {
               <div className="poster-frame">
 
                 {/* background cust */}
-                <img
-                  src={movie.posterUrl}
-                  alt=""
-                  aria-hidden="true"
-                  className="poster-glow"
-                />
+                {movie.posterUrl ? (
+                  <img
+                    src={movie.posterUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="poster-glow"
+                  />
+                ) : (
+                  <div className="poster-glow bg-dark opacity-50" aria-hidden="true" />
+                )}
 
                 {/* poster */}
-                <img
-                  src={movie.posterUrl}
-                  alt={movie.title}
+                <MoviePoster
+                  posterUrl={movie.posterUrl}
+                  title={movie.title}
                   className="hero-poster"
                 />
 
@@ -50,7 +54,50 @@ function HeroSlide({ movie, isActive }) {
   )
 }
 
+function HeroSkeleton() {
+  return (
+    <div className="hero-carousel d-flex justify-content-center align-items-center bg-dark">
+      <div className="hero-slide w-100">
+        <div className="container-fluid h-100">
+          <div className="row h-100 align-items-center">
+
+            {/* poster-frame skeleton */}
+            <div className="col-12 col-md-5 hero-poster-wrap">
+              <div className="poster-frame">
+                <div className="hero-skeleton-poster skeleton-pulse"></div>
+              </div>
+            </div>
+
+            {/* description skeleton */}
+            <div className="col-12 col-md-7 hero-info">
+              <div className="hero-skeleton-text skeleton-pulse" style={{ width: '20%' }}></div>
+              <div className="hero-skeleton-title skeleton-pulse"></div>
+              <div className="hero-skeleton-text skeleton-pulse" style={{ width: '15%', marginBottom: '2.2rem' }}></div>
+              <div className="hero-skeleton-btn skeleton-pulse"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function HeroCarousel() {
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    movieApi.getMovies(0, 10)
+      .then(data => setMovies(data))
+      .catch(err => console.error("Failed to fetch carousel movies:", err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <HeroSkeleton />
+
+  if (movies.length === 0) return null
+
   return (
     <div className="hero-carousel">
       <div
@@ -59,7 +106,7 @@ function HeroCarousel() {
         data-bs-ride="carousel"
         data-bs-interval="6000">
         <div className="carousel-indicators">
-          {CAROUSEL_MOVIES.map((_, i) => (
+          {movies.map((_, i) => (
             <button key={i}
               type="button"
               data-bs-target="#heroCarousel"
@@ -71,7 +118,7 @@ function HeroCarousel() {
         </div>
 
         <div className="carousel-inner h-100">
-          {CAROUSEL_MOVIES.map((movie, i) => (
+          {movies.map((movie, i) => (
             <HeroSlide key={movie.id} movie={movie} isActive={i === 0} />
           ))}
         </div>

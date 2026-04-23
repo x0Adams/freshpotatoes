@@ -1,94 +1,98 @@
-import { useState, useEffect , useRef } from 'react'
-import { Link, useNavigate, useLocation  } from 'react-router-dom'
-import { searchMovies } from '../data/mockMovies'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { movieApi } from '../services/api'
+import { useAuth } from '../context/AuthContext'
+import AuthModal from './AuthModal'
 
-function Navbar({ onLoginClick }) {
-
-  // scroll event listener
+function Navbar() {
+  const { user, logout } = useAuth()
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  
+  const navigate = useNavigate()
+  const location = useLocation()
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [open, setOpen] = useState(false)
   const wrapperRef = useRef(null)
-  const navigate = useNavigate()
-  const location = useLocation()
 
+  // 1. Handle scroll effect
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 0)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // live suggestions
+  // 2. Sync State FROM URL (Initial load and Back/Forward)
   useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    setQuery(params.get('q') || '')
+  }, [location.search])
+
+  // 3. Live Suggestions
+  useEffect(() => {
+    const controller = new AbortController()
     if (query.trim().length >= 3) {
-      setSuggestions(searchMovies(query, 5))
-      setOpen(true)
+      const timeoutId = setTimeout(() => {
+        movieApi.search(query, controller.signal)
+          .then(data => {
+            setSuggestions(data.slice(0, 5))
+            setOpen(true)
+          })
+          .catch(err => {
+            if (err.name !== 'AbortError') console.error("Search failed:", err)
+          })
+      }, 300)
+      return () => {
+        clearTimeout(timeoutId)
+        controller.abort()
+      }
     } else {
       setSuggestions([])
       setOpen(false)
     }
   }, [query])
 
-  // close dropdown
+  // 4. Click outside to close
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-        setOpen(false)
-      }
+    function handleClick(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false)
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  function handleKeyDown(e) {
-    if (e.key === 'Enter' && query.trim().length >= 3) {
+  function handleSearchSubmit(e) {
+    if (e) e.preventDefault()
+    if (query.trim().length >= 3) {
       setOpen(false)
       navigate(`/search?q=${encodeURIComponent(query.trim())}`)
     }
   }
 
-  function handleSuggestionClick() {
-    setQuery('')
-    setOpen(false)
-  }
-
-  // when on /search prefill
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const q = params.get('q') || ''
-    setQuery(q)
-  }, [location.search])
-
-  // when on /search update
-  useEffect(() => {
-    if (location.pathname === '/search') {
-      if (query.trim().length >= 3) {
-        navigate(`/search?q=${encodeURIComponent(query.trim())}`, { replace: true })
-      } else {
-        navigate('/search', { replace: true })
-      }
+  function handleKeyDown(e) {
+    if (e.key === 'Enter') {
+      handleSearchSubmit()
     }
-  }, [query])
+  }
 
   return (
     <>
       <nav className={`navbar navbar-expand-lg fixed-top cv-nav ${scrolled ? 'cv-nav--scrolled' : ''}`}>
         <div className="container-fluid px-4">
-          {/*namelink*/}
           <Link className="navbar-brand fw-bold fs-4" to="/">
             fresh<span className="text-warning">Potatoes</span>
           </Link>
 
           {/*search*/}
-          <div className="d-none d-lg-flex mx-auto cv-search search-wrapper" ref={wrapperRef}>
+          <form className="d-none d-lg-flex mx-auto cv-search search-wrapper" ref={wrapperRef} onSubmit={handleSearchSubmit}>
             <div className="input-group w-100">
               <span className="input-group-text bg-transparent border-secondary">
                 <i className="bi bi-search text-secondary" />
               </span>
               <input
                 type="search"
-                className="form-control border-secondary border-start-0 bg-transparent"
+                className="form-control border-secondary bg-transparent text-light"
                 placeholder="Search movies…"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
@@ -97,45 +101,48 @@ function Navbar({ onLoginClick }) {
               />
             </div>
 
-            {/*dropdown*/}
             {open && suggestions.length > 0 && (
               <div className="search-dropdown">
-                {suggestions.map(movie => (
+                {suggestions.map(item => (
                   <Link
-                    key={movie.id}
-                    to={`/movie/${movie.id}`}
+                    key={item.id}
+                    to={`/movie/${item.id}`}
                     className="search-dropdown-item"
-                    onClick={handleSuggestionClick}
+                    onClick={() => setOpen(false)}
                   >
-                    <img
-                      src={movie.posterUrl}
-                      alt={movie.title}
-                      className="search-dropdown-thumb"
-                    />
+                    <img src={item.posterUrl || '/favicon.png'} alt="" className="search-dropdown-thumb" />
                     <div className="search-dropdown-info">
-                      <span className="search-dropdown-title">{movie.title}</span>
-                      <span className="search-dropdown-meta">{movie.genre} · {movie.year}</span>
+                      <span className="search-dropdown-title">{item.title}</span>
+                      <span className="search-dropdown-meta">{`${item.genre} · ${item.year}`}</span>
                     </div>
                   </Link>
                 ))}
-                <div className="search-dropdown-footer">
-                  Press Enter to see all results
-                </div>
+                <div className="search-dropdown-footer">Press Enter for all results</div>
               </div>
             )}
-          </div>
+          </form>
 
-          {/*login*/}
-          <div className="d-flex align-items-center">
-              <button 
-                className="btn btn-outline-warning btn-sm px-3" 
-                onClick={onLoginClick}>
-                    Log In
-              </button>
+          <div className="d-flex align-items-center gap-2">
+            <Link to="/search" className="btn btn-link text-light d-lg-none p-2"><i className="bi bi-search fs-5" /></Link>
+            {user ? (
+              <div className="dropdown">
+                <button className="btn btn-link text-warning text-decoration-none dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                  <i className="bi bi-person-circle fs-5"></i>
+                  <span className="fw-bold text-truncate" style={{ maxWidth: '100px' }}>{user.username}</span>
+                </button>
+                <ul className="dropdown-menu dropdown-menu-end dropdown-menu-dark border-secondary">
+                  <li><Link className="dropdown-item" to="/profile"><i className="bi bi-person me-2"></i> Profile</Link></li>
+                  <li><hr className="dropdown-divider border-secondary" /></li>
+                  <li><button className="dropdown-item text-danger" onClick={logout}><i className="bi bi-box-arrow-right me-2"></i> Logout</button></li>
+                </ul>
+              </div>
+            ) : (
+              <button className="btn btn-warning btn-sm px-4 fw-bold text-dark" onClick={() => setShowAuthModal(true)}>Log In</button>
+            )}
           </div>
-
         </div>
       </nav>
+      <AuthModal show={showAuthModal} onHide={() => setShowAuthModal(false)} />
     </>
   )
 }
