@@ -1,26 +1,36 @@
 package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.Instant;
+
 @Entity
-@Table(name = "rate", schema = "fresh_potato")
+@Table(name = "rate", schema = "fresh_potatoes")
 public class Rate {
     @EmbeddedId
     private RateId id;
 
-    @MapsId("user")
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @MapsId("movie")
+    @MapsId("movieId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "movie", nullable = false)
+    @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
+
+    @Column(name = "rating", nullable = false)
+    private Byte rating;
+
+    @ColumnDefault("current_timestamp()")
+    @Column(name = "time", nullable = false)
+    private Instant time;
 
     public RateId getId() {
         return id;
@@ -44,6 +54,22 @@ public class Rate {
 
     public void setMovie(Movie movie) {
         this.movie = movie;
+    }
+
+    public Byte getRating() {
+        return rating;
+    }
+
+    public void setRating(Byte rating) {
+        this.rating = rating;
+    }
+
+    public Instant getTime() {
+        return time;
+    }
+
+    public void setTime(Instant time) {
+        this.time = time;
     }
 
 }

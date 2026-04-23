@@ -8,27 +8,27 @@ import java.util.Objects;
 
 @Embeddable
 public class GenreMovieId implements Serializable {
-    private static final long serialVersionUID = 1511742654860317629L;
-    @Column(name = "movie", nullable = false, length = 36)
-    private String movie;
+    private static final long serialVersionUID = -892133774396273769L;
+    @Column(name = "movie_id", nullable = false)
+    private Integer movieId;
 
-    @Column(name = "genre", nullable = false, length = 75)
-    private String genre;
+    @Column(name = "genre_id", nullable = false)
+    private Integer genreId;
 
-    public String getMovie() {
-        return movie;
+    public Integer getMovieId() {
+        return movieId;
     }
 
-    public void setMovie(String movie) {
-        this.movie = movie;
+    public void setMovieId(Integer movieId) {
+        this.movieId = movieId;
     }
 
-    public String getGenre() {
-        return genre;
+    public Integer getGenreId() {
+        return genreId;
     }
 
-    public void setGenre(String genre) {
-        this.genre = genre;
+    public void setGenreId(Integer genreId) {
+        this.genreId = genreId;
     }
 
     @Override
@@ -36,12 +36,12 @@ public class GenreMovieId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GenreMovieId entity = (GenreMovieId) o;
-        return Objects.equals(this.movie, entity.movie) &&
-                Objects.equals(this.genre, entity.genre);
+        return Objects.equals(this.movieId, entity.movieId) &&
+                Objects.equals(this.genreId, entity.genreId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(movie, genre);
+        return Objects.hash(movieId, genreId);
     }
 }

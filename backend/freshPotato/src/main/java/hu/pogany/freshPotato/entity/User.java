@@ -1,60 +1,73 @@
 package hu.pogany.freshPotato.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "user", schema = "fresh_potato", indexes = {@Index(name = "email_2",
-        columnList = "email",
-        unique = true)}, uniqueConstraints = {
-        @UniqueConstraint(name = "email",
-                columnNames = {"email"}),
-        @UniqueConstraint(name = "user_name",
-                columnNames = {"user_name"})})
+@Table(name = "users", schema = "fresh_potatoes")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "uuid", nullable = false, length = 36)
-    private String uuid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Integer id;
 
-    @Column(name = "email", nullable = false, length = 70)
+    @Column(name = "email", nullable = false, length = 75)
     private String email;
 
-    @Column(name = "user_name", nullable = false, length = 50)
-    private String userName;
+    @Column(name = "username", nullable = false, length = 50)
+    private String username;
 
-    @Column(name = "password_hash", nullable = false, length = 250)
-    private String passwordHash;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "gender_id", nullable = false)
+    private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "role", nullable = false)
-    private Role role;
+    @Column(name = "age", nullable = false)
+    private Integer age;
 
-    @ColumnDefault("current_timestamp()")
+    @Column(name = "password", nullable = false, length = 250)
+    private String password;
+
+    @CreationTimestamp
     @Column(name = "creation_date", nullable = false)
     private Instant creationDate;
 
-    @ManyToMany
-    @JoinTable(name = "rate", joinColumns = {@JoinColumn(name = "user")}, inverseJoinColumns = {@JoinColumn(name = "movie")})
-    private Set<Movie> movies = new LinkedHashSet<>();
+    @ColumnDefault("1")
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled;
 
-    @OneToMany
-    @JoinColumn(name = "user_uuid")
+    @Builder.Default
+    @OneToMany(mappedBy = "owner")
+    private Set<Playlist> playlists = new LinkedHashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user")
+    private Set<Rate> rates = new LinkedHashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user")
     private Set<RefreshToken> refreshTokens = new LinkedHashSet<>();
 
-    public String getUuid() {
-        return uuid;
+    @Builder.Default
+    @OneToMany(mappedBy = "user")
+    private Set<Review> reviews = new LinkedHashSet<>();
+
+    public Integer getId() {
+        return id;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getEmail() {
@@ -65,28 +78,36 @@ public class User {
         this.email = email;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public Gender getGender() {
+        return gender;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
-    public Role getRole() {
-        return role;
+    public Integer getAge() {
+        return age;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Instant getCreationDate() {
@@ -97,12 +118,28 @@ public class User {
         this.creationDate = creationDate;
     }
 
-    public Set<Movie> getMovies() {
-        return movies;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setMovies(Set<Movie> movies) {
-        this.movies = movies;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public Set<Playlist> getPlaylists() {
+        return playlists;
+    }
+
+    public void setPlaylists(Set<Playlist> playlists) {
+        this.playlists = playlists;
+    }
+
+    public Set<Rate> getRates() {
+        return rates;
+    }
+
+    public void setRates(Set<Rate> rates) {
+        this.rates = rates;
     }
 
     public Set<RefreshToken> getRefreshTokens() {
@@ -111,6 +148,14 @@ public class User {
 
     public void setRefreshTokens(Set<RefreshToken> refreshTokens) {
         this.refreshTokens = refreshTokens;
+    }
+
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
     }
 
 }

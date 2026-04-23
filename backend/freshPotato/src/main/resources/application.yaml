@@ -2,12 +2,27 @@ spring:
   application:
     name: freshPotato
   datasource:
-    url: jdbc:mariadb://notkulonme.hu:3306/fresh_potatoes
-    username: root
-    password: NagyonTitkosJelszo186
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/fresh_potatoes}
+    username: ${DB_USER:root}
+    password: ${DB_PASS:}
   jpa:
     open-in-view: false
-    show-sql: true
+    show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
-        format_sql: true
+        format_sql: ${SHOW_SQL:false}
+app:
+  jwt:
+    access-token-ttl: ${ACCESS_TOKEN_TTL:10m}
+    refresh-token-ttl: ${REFRESH_TOKEN_TTL:10d}
+  wiki:
+    apiUrl: https://en.wikipedia.org/api/rest_v1/page/media-list
+    rateLimit: 200 # per second
+    userAgent: ${WIKI_USER_AGENT:freshPotatoBot}
+    contactEmail: ${CONTACT_EMAIL}
+
+  youtube:
+    apiUrl: https://www.googleapis.com/youtube/v3/search
+    apiKey: ${GOOGLE_API_KEY:NO}
+    dailyLimit: ${LIMIT:10000}
+    queryCost: ${QUERY_COST:100}

@@ -5,21 +5,21 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "genre_movie", schema = "fresh_potato")
+@Table(name = "genre_movie", schema = "fresh_potatoes")
 public class GenreMovie {
     @EmbeddedId
     private GenreMovieId id;
 
-    @MapsId("movie")
+    @MapsId("movieId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "movie", nullable = false)
+    @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @MapsId("genre")
+    @MapsId("genreId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "genre", nullable = false)
+    @JoinColumn(name = "genre_id", nullable = false)
     private Genre genre;
 
     public GenreMovieId getId() {

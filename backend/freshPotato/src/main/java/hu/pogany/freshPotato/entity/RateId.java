@@ -8,27 +8,27 @@ import java.util.Objects;
 
 @Embeddable
 public class RateId implements Serializable {
-    private static final long serialVersionUID = -765172746569342544L;
-    @Column(name = "user", nullable = false, length = 36)
-    private String user;
+    private static final long serialVersionUID = -6274877734585491877L;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
-    @Column(name = "movie", nullable = false, length = 36)
-    private String movie;
+    @Column(name = "movie_id", nullable = false)
+    private Integer movieId;
 
-    public String getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public String getMovie() {
-        return movie;
+    public Integer getMovieId() {
+        return movieId;
     }
 
-    public void setMovie(String movie) {
-        this.movie = movie;
+    public void setMovieId(Integer movieId) {
+        this.movieId = movieId;
     }
 
     @Override
@@ -36,12 +36,12 @@ public class RateId implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RateId entity = (RateId) o;
-        return Objects.equals(this.user, entity.user) &&
-                Objects.equals(this.movie, entity.movie);
+        return Objects.equals(this.userId, entity.userId) &&
+                Objects.equals(this.movieId, entity.movieId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user, movie);
+        return Objects.hash(userId, movieId);
     }
 }
