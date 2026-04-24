@@ -1,5 +1,6 @@
 package hu.pogany.freshPotato.controller;
 
+import hu.pogany.freshPotato.dto.ModifyMovieDto;
 import hu.pogany.freshPotato.dto.response.MovieDto;
 import hu.pogany.freshPotato.dto.response.SearchMovieDto;
 import hu.pogany.freshPotato.service.JwtService;
@@ -12,8 +13,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
@@ -102,6 +106,42 @@ public class MovieController {
             @Parameter(description = "Page size (max 100)", example = "30") @RequestParam(defaultValue = "30") @Max(100) int size)
     {
         return movieService.findPopularMovies(page, size);
+    }
+
+    @GetMapping("/genre/{genre}")
+    @Operation(summary = "Get popular movies by genre", description = "Returns movies of the selected genre sorted by popularity in a paginated form")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Popular movies by genre returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchMovieDto.class)))),
+            @ApiResponse(responseCode = "404", description = "Genre does not exist or no movies found", content = @Content(schema = @Schema(type = "string")))
+    })
+    public List<SearchMovieDto> popularMoviesByGenre(
+            @Parameter(description = "Genre name", example = "Action") @PathVariable String genre,
+            @Parameter(description = "Zero-based page index", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (max 100)", example = "30") @RequestParam(defaultValue = "30") @Max(100) int size) {
+        return movieService.findPopularMoviesByGenre(genre, page, size);
+    }
+
+    @PatchMapping("/admin/{id}")
+    @Operation(summary = "Admin modify movie", description = "Modifies a movie by id as admin")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Movie updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid movie payload", content = @Content(schema = @Schema(type = "string"))),
+            @ApiResponse(responseCode = "404", description = "Movie not found", content = @Content(schema = @Schema(type = "string", example = "Movie not found")))
+    })
+    public void modifyMovie(@PathVariable @Min(1) int id, @Valid @RequestBody ModifyMovieDto dto) {
+        movieService.modify(id, dto);
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @Operation(summary = "Admin delete movie", description = "Deletes a movie and all dependent links as admin")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Movie deleted"),
+            @ApiResponse(responseCode = "404", description = "Movie not found", content = @Content(schema = @Schema(type = "string", example = "Movie not found")))
+    })
+    public void deleteMovie(@PathVariable @Min(1) int id) {
+        movieService.deleteMovie(id);
     }
 
 

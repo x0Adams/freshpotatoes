@@ -22,4 +22,5 @@ public interface GenericRateRepository<T> extends JpaRepository<T, RateId> {
     void deleteRateById(RateId id);
 
     void deleteRateByUserIdAndMovieId(Integer userId, Integer movieId);
+    void deleteByMovie(Movie movie);
 }

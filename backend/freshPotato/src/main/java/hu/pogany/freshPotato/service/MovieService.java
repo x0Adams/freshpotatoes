@@ -1,10 +1,11 @@
 package hu.pogany.freshPotato.service;
 
+import hu.pogany.freshPotato.dto.ModifyMovieDto;
 import hu.pogany.freshPotato.dto.response.MovieDto;
 import hu.pogany.freshPotato.dto.response.SearchMovieDto;
 import hu.pogany.freshPotato.entity.View;
 import hu.pogany.freshPotato.mapper.Mapper;
-import hu.pogany.freshPotato.repository.MovieRepository;
+import hu.pogany.freshPotato.repository.*;
 import hu.pogany.freshPotato.specification.MovieSpecification;
 import hu.pogany.freshPotato.entity.Movie;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,12 +34,33 @@ public class MovieService {
     private final Mapper mapper;
     private final PosterService posterService;
     private final TrailerService trailerService;
+    private final GenreRepository genreRepository;
+    private final MovieInPlaylistRepository movieInPlaylistRepository;
+    private final ProductionsCountryRepository productionsCountryRepository;
+    private final ReviewRepository reviewRepository;
+    private final RateRepository rateRepository;
+    private final StaffRoleInMovieRepository staffRoleInMovieRepository;
 
-    public MovieService(MovieRepository movieRepository, Mapper mapper, PosterService posterService, TrailerService trailerService) {
+    public MovieService(MovieRepository movieRepository,
+                        Mapper mapper,
+                        PosterService posterService,
+                        TrailerService trailerService,
+                        GenreRepository genreRepository,
+                        MovieInPlaylistRepository movieInPlaylistRepository,
+                        ProductionsCountryRepository productionsCountryRepository,
+                        ReviewRepository reviewRepository,
+                        RateRepository rateRepository,
+                        StaffRoleInMovieRepository staffRoleInMovieRepository) {
         this.movieRepository = movieRepository;
         this.mapper = mapper;
         this.posterService = posterService;
         this.trailerService = trailerService;
+        this.genreRepository = genreRepository;
+        this.movieInPlaylistRepository = movieInPlaylistRepository;
+        this.productionsCountryRepository = productionsCountryRepository;
+        this.reviewRepository = reviewRepository;
+        this.rateRepository = rateRepository;
+        this.staffRoleInMovieRepository = staffRoleInMovieRepository;
     }
 
     public List<SearchMovieDto> searchForName(String name) {
@@ -68,6 +90,34 @@ public class MovieService {
         return mapper.toMovieDto(movie);
     }
 
+    @Transactional
+    public void modify(int id, ModifyMovieDto dto) {
+        Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
+        movie.setName(dto.name());
+        movie.setPosterPath(dto.posterPath());
+        movie.setDuration(dto.duration());
+        movie.setReleaseDate(dto.releaseDate());
+        movie.setWikipediaTitle(dto.wikipediaTitle());
+        movie.setYoutubeMovie(dto.youtubeMovie());
+        movie.setTrailer(dto.trailer());
+    }
+
+    @Transactional
+    public void deleteMovie(int movieId) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException("Movie not found"));
+
+        // Remove dependencies explicitly to avoid FK conflicts in schemas without full cascade coverage.
+        movieInPlaylistRepository.deleteByMovieId(movieId);
+        productionsCountryRepository.deleteByMovie(movie);
+        reviewRepository.deleteByMovie(movie);
+        rateRepository.deleteByMovie(movie);
+        staffRoleInMovieRepository.deleteByMovie(movie);
+
+        movie.getGenres().clear();
+        movieRepository.delete(movie);
+    }
+
     public MovieDto getMovieNotFetchExternal(int id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
         return mapper.toMovieDto(movie);
@@ -81,13 +131,7 @@ public class MovieService {
         List<Movie> movies = movieIds.isEmpty() ? List.of() : movieRepository.findByIdIn(movieIds);
         long queryMs = (System.nanoTime() - queryStartedAt) / 1_000_000;
 
-        if (!movieIds.isEmpty()) {
-            Map<Integer, Integer> positionById = new HashMap<>(movieIds.size());
-            for (int i = 0; i < movieIds.size(); i++) {
-                positionById.put(movieIds.get(i), i);
-            }
-            movies.sort(Comparator.comparingInt(movie -> positionById.getOrDefault(movie.getId(), Integer.MAX_VALUE)));
-        }
+        sortById(movieIds, movies);
 
         long mappingStartedAt = System.nanoTime();
         List<SearchMovieDto> result = mapper.toSearchMovieDtoList(movies);
@@ -97,6 +141,20 @@ public class MovieService {
         log.debug("findPopularMovies took {} ms (query={} ms, mapping={} ms, page={}, size={}, rows={})",
                 totalMs, queryMs, mappingMs, page, size, result.size());
         return result;
+    }
+
+    public List<SearchMovieDto> findPopularMoviesByGenre(String genre, int page, int size) {
+        if (!genreRepository.existsByName(genre))
+            throw new EntityNotFoundException("Genre doesn't exist in database");
+        List<Integer> movieIds = movieRepository.findPopularMovieIdsByGenre(genre, PageRequest.of(page, size));
+
+        if (movieIds.isEmpty())
+            throw new EntityNotFoundException("No movies by this genre");
+
+        List<Movie> movies = movieRepository.findByIdIn(movieIds);
+        sortById(movieIds, movies);
+
+        return mapper.toSearchMovieDtoList(movies);
     }
 
     public List<SearchMovieDto> randomMovies() {
@@ -161,6 +219,16 @@ public class MovieService {
             trailerService.fetchTrailer(movie);
         } catch (NotContextException | CredentialException | TimeLimitExceededException | InterruptedException | RuntimeException e) {
             log.error(e.getMessage());
+        }
+    }
+
+    private void sortById(List<Integer> movieIds, List<Movie> movies) {
+        if (!movieIds.isEmpty()) {
+            Map<Integer, Integer> positionById = new HashMap<>(movieIds.size());
+            for (int i = 0; i < movieIds.size(); i++) {
+                positionById.put(movieIds.get(i), i);
+            }
+            movies.sort(Comparator.comparingInt(movie -> positionById.getOrDefault(movie.getId(), Integer.MAX_VALUE)));
         }
     }
 }

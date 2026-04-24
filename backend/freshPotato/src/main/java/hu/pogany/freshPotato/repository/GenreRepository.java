@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface GenreRepository extends JpaRepository<Genre, Integer> {
     Optional<Genre> findByName(String name);
-
+    boolean existsByName(String name);
 }
