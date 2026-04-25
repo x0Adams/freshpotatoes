@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { movieApi } from '../services/api'
 import MoviePoster from './MoviePoster'
+import testBg from '../assets/test_bg.jpg'
 
 function HeroSlide({ movie, isActive }) {
   return (
@@ -15,16 +16,12 @@ function HeroSlide({ movie, isActive }) {
               <div className="poster-frame">
 
                 {/* background cust */}
-                {movie.posterUrl ? (
-                  <img
-                    src={movie.posterUrl}
-                    alt=""
-                    aria-hidden="true"
-                    className="poster-glow"
-                  />
-                ) : (
-                  <div className="poster-glow bg-dark opacity-50" aria-hidden="true" />
-                )}
+                <img
+                  src={movie.posterUrl || testBg}
+                  alt=""
+                  aria-hidden="true"
+                  className={`poster-glow ${!movie.posterUrl ? 'opacity-50' : ''}`}
+                />
 
                 {/* poster */}
                 <MoviePoster
@@ -38,12 +35,16 @@ function HeroSlide({ movie, isActive }) {
 
             {/* describtion */}
             <div className="col-12 col-md-7 hero-info">
-              <p className="hero-genre">{movie.genre}</p>
+              <div className="movie-genres mb-2">
+                {movie.genres && movie.genres.map(g => (
+                  <span key={g} className="movie-genre-badge">{g}</span>
+                ))}
+              </div>
               <h1 className="hero-title">{movie.title}</h1>
               <p className="hero-year">{movie.year}</p>
               <Link to={`/movie/${movie.id}`}
-                className="btn btn-warning fw-semibold px-4 py-2 text-dark">
-                View Movie →
+                className="btn-fresh-primary mt-2">
+                View Movie <i className="bi bi-arrow-right ms-2" />
               </Link>
             </div>
 

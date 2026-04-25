@@ -4,32 +4,45 @@ import { playlistApi } from '../services/api'
 import MoviePoster from './MoviePoster'
 import CreatePlaylistModal from './CreatePlaylistModal'
 
-export default function PlaylistSection({ user }) {
-  const [playlists, setPlaylists] = useState([])
-  const [loading, setLoading] = useState(true)
+export default function PlaylistSection({ user, initialPlaylists = [], readOnly = false }) {
+  const [playlists, setPlaylists] = useState(initialPlaylists)
+  const [loading, setLoading] = useState(!readOnly)
   const [selectedPlaylist, setSelectedPlaylist] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
   const fetchPlaylists = useCallback(async () => {
+    if (readOnly) return
     const token = localStorage.getItem('accessToken')
     if (!token) return
     
     try {
-      const data = await playlistApi.getByOwner(user.id, token)
-      setPlaylists(data)
+      const newData = await playlistApi.getByOwner(user.id, token)
+      setPlaylists(prev => {
+        // Merge: keep movie data from prev if it exists for the same ID
+        return newData.map(newItem => {
+          const existing = prev.find(p => p.id === newItem.id)
+          return { ...newItem, movies: newItem.movies || existing?.movies || [] }
+        })
+      })
     } catch (err) {
       console.error("Failed to fetch playlists:", err)
     } finally {
       setLoading(false)
     }
-  }, [user.id])
+  }, [user.id, readOnly])
 
   useEffect(() => {
-    fetchPlaylists()
-  }, [fetchPlaylists])
+    if (readOnly) {
+      setPlaylists(initialPlaylists)
+      setLoading(false)
+    } else {
+      fetchPlaylists()
+    }
+  }, [fetchPlaylists, readOnly, initialPlaylists])
 
   const handleCreateSuccess = (newPlaylist) => {
+    if (readOnly) return
     fetchPlaylists();
     if (newPlaylist && newPlaylist.id) {
        selectPlaylist(newPlaylist.id);
@@ -37,6 +50,7 @@ export default function PlaylistSection({ user }) {
   }
 
   const handleDelete = async (playlistId) => {
+    if (readOnly) return
     if (!window.confirm('Delete this playlist?') || isProcessing) return
     
     setIsProcessing(true)
@@ -54,12 +68,13 @@ export default function PlaylistSection({ user }) {
   }
 
   const handleRemoveMovie = async (e, playlistId, movieId) => {
+    if (readOnly) return
     e.preventDefault()
     e.stopPropagation()
 
     if (!playlistId || !movieId || isProcessing) return;
 
-    // 1. Optimistic Update
+    // Optimistic Update
     const originalPlaylist = { ...selectedPlaylist };
     setSelectedPlaylist(prev => ({
       ...prev,
@@ -73,10 +88,20 @@ export default function PlaylistSection({ user }) {
       const updated = await playlistApi.removeMovie(playlistId, movieId, token)
       if (updated) {
         setSelectedPlaylist(updated)
+        // Sync to sidebar
+        setPlaylists(prev => prev.map(pl => 
+          pl.id === playlistId ? { ...pl, movies: updated.movies } : pl
+        ))
       } else {
         const fresh = await playlistApi.getById(playlistId, token)
         setSelectedPlaylist(fresh)
+        // Sync to sidebar
+        setPlaylists(prev => prev.map(pl => 
+          pl.id === playlistId ? { ...pl, movies: fresh.movies } : pl
+        ))
       }
+      // We don't necessarily need fetchPlaylists() here if we sync manually, 
+      // but keeping it for other metadata (like name changes/visibility)
       await fetchPlaylists()
     } catch (err) {
       setSelectedPlaylist(originalPlaylist);
@@ -87,135 +112,168 @@ export default function PlaylistSection({ user }) {
   }
 
   const selectPlaylist = async (id) => {
+    // If clicking the already selected playlist, deselect it
+    if (selectedPlaylist?.id === id) {
+      setSelectedPlaylist(null);
+      return;
+    }
+
+    if (readOnly) {
+        const pl = playlists.find(p => p.id === id);
+        setSelectedPlaylist(pl);
+        return;
+    }
     const token = localStorage.getItem('accessToken')
     try {
       const data = await playlistApi.getById(id, token)
       setSelectedPlaylist(data)
+      
+      // Sync the count back to the sidebar list
+      setPlaylists(prev => prev.map(pl => 
+        pl.id === id ? { ...pl, movies: data.movies } : pl
+      ))
     } catch (err) {
       console.error(err)
     }
   }
 
   return (
-    <div className="playlist-section mt-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="text-warning fw-bold m-0">My Playlists</h3>
-        <button 
-          className="btn btn-warning btn-sm fw-bold text-dark"
-          onClick={() => setShowCreateModal(true)}
-          disabled={isProcessing}
-        >
-          + New Playlist
-        </button>
-      </div>
+    <div className="playlist-dashboard mt-4 pt-4 border-top border-secondary border-opacity-10">
+      <div className="row g-4">
+        {/* Sidebar: Playlist Selection */}
+        <div className="col-lg-3">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+             <h4 className="text-warning fw-black m-0 tracking-tight">COLLECTIONS</h4>
+             {!readOnly && (
+                <button 
+                  className="btn-fresh-primary p-0 d-flex align-items-center justify-content-center" 
+                  style={{ width: '32px', height: '32px' }}
+                  onClick={() => setShowCreateModal(true)}
+                  title="New Playlist"
+                >
+                  <i className="bi bi-plus-lg fs-6" />
+                </button>
+             )}
+          </div>
 
-      <CreatePlaylistModal 
-        show={showCreateModal} 
-        onHide={() => setShowCreateModal(false)}
-        onSuccess={handleCreateSuccess}
-      />
-
-      <div className="row">
-        <div className="col-md-4">
-          <div className="list-group list-group-flush border border-secondary rounded overflow-hidden shadow-sm">
-            {playlists.length === 0 && !loading && (
-              <div className="bg-dark p-4 text-center">
-                <i className="bi bi-collection-play text-secondary fs-2 mb-2 d-block" />
-                <p className="text-secondary small m-0">You don't have any playlists yet.</p>
-              </div>
-            )}
+          <div className="playlist-sidebar">
             {playlists.map(pl => (
               <button
                 key={pl.id}
-                className={`list-group-item list-group-item-action bg-dark text-light border-secondary d-flex justify-content-between align-items-center py-3 ${selectedPlaylist?.id === pl.id ? 'active border-warning' : ''}`}
+                className={`playlist-sidebar-item ${selectedPlaylist?.id === pl.id ? 'active' : ''}`}
                 onClick={() => selectPlaylist(pl.id)}
-                disabled={isProcessing}
               >
-                <div className="d-flex align-items-center gap-2">
-                  <i className="bi bi-music-note-list text-warning" />
-                  <span className="fw-semibold">{pl.name}</span>
+                <div className="d-flex align-items-center gap-3">
+                  <div className={`playlist-icon-box ${selectedPlaylist?.id === pl.id ? 'bg-warning' : 'bg-secondary bg-opacity-10'}`}>
+                    <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'} ${selectedPlaylist?.id === pl.id ? 'text-dark' : 'text-warning'}`} />
+                  </div>
+                  <div className="text-start overflow-hidden">
+                    <div className="playlist-sidebar-name text-truncate">{pl.name}</div>
+                    <div className="playlist-sidebar-meta">{pl.movies?.length || 0} movies</div>
+                  </div>
                 </div>
-                <i className="bi bi-chevron-right smaller opacity-50" />
+                <i className="bi bi-chevron-right ms-auto opacity-25" />
               </button>
             ))}
+            
+            {playlists.length === 0 && !loading && (
+              <div className="text-center py-4 border border-secondary border-dashed rounded opacity-50">
+                 <p className="smaller m-0">No collections yet</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="col-md-8 mt-4 mt-md-0">
+        {/* Main: Movies Grid */}
+        <div className="col-lg-9">
           {selectedPlaylist ? (
-            <div className="bg-dark p-4 rounded border border-secondary h-100 shadow-sm">
+            <div className="playlist-main-content animate-fade-in">
               <div className="d-flex justify-content-between align-items-start mb-4">
                 <div>
-                  <h4 className="text-light fw-bold mb-1">{selectedPlaylist.name}</h4>
-                  <p className="text-secondary smaller m-0">
-                    {selectedPlaylist.isPrivate ? (
-                      <><i className="bi bi-lock-fill me-1" /> Private</>
-                    ) : (
-                      <><i className="bi bi-globe me-1" /> Public</>
+                  <h2 className="text-light fw-black mb-1">{selectedPlaylist.name}</h2>
+                  <div className="d-flex align-items-center gap-3">
+                    <span className="badge bg-warning text-dark px-3 rounded-pill uppercase smaller fw-bold">
+                       {selectedPlaylist.movies?.length || 0} Titles
+                    </span>
+                    {!readOnly && (
+                        <span className="text-secondary smaller uppercase tracking-widest fw-bold">
+                            {selectedPlaylist.isPrivate ? 'Private' : 'Public'}
+                        </span>
                     )}
-                    {" • "}{selectedPlaylist.movies?.length || 0} movies
-                  </p>
+                  </div>
                 </div>
-                <button 
-                  className="btn btn-outline-danger btn-sm border-0"
-                  onClick={() => handleDelete(selectedPlaylist.id)}
-                  disabled={isProcessing}
-                  title="Delete playlist"
-                >
-                  <i className="bi bi-trash3" />
-                </button>
+                {!readOnly && (
+                  <button 
+                    className="btn btn-outline-danger btn-sm border-0 opacity-25 hover-opacity-100"
+                    onClick={() => handleDelete(selectedPlaylist.id)}
+                    title="Delete collection"
+                  >
+                    <i className="bi bi-trash3 fs-5" />
+                  </button>
+                )}
               </div>
 
-              <div className="row g-3">
-                {selectedPlaylist.movies?.map((movie, idx) => (
-                  <div key={`${movie.id}-${idx}`} className="col-6 col-sm-4">
-                    <div className="position-relative">
-                      <Link
-                        to={`/movie/${movie.id}`}
-                        className="coming-card w-100"
-                      >
+              {selectedPlaylist.movies?.length > 0 ? (
+                <div className="playlist-grid">
+                  {selectedPlaylist.movies.map((movie, idx) => (
+                    <div key={`${movie.id}-${idx}`} className="playlist-card-wrapper">
+                      <Link to={`/movie/${movie.id}`} className="coming-card w-100">
                         <MoviePoster
                           posterUrl={movie.posterUrl}
                           title={movie.title}
                           className="coming-card-img"
                         />
                         <div className="coming-card-overlay">
-                          <p className="coming-card-genre">{movie.genre}</p>
+                          <div className="coming-card-genres">
+                            {movie.genres?.slice(0, 3).map(g => (
+                              <p key={g} className="coming-card-genre">{g}</p>
+                            ))}
+                          </div>
                           <p className="coming-card-title text-truncate w-100">{movie.title}</p>
                           <p className="coming-card-date">
-                            <i className="bi bi-calendar3" />
-                            {movie.year}
+                            <i className="bi bi-calendar3" /> {movie.year}
                           </p>
                         </div>
                       </Link>
-                      <button 
-                        className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 z-3 shadow"
-                        onClick={(e) => handleRemoveMovie(e, selectedPlaylist.id, movie.id)}
-                        style={{ borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
-                        title="Remove from playlist"
-                        disabled={isProcessing}
-                      >
-                        <i className="bi bi-x-lg" style={{ fontSize: '0.8rem' }} />
-                      </button>
+                      {!readOnly && (
+                        <button 
+                          className="btn btn-danger btn-sm playlist-remove-btn"
+                          onClick={(e) => handleRemoveMovie(e, selectedPlaylist.id, movie.id)}
+                          disabled={isProcessing}
+                        >
+                          <i className="bi bi-x-lg" />
+                        </button>
+                      )}
                     </div>
-                  </div>
-                ))}
-                {selectedPlaylist.movies?.length === 0 && (
-                  <div className="text-center py-5 w-100">
-                    <i className="bi bi-plus-circle text-secondary fs-1 mb-3 d-block" />
-                    <p className="text-secondary italic">This playlist is empty. Add some movies from the movie pages!</p>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-5 rounded border border-secondary border-dashed bg-dark bg-opacity-25">
+                  <i className="bi bi-camera-reels text-secondary fs-1 mb-3 d-block opacity-10" />
+                  <h5 className="text-secondary">This collection is empty</h5>
+                  {!readOnly && <p className="text-secondary smaller italic">Add movies from discovery to start your collection!</p>}
+                </div>
+              )}
             </div>
           ) : (
-            <div className="d-flex flex-column align-items-center justify-content-center h-100 border border-secondary border-dashed rounded py-5 text-secondary bg-dark bg-opacity-25">
-              <i className="bi bi-arrow-left-circle mb-3 fs-3" />
-              <p className="m-0">Select a playlist from the left to manage its content</p>
+            <div className="h-100 d-flex flex-column align-items-center justify-content-center py-5 border border-secondary border-opacity-10 rounded">
+               <div className="mb-4 opacity-10" style={{ fontSize: '5rem' }}>
+                  <i className="bi bi-collection-play" />
+               </div>
+               <h4 className="text-secondary fw-bold">No Collection Selected</h4>
+               <p className="text-secondary smaller text-center opacity-50 px-4">Choose a playlist from the sidebar to manage your movies.</p>
             </div>
           )}
         </div>
       </div>
+
+      {!readOnly && (
+        <CreatePlaylistModal 
+          show={showCreateModal} 
+          onHide={() => setShowCreateModal(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      )}
     </div>
   )
 }

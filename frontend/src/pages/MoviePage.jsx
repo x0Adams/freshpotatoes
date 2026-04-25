@@ -66,15 +66,22 @@ function PotatoRating({ rating, userRating, onRate, onDelete, isSubmitting }) {
 
 function CommentsSection({ reviews, user, onPost, onDelete, isPosting, loading }) {
   const [text, setText] = useState('')
+  const userReview = user ? reviews.find(r => r.userId === user.id) : null
+
+  // Pre-fill text when userReview is found or changed
+  useEffect(() => {
+    if (userReview) {
+      setText(userReview.rating)
+    } else {
+      setText('')
+    }
+  }, [userReview])
   
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!text.trim()) return
     onPost(text)
-    setText('')
   }
-
-  const userReview = user ? reviews.find(r => r.userId === user.id) : null
 
   return (
     <div className="movie-section">
@@ -82,23 +89,35 @@ function CommentsSection({ reviews, user, onPost, onDelete, isPosting, loading }
         Reviews <span>({reviews.length})</span>
       </h2>
 
-      {user && !userReview && (
+      {user && (
         <form onSubmit={handleSubmit} className="comment-form mb-5">
           <textarea
             className="form-control comment-input mb-2"
             rows={3}
-            placeholder="What did you think of the movie?"
+            placeholder={userReview ? "Update your review..." : "What did you think of the movie?"}
             value={text}
             onChange={(e) => setText(e.target.value)}
             disabled={isPosting}
           />
-          <button 
-            type="submit" 
-            className="btn btn-warning btn-sm fw-semibold px-4 text-dark"
-            disabled={isPosting || !text.trim()}
-          >
-            {isPosting ? 'Posting...' : 'Post Review'}
-          </button>
+          <div className="d-flex gap-2">
+            <button 
+              type="submit" 
+              className="btn-fresh-primary px-4 py-2"
+              disabled={isPosting || !text.trim() || (userReview && text === userReview.rating)}
+            >
+              {isPosting ? 'Saving...' : userReview ? 'Update Review' : 'Post Review'}
+            </button>
+            {userReview && (
+              <button 
+                type="button" 
+                className="btn-fresh-danger px-4 py-2"
+                onClick={onDelete}
+                disabled={isPosting}
+              >
+                Delete Review
+              </button>
+            )}
+          </div>
         </form>
       )}
 
@@ -124,24 +143,19 @@ function CommentsSection({ reviews, user, onPost, onDelete, isPosting, loading }
                     <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
                       <i className="bi bi-person-fill text-dark" />
                     </div>
-                    <span className="fw-bold text-light">{rev.username}</span>
-                    {user && rev.userId === user.id && (
+                    {/* Robust ID extraction for user profile link */}
+                    <Link 
+                      to={`/user/${rev.userId ?? rev.userid ?? rev.user_id ?? rev.user?.id ?? 0}`} 
+                      className="fw-bold text-light text-decoration-none hover-warning"
+                    >
+                      {rev.username}
+                    </Link>
+                    {user && (rev.userId === user.id || rev.userid === user.id) && (
                       <span className="badge bg-warning text-dark smaller">You</span>
                     )}
                   </div>
-                  {user && rev.userId === user.id && (
-                    <button 
-                      className="btn btn-outline-danger btn-sm border-0 p-1" 
-                      onClick={onDelete}
-                      disabled={isPosting}
-                    >
-                      <i className="bi bi-trash3" />
-                    </button>
-                  )}
                 </div>
-                <p className="text-secondary mb-0" style={{ whiteSpace: 'pre-line' }}>
-                  {rev.rating}
-                </p>
+                <p className="comment-text">{rev.rating}</p>
               </div>
             ))
           )}
@@ -188,35 +202,37 @@ function MoviePage() {
       })
   }, [id])
 
-  // Fetch reviews
   useEffect(() => {
     if (id) {
       setLoadingReviews(true)
       reviewApi.getAllByMovie(id)
         .then(data => setReviews(data))
-        .catch(err => console.error("Failed to fetch reviews:", err))
         .finally(() => setLoadingReviews(false))
     }
   }, [id])
 
-  // Fetch user rating separately
   useEffect(() => {
     if (user && id) {
-      const token = localStorage.getItem('accessToken')
       movieApi.getUserRating(user.id, id)
-        .then(rating => setUserRating(rating))
-        .catch(err => console.error("Failed to fetch user rating:", err))
-
-      playlistApi.getByOwner(user.id, token)
-        .then(data => setPlaylists(data))
-        .catch(err => console.error("Failed to fetch playlists:", err))
+        .then(val => setUserRating(val))
+        .catch(() => setUserRating(0))
     } else {
       setUserRating(0)
+    }
+  }, [user, id])
+
+  useEffect(() => {
+    if (user) {
+      const token = localStorage.getItem('accessToken')
+      playlistApi.getByOwner(user.id, token)
+        .then(data => setPlaylists(data))
+        .catch(() => setPlaylists([]))
+    } else {
       setPlaylists([])
     }
-  }, [id, user])
+  }, [user])
 
-  const handleRate = async (rating) => {
+  const handleRate = async (val) => {
     if (!user) {
       alert("Please log in to rate movies!")
       return
@@ -225,54 +241,15 @@ function MoviePage() {
     setIsSubmittingRating(true)
     try {
       const token = localStorage.getItem('accessToken')
-      await movieApi.rate(id, rating, token)
-      setUserRating(rating)
+      await movieApi.rate(id, val, token)
+      setUserRating(val)
       // Refresh movie data to see updated average
       const updatedMovie = await movieApi.getById(id)
       setMovie(updatedMovie)
     } catch (err) {
-      alert(err.message || "Failed to submit rating")
+      alert(err.message || "Failed to save rating")
     } finally {
       setIsSubmittingRating(false)
-    }
-  }
-
-  const handleAddToPlaylist = async (playlistId) => {
-    setIsAddingToPlaylist(true)
-    try {
-      const token = localStorage.getItem('accessToken')
-      
-      // Check if already in this playlist
-      const details = await playlistApi.getById(playlistId, token)
-      const isAlreadyIn = details.movies?.some(m => String(m.id) === String(id));
-      
-      if (isAlreadyIn) {
-        alert("This movie is already in that playlist!")
-        return
-      }
-
-      await playlistApi.addMovie(playlistId, id, token)
-      alert("Movie added to playlist!")
-    } catch (err) {
-      alert(err.message || "Failed to add movie to playlist")
-    } finally {
-      setIsAddingToPlaylist(false)
-    }
-  }
-
-  const handleCreatePlaylistSuccess = async (newPlaylist) => {
-    // 1. Refresh playlist list
-    const token = localStorage.getItem('accessToken')
-    try {
-      const updatedList = await playlistApi.getByOwner(user.id, token)
-      setPlaylists(updatedList)
-      
-      // 2. Automatically add current movie to the new playlist
-      if (newPlaylist && newPlaylist.id) {
-        await handleAddToPlaylist(newPlaylist.id)
-      }
-    } catch (err) {
-      console.error(err)
     }
   }
 
@@ -332,6 +309,36 @@ function MoviePage() {
     }
   }
 
+  const handleAddToPlaylist = async (playlistId) => {
+    if (!user) return
+    setIsAddingToPlaylist(true)
+    try {
+      const token = localStorage.getItem('accessToken')
+      await playlistApi.addMovie(playlistId, id, token)
+      alert("Movie added to playlist!")
+    } catch (err) {
+      alert(err.message || "Failed to add movie")
+    } finally {
+      setIsAddingToPlaylist(false)
+    }
+  }
+
+  const handleCreatePlaylistSuccess = async (newPlaylist) => {
+    // 1. Refresh playlist list
+    const token = localStorage.getItem('accessToken')
+    try {
+      const updatedList = await playlistApi.getByOwner(user.id, token)
+      setPlaylists(updatedList)
+      
+      // 2. Automatically add current movie to the new playlist
+      if (newPlaylist && newPlaylist.id) {
+        await handleAddToPlaylist(newPlaylist.id)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   if (loading) return (
     <div className="text-center py-5 mt-5">
       <div className="spinner-border text-warning" role="status">
@@ -384,6 +391,9 @@ function MoviePage() {
 
           <div className="movie-meta-row">
             <span><i className="bi bi-calendar3" /> {movie.year}</span>
+            {movie.duration > 0 && (
+              <span><i className="bi bi-clock" /> {Math.floor(movie.duration / 60)}h {movie.duration % 60}m</span>
+            )}
             {movie.country && (
               <span><i className="bi bi-globe2" /> {movie.country}</span>
             )}
@@ -398,59 +408,48 @@ function MoviePage() {
             isSubmitting={isSubmittingRating}
           />
 
-          {/* Links */}
-          <div className="movie-links">
+          <div className="movie-links d-flex align-items-center gap-3 mt-4">
             {movie.trailerUrl && (
-              <button
+              <button 
+                className="btn-fresh-primary"
                 onClick={() => setShowTrailer(true)}
-                className="btn btn-warning btn-sm fw-semibold text-dark px-3" >
-                <i className="bi bi-play-fill me-1" /> Watch Trailer
+              >
+                <i className="bi bi-play-fill me-2 fs-5" /> Watch Trailer
               </button>
-            )}
-            {movie.youtubeUrl && (
-              <a
-                href={movie.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-outline-secondary btn-sm px-3">
-                <i className="bi bi-youtube me-1" /> YouTube Page
-              </a>
             )}
 
             {user && (
               <div className="dropdown">
                 <button 
-                  className="btn btn-outline-warning btn-sm px-3 dropdown-toggle"
-                  type="button"
+                  className="btn-fresh-secondary dropdown-toggle" 
+                  type="button" 
                   data-bs-toggle="dropdown"
                   disabled={isAddingToPlaylist}
                 >
-                  <i className="bi bi-plus-lg me-1" /> Add to Playlist
+                  <i className="bi bi-plus-lg me-2" /> Add to Playlist
                 </button>
-                <ul className="dropdown-menu dropdown-menu-dark border-secondary">
+                <ul className="dropdown-menu shadow-lg">
                   {playlists.length === 0 ? (
-                    <li><span className="dropdown-item disabled">No playlists yet</span></li>
+                    <li className="px-3 py-2 text-secondary smaller italic">No playlists yet</li>
                   ) : (
                     playlists.map(pl => (
                       <li key={pl.id}>
-                        <button 
-                          className="dropdown-item" 
-                          onClick={() => handleAddToPlaylist(pl.id)}
-                        >
+                        <button className="dropdown-item" onClick={() => handleAddToPlaylist(pl.id)}>
+                          <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'}`} />
                           {pl.name}
                         </button>
                       </li>
                     ))
                   )}
-                  <li><hr className="dropdown-divider border-secondary" /></li>
+                  <li><hr className="dropdown-divider border-opacity-25" /></li>
                   <li>
                     <button className="dropdown-item text-warning" onClick={() => setShowCreateModal(true)}>
-                       + Create New Playlist
+                       <i className="bi bi-plus-circle-fill" /> Create New Playlist
                     </button>
                   </li>
                   <li>
                     <Link className="dropdown-item text-secondary smaller" to="/profile">
-                       Manage All Playlists
+                       <i className="bi bi-gear-fill" /> Manage All Playlists
                     </Link>
                   </li>
                 </ul>

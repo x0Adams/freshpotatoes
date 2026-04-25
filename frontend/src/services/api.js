@@ -23,22 +23,49 @@ function formatPosterUrl(path) {
 
 // Helper to format basic movie data
 function formatBasicMovie(movie) {
-  const posterPath = movie.posterPath || movie.poster_path || movie.posterUrl;
+  if (!movie) return { id: 0, title: 'Unknown' };
+
+  // 1. Poster Path extraction
+  const posterPath = movie.posterPath ?? movie.poster_path ?? movie.posterUrl ?? movie.movie?.posterPath;
+  
+  // 2. ID extraction (Robust check for all DTO variations)
+  let rawId = movie.movieId ?? movie.id ?? movie.movie_id ?? movie.movieID ?? movie.movie?.id ?? movie.movie?.movieId;
+  
+  // Fallback for raw values or strings
+  if ((rawId === undefined || rawId === null) && (typeof movie === 'string' || typeof movie === 'number')) {
+    rawId = movie;
+  }
+
+  const idNum = (rawId !== undefined && rawId !== null) ? Number(rawId) : 0;
+  
+  const movieObj = movie.movie || movie;
+  const genres = movieObj.genres || [];
+
   return {
-    id: Number(movie.id),
-    title: movie.name || movie.title,
+    id: idNum,
+    title: movieObj.name ?? movieObj.title ?? 'Unknown Movie',
     posterUrl: formatPosterUrl(posterPath),
-    year: movie.releaseDate ? movie.releaseDate.substring(0, 4) : (movie.year || 'Unknown'),
-    genre: movie.genres && movie.genres.length > 0 ? movie.genres[0].name : 'Movie'
+    year: (movieObj.releaseDate && typeof movieObj.releaseDate === 'string') 
+      ? movieObj.releaseDate.substring(0, 4) 
+      : (movieObj.year ?? 'Unknown'),
+    genres: Array.isArray(genres) ? genres.map(g => {
+      if (!g) return 'Movie';
+      return typeof g === 'string' ? g : (g.name || 'Movie');
+    }).sort() : [],
+    genre: (Array.isArray(genres) && genres.length > 0)
+      ? (typeof genres[0] === 'string' ? genres[0] : (genres[0]?.name || 'Movie'))
+      : 'Movie'
   };
 }
+
+const isValidMovie = m => (m.name || m.title) && (m.name !== 'None' && m.title !== 'None');
 
 export const movieApi = {
   async search(query, signal) {
     const res = await fetch(`${BASE_URL}/movie/search/${encodeURIComponent(query)}`, { signal });
     if (!res.ok) throw new Error(`Search failed`);
     const data = await res.json();
-    return data.map(formatBasicMovie);
+    return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
   async advancedSearch(params = {}, signal) {
@@ -53,7 +80,7 @@ export const movieApi = {
       throw new Error(`Advanced search failed`);
     }
     const data = await res.json();
-    return data.map(formatBasicMovie);
+    return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
   // NEW: Fetch paginated movies
@@ -61,15 +88,45 @@ export const movieApi = {
     const res = await fetch(`${BASE_URL}/movie?page=${page}&size=${size}`);
     if (!res.ok) throw new Error('Failed to fetch movies');
     const data = await res.json();
-    return data.map(formatBasicMovie);
+    return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
-  // NEW: Fetch movies by genre
+  // NEW: Fetch movies by genre using sequential random letter discovery
   async getMoviesByGenre(genre, page = 0, size = 30) {
-    const res = await fetch(`${BASE_URL}/movie/search?title=a&genre=${encodeURIComponent(genre)}&page=${page}&size=${size}`);
-    if (!res.ok) throw new Error('Failed to fetch movies by genre');
-    const data = await res.json();
-    return data.map(formatBasicMovie);
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('').sort(() => 0.5 - Math.random());
+    const seenIds = new Set();
+    const allResults = [];
+
+    // On the first page, we hunt for at least 10 movies
+    // If page > 0, we just do one fetch to keep pagination simple
+    const maxAttempts = page === 0 ? 10 : 1;
+
+    for (let i = 0; i < maxAttempts; i++) {
+      const char = alphabet[i];
+      try {
+        const res = await fetch(`${BASE_URL}/movie/search?title=${char}&genre=${encodeURIComponent(genre)}&page=${page}&size=${size}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            data.forEach(m => {
+              if (isValidMovie(m)) {
+                if (!seenIds.has(m.id)) {
+                  seenIds.add(m.id);
+                  allResults.push(m);
+                }
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error(`Genre hunt failed for letter ${char}:`, err);
+      }
+
+      // If we've reached our threshold of 20 movies, we can stop hunting
+      if (allResults.length >= 20) break;
+    }
+
+    return allResults.map(formatBasicMovie);
   },
 
   // NEW: Fetch random movies
@@ -77,7 +134,7 @@ export const movieApi = {
     const res = await fetch(`${BASE_URL}/movie/random`);
     if (!res.ok) throw new Error('Failed to fetch random movies');
     const data = await res.json();
-    return data.map(formatBasicMovie);
+    return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
   // NEW: Fetch full movie details
@@ -132,6 +189,13 @@ export const movieApi = {
     const ratings = await res.json();
     const movieRating = ratings.find(r => r.movieId === Number(movieId));
     return movieRating ? movieRating.rating : 0;
+  },
+
+  async getRatingsByUser(userId) {
+    const res = await fetch(`${BASE_URL}/rate?userid=${userId}`);
+    if (!res.ok) throw new Error('Failed to fetch user ratings');
+    const data = await res.json();
+    return data.map(formatBasicMovie);
   },
 
   async deleteRate(movieId, token) {
@@ -214,7 +278,7 @@ export const authApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) throw new Error('Could not fetch user profile');
+    if (!res.ok) throw new Error('Failed to fetch user data');
     const data = await res.json();
     // Map backend UserDto to our frontend-friendly user object
     return {
@@ -225,8 +289,38 @@ export const authApi = {
       genderName: data.gender,
       roles: [] // UserDto doesn't currently provide roles
     };
+  },
+
+  async getUserPublicById(userId) {
+    const idNum = parseInt(userId);
+    if (isNaN(idNum) || idNum === 0) throw new Error('Invalid User ID');
+
+    const res = await fetch(`${BASE_URL}/auth/user/${idNum}`);
+    if (!res.ok) {
+      if (res.status === 404) {
+         const errText = await res.text().catch(() => '');
+         throw new Error(errText || 'User not found.');
+      }
+      if (res.status >= 500) {
+         throw new Error('Server error: The backend failed to load this profile.');
+      }
+      throw new Error(`Profile unavailable (Status: ${res.status})`);
+    }
+    const data = await res.json();
+    return {
+      id: data.id,
+      username: data.username,
+      age: data.age,
+      genderName: data.gender,
+      playlists: Array.isArray(data.playlists) ? data.playlists.map(pl => ({
+        ...pl,
+        movies: Array.isArray(pl.movies) ? pl.movies.map(formatBasicMovie) : []
+      })) : [],
+      ratedMovies: Array.isArray(data.ratedMovies) ? data.ratedMovies.map(formatBasicMovie) : [],
+      reviewedMovies: Array.isArray(data.reviewedMovies) ? data.reviewedMovies.map(formatBasicMovie) : []
+    };
   }
-};
+  };
 
 export const genreApi = {
   async getAll() {
@@ -358,6 +452,13 @@ export const reviewApi = {
     const res = await fetch(`${BASE_URL}/review/${movieId}`);
     if (!res.ok) throw new Error('Failed to fetch reviews');
     return res.json();
+  },
+
+  async getReviewsByUser(userId) {
+    const res = await fetch(`${BASE_URL}/review?userid=${userId}`);
+    if (!res.ok) throw new Error('Failed to fetch user reviews');
+    const data = await res.json();
+    return data.map(formatBasicMovie);
   },
 
   async postReview(movieId, reviewText, token) {
