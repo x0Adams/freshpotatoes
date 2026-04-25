@@ -1,0 +1,78 @@
+/* Global freshPotatoes Button System */
+.btn-fresh-primary,
+.btn-fresh-secondary,
+.btn-fresh-danger,
+.btn-nav-login,
+.btn-nav-user {
+  text-decoration: none !important;
+}
+
+.btn-fresh-primary {
+  background: #ffc107;
+  color: #000;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.6rem 2rem;
+  border-radius: 30px;
+  border: none;
+  font-size: 0.85rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-fresh-primary:hover:not(:disabled) {
+  background: #ffca2c;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+  color: #000;
+}
+
+.btn-fresh-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-fresh-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.6rem 1.8rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(5px);
+}
+
+.btn-fresh-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.btn-fresh-danger {
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  color: #ff6b6b;
+  font-weight: 700;
+  padding: 0.6rem 1.8rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.btn-fresh-danger:hover:not(:disabled) {
+  background: rgba(220, 53, 69, 0.2);
+  border-color: rgba(220, 53, 69, 0.3);
+  color: #ff4747;
+}
+

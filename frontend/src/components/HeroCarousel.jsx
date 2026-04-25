@@ -120,7 +120,7 @@ function HeroCarousel() {
 
         <div className="carousel-inner h-100">
           {movies.map((movie, i) => (
-            <HeroSlide key={movie.id} movie={movie} isActive={i === 0} />
+            <HeroSlide key={`${movie.id}-${i}`} movie={movie} isActive={i === 0} />
           ))}
         </div>
 

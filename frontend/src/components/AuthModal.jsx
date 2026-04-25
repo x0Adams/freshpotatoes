@@ -1,23 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 function AuthModal({ show, onHide }) {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
-
-  const [formData, setFormData] = useState({
-    email: '',
-    username: '',
-    genderName: 'None', 
-    age: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const { showToast } = useToast();
+  const [shouldRender, setRender] = useState(show);
 
   useEffect(() => {
     if (show) {
+      setRender(true);
+      document.body.classList.add('modal-open-lock');
       setError('');
       setLoading(false);
       setFormData({
@@ -28,8 +24,26 @@ function AuthModal({ show, onHide }) {
         password: '',
         confirmPassword: ''
       });
+    } else {
+      document.body.classList.remove('modal-open-lock');
     }
+    return () => {
+      document.body.classList.remove('modal-open-lock');
+    };
   }, [show]);
+
+  const onAnimationEnd = () => {
+    if (!show) setRender(false);
+  };
+
+  const [formData, setFormData] = useState({
+    email: '',
+    username: '',
+    genderName: 'None', 
+    age: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -49,6 +63,7 @@ function AuthModal({ show, onHide }) {
     try {
       if (isLogin) {
         await login(formData.username, formData.password);
+        showToast(`Welcome back, ${formData.username}!`);
       } else {
         await register({
           email: formData.email,
@@ -57,6 +72,9 @@ function AuthModal({ show, onHide }) {
           age: parseInt(formData.age),
           password: formData.password
         });
+        showToast("Account created successfully! Please sign in.");
+        setIsLogin(true);
+        return;
       }
       onHide();
     } catch (err) {
@@ -66,10 +84,14 @@ function AuthModal({ show, onHide }) {
     }
   };
 
-  if (!show) return null;
+  if (!shouldRender) return null;
 
   return (
-    <div className="custom-modal-overlay animate-fade-in" onClick={onHide}>
+    <div 
+      className={`custom-modal-overlay ${show ? 'animate-fade-in' : 'animate-fade-out'}`} 
+      onAnimationEnd={onAnimationEnd}
+      onClick={onHide}
+    >
       <div className="custom-modal-container" onClick={e => e.stopPropagation()}>
         <div className="custom-modal-glow" />
         
@@ -127,7 +149,8 @@ function AuthModal({ show, onHide }) {
                       <option value="None" disabled>Select</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
-                      <option value="other">Other</option>
+                      <option value="transfeminine">Transfeminine</option>
+                      <option value="transmasculine">Transmasculine</option>
                     </select>
                   </div>
                 </div>
@@ -174,7 +197,7 @@ function AuthModal({ show, onHide }) {
               </div>
             )}
 
-            <button type="submit" className="btn-custom-primary w-100 mt-2" disabled={loading}>
+            <button type="submit" className="btn-fresh-primary w-100 mt-2" disabled={loading}>
               {loading ? (
                 <><span className="spinner-border spinner-border-sm me-2" /> Working...</>
               ) : (isLogin ? 'Sign In' : 'Join Now')}

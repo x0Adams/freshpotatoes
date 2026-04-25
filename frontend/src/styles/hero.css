@@ -1,0 +1,257 @@
+/* CAROUSEL */
+/* hero Carousel */
+.hero-carousel {
+  height: 80vh;
+  min-height: 650px;
+}
+
+@media (max-width: 768px) {
+  .hero-carousel {
+    height: 100vh !important;
+    min-height: auto;
+  }
+}
+
+.hero-carousel .carousel,
+.hero-carousel .carousel-inner,
+.hero-carousel .carousel-item {
+  height: 100%;
+}
+
+.hero-slide {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 8%;
+  background: radial-gradient(ellipse at 30% 50%, var(--slide-glow) 0%, #0a0a0f 75%);
+  transition: background 0.6s ease;
+}
+
+@media (max-width: 992px) {
+  .hero-slide {
+    padding: 0 5%;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-slide {
+    padding: 2rem 1.5rem;
+    background: radial-gradient(circle at center, var(--slide-glow) 0%, #0a0a0f 100%);
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .hero-slide .row {
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: nowrap;
+  }
+}
+
+/* poster */
+.hero-poster-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.poster-frame {
+  position: relative;
+  width: 100%;
+  max-width: 250px;
+}
+
+/* cust background */
+.poster-glow {
+  position: absolute;
+  inset: -18%;
+  width: 250%;
+  height: 250%;
+  object-fit: cover;
+  border-radius: 16px;
+  filter: blur(10rem) saturate(1.6);
+  opacity: 0.82;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hero-poster {
+  position: relative;
+  z-index: 1;
+  width: 125%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 32px 60px rgba(0, 0, 0, 0.6);
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .poster-frame {
+    max-width: 180px;
+  }
+  .hero-poster {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .poster-frame {
+    max-width: 140px;
+  }
+}
+
+/* describ */
+.hero-info {
+  padding-left: 5%;
+}
+
+@media (max-width: 768px) {
+  .hero-info {
+    padding: 0;
+  }
+}
+
+.hero-info .movie-genre-badge {
+  border: none;
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+.hero-genre {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffc107;
+  margin-bottom: 0.8rem;
+}
+
+.hero-title {
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+}
+
+.profile-meta-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+@media (max-width: 850px) {
+  .profile-meta-list {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.movie-title {
+  font-size: clamp(2.2rem, 6vw, 4.8rem);
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-year {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 2.2rem;
+  letter-spacing: 0.05em;
+}
+
+/* carousel cntrl */
+.hero-carousel .carousel-control-prev,
+.hero-carousel .carousel-control-next {
+  width: 5%;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.hero-carousel .carousel-control-prev:hover,
+.hero-carousel .carousel-control-next:hover {
+  opacity: 1;
+}
+
+.hero-carousel .carousel-indicators [data-bs-target] {
+  width: 24px;
+  height: 3px;
+  border-radius: 2px;
+  background-color: rgba(255, 193, 7, 0.5);
+  border: none;
+  transition: all 0.3s;
+}
+
+.hero-carousel .carousel-indicators .active {
+  background-color: #ffc107;
+  width: 40px;
+}
+
+/* skeleton loading */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.5; }
+}
+
+.skeleton-pulse {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.hero-skeleton-poster {
+  width: 125%;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+}
+
+.hero-skeleton-text {
+  height: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero-skeleton-title {
+  height: 4rem;
+  margin-bottom: 1rem;
+  width: 80%;
+}
+
+@media (max-width: 768px) {
+  .hero-skeleton-title {
+    width: 90%;
+    margin: 0 auto 1rem;
+  }
+  .hero-skeleton-text {
+    margin: 0 auto 1rem;
+  }
+  .hero-skeleton-btn {
+    margin: 0 auto;
+  }
+}
+
+.hero-skeleton-btn {
+  height: 3rem;
+  width: 150px;
+  border-radius: 4px;
+}
+
+.discover-skeleton-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+

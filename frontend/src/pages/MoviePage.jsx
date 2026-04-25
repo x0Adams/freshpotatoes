@@ -1,11 +1,14 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { movieApi, reviewApi, playlistApi } from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import MoviePoster from '../components/MoviePoster'
 import DiscoverMovies from '../components/DiscoverMovies'
 import TrailerModal from '../components/TrailerModal'
 import CreatePlaylistModal from '../components/CreatePlaylistModal'
+import ModifyMovieModal from '../components/ModifyMovieModal'
+import ConfirmModal from '../components/ConfirmModal'
 import testBg from '../assets/test_bg.jpg'
 import potatoIcon from '../assets/potato.png'
 
@@ -49,7 +52,8 @@ function PotatoRating({ rating, userRating, onRate, onDelete, isSubmitting }) {
         
         {userRating > 0 && onDelete && (
           <button 
-            className="btn btn-outline-danger btn-sm border-0 p-1 lh-1" 
+            className="btn-fresh-danger p-0"
+            style={{ width: '32px', height: '32px', borderRadius: '50%' }}
             onClick={onDelete}
             disabled={isSubmitting}
             title="Remove my rating"
@@ -64,7 +68,7 @@ function PotatoRating({ rating, userRating, onRate, onDelete, isSubmitting }) {
   )
 }
 
-function CommentsSection({ reviews, user, onPost, onDelete, isPosting, loading }) {
+function CommentsSection({ reviews, user, onPost, onDelete, onAdminDelete, isPosting, loading }) {
   const [text, setText] = useState('')
   const userReview = user ? reviews.find(r => r.userId === user.id) : null
 
@@ -154,6 +158,17 @@ function CommentsSection({ reviews, user, onPost, onDelete, isPosting, loading }
                       <span className="badge bg-warning text-dark smaller">You</span>
                     )}
                   </div>
+
+                  {user?.isAdmin && (
+                     <button 
+                       className="btn-fresh-danger p-0"
+                       style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+                       onClick={() => onAdminDelete(rev.userId || rev.userid, rev.username)}
+                       title="Admin: Delete Review"
+                     >
+                        <i className="bi bi-shield-x" />
+                     </button>
+                  )}
                 </div>
                 <p className="comment-text">{rev.rating}</p>
               </div>
@@ -169,6 +184,8 @@ function CommentsSection({ reviews, user, onPost, onDelete, isPosting, loading }
 function MoviePage() {
   const { id } = useParams()
   const { user } = useAuth()
+  const { showToast } = useToast()
+  const navigate = useNavigate()
   const [movie, setMovie] = useState(null)
   const [reviews, setReviews] = useState([])
   const [playlists, setPlaylists] = useState([])
@@ -181,6 +198,10 @@ function MoviePage() {
   const [isAddingToPlaylist, setIsAddingToPlaylist] = useState(false)
   const [showTrailer, setShowTrailer] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showModifyModal, setShowModifyModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showReviewDeleteModal, setShowReviewDeleteModal] = useState(false)
+  const [reviewDeletionInfo, setReviewDeletionInfo] = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -234,7 +255,7 @@ function MoviePage() {
 
   const handleRate = async (val) => {
     if (!user) {
-      alert("Please log in to rate movies!")
+      showToast("Please log in to rate movies!", "error")
       return
     }
     
@@ -246,8 +267,9 @@ function MoviePage() {
       // Refresh movie data to see updated average
       const updatedMovie = await movieApi.getById(id)
       setMovie(updatedMovie)
+      showToast("Rating saved!")
     } catch (err) {
-      alert(err.message || "Failed to save rating")
+      showToast(err.message || "Failed to save rating", "error")
     } finally {
       setIsSubmittingRating(false)
     }
@@ -255,7 +277,7 @@ function MoviePage() {
 
   const handlePostReview = async (text) => {
     if (!user) {
-      alert("Please log in to post reviews!")
+      showToast("Please log in to post reviews!", "error")
       return
     }
     
@@ -266,28 +288,47 @@ function MoviePage() {
       // Refresh reviews
       const updatedReviews = await reviewApi.getAllByMovie(id)
       setReviews(updatedReviews)
+      showToast("Review posted successfully!")
     } catch (err) {
-      alert(err.message || "Failed to post review")
+      showToast(err.message || "Failed to post review", "error")
     } finally {
       setIsPostingReview(false)
     }
   }
 
-  const handleDeleteReview = async () => {
+  const handleDeleteReview = () => {
     if (!user) return
-    if (!window.confirm("Are you sure you want to delete your review?")) return
+    setReviewDeletionInfo({ type: 'self' })
+    setShowReviewDeleteModal(true)
+  }
+
+  const handleAdminDeleteReview = (userId, username) => {
+    if (!user?.isAdmin) return
+    setReviewDeletionInfo({ type: 'admin', userId, username })
+    setShowReviewDeleteModal(true)
+  }
+
+  const handleConfirmReviewDelete = async () => {
+    if (!reviewDeletionInfo) return
 
     setIsPostingReview(true)
     try {
       const token = localStorage.getItem('accessToken')
-      await reviewApi.deleteReview(id, token)
+      if (reviewDeletionInfo.type === 'self') {
+        await reviewApi.deleteReview(id, token)
+        showToast("Review deleted")
+      } else {
+        await reviewApi.adminDeleteReview(reviewDeletionInfo.userId, id, token)
+        showToast(`Deleted ${reviewDeletionInfo.username}'s review`)
+      }
       // Refresh reviews
       const updatedReviews = await reviewApi.getAllByMovie(id)
       setReviews(updatedReviews)
     } catch (err) {
-      alert(err.message || "Failed to delete review")
+      showToast(err.message || "Failed to delete review", "error")
     } finally {
       setIsPostingReview(false)
+      setReviewDeletionInfo(null)
     }
   }
 
@@ -302,8 +343,9 @@ function MoviePage() {
       // Refresh movie data to see updated average
       const updatedMovie = await movieApi.getById(id)
       setMovie(updatedMovie)
+      showToast("Rating removed")
     } catch (err) {
-      alert(err.message || "Failed to delete rating")
+      showToast(err.message || "Failed to delete rating", "error")
     } finally {
       setIsSubmittingRating(false)
     }
@@ -315,11 +357,37 @@ function MoviePage() {
     try {
       const token = localStorage.getItem('accessToken')
       await playlistApi.addMovie(playlistId, id, token)
-      alert("Movie added to playlist!")
+      showToast("Movie added to playlist!")
     } catch (err) {
-      alert(err.message || "Failed to add movie")
+      showToast(err.message || "Failed to add movie", "error")
     } finally {
       setIsAddingToPlaylist(false)
+    }
+  }
+
+  const handleAdminDeleteMovie = () => {
+    if (!user?.isAdmin) return
+    setShowDeleteModal(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      await movieApi.adminDeleteMovie(id, token)
+      showToast("Movie deleted successfully.")
+      navigate('/')
+    } catch (err) {
+      showToast(err.message || "Failed to delete movie as admin", "error")
+    }
+  }
+
+  const handleModifySuccess = async () => {
+    try {
+      const updatedMovie = await movieApi.getById(id)
+      setMovie(updatedMovie)
+      showToast("Movie updated successfully.")
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -347,14 +415,39 @@ function MoviePage() {
     </div>
   )
 
+  const handlePickDifferent = async () => {
+    try {
+      const randoms = await movieApi.getRandomMovies();
+      if (randoms.length > 0) {
+        navigate(`/movie/${randoms[0].id}`);
+      } else {
+        navigate('/');
+      }
+    } catch {
+      navigate('/');
+    }
+  }
+
   if (error || !movie) return (
-    <div className="text-center py-5 mt-5">
-      <p className="text-secondary">{error || "Movie not found."}</p>
-      <Link to="/" className="btn btn-outline-warning btn-sm mt-3">← Back to Home</Link>
+    <div className="movie-page">
+       <div className="movie-hero" style={{ minHeight: '60vh' }}>
+          <div className="movie-hero-bg" />
+          <div className="container text-center animate-fade-in" style={{ zIndex: 1 }}>
+             <i className="bi bi-exclamation-octagon text-danger mb-4" style={{ fontSize: '5rem' }} />
+             <h2 className="text-light fw-black uppercase tracking-widest mb-3">Cinematic Glitch</h2>
+             <p className="text-secondary fs-5 mb-5 mx-auto" style={{ maxWidth: '600px' }}>
+                {error || "We encountered a mysterious issue while loading this movie. It might be lost in our cinematic archives."}
+             </p>
+             <div className="d-flex justify-content-center gap-3">
+                <Link to="/" className="btn-fresh-secondary">← Back to Home</Link>
+                <button onClick={handlePickDifferent} className="btn-fresh-primary">
+                   Try a Different Surprise <i className="bi bi-dice-5 ms-2" />
+                </button>
+             </div>
+          </div>
+       </div>
     </div>
   )
-
-  const isPlaceholderDescription = !movie.description || movie.description === movie.title || movie.description === 'Not Fetched';
 
   return (
     <div className="movie-page">
@@ -418,6 +511,17 @@ function MoviePage() {
               </button>
             )}
 
+            {movie.youtubeMovie && (
+              <a 
+                href={movie.youtubeMovie.startsWith('http') ? movie.youtubeMovie : `https://www.youtube.com/watch?v=${movie.youtubeMovie}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-fresh-secondary text-decoration-none"
+              >
+                <i className="bi bi-youtube me-2 fs-5" /> Watch on YouTube
+              </a>
+            )}
+
             {user && (
               <div className="dropdown">
                 <button 
@@ -428,7 +532,7 @@ function MoviePage() {
                 >
                   <i className="bi bi-plus-lg me-2" /> Add to Playlist
                 </button>
-                <ul className="dropdown-menu shadow-lg">
+                <ul className="dropdown-menu playlist-dropdown shadow-lg">
                   {playlists.length === 0 ? (
                     <li className="px-3 py-2 text-secondary smaller italic">No playlists yet</li>
                   ) : (
@@ -453,6 +557,23 @@ function MoviePage() {
                     </Link>
                   </li>
                 </ul>
+              </div>
+            )}
+
+            {user?.isAdmin && (
+              <div className="d-flex gap-2">
+                <button 
+                  className="btn-fresh-secondary"
+                  onClick={() => setShowModifyModal(true)}
+                >
+                  <i className="bi bi-pencil-square me-2" /> Modify Movie
+                </button>
+                <button 
+                  className="btn-fresh-danger"
+                  onClick={handleAdminDeleteMovie}
+                >
+                  <i className="bi bi-shield-lock-fill me-2" /> Delete Movie
+                </button>
               </div>
             )}
           </div>
@@ -490,12 +611,6 @@ function MoviePage() {
               </div>
             )}
           </div>
-
-          {/* description */}
-          {!isPlaceholderDescription && (
-            <p className="movie-description">{movie.description}</p>
-          )}
-
         </div>
       </div>
 
@@ -508,6 +623,7 @@ function MoviePage() {
         user={user}
         onPost={handlePostReview}
         onDelete={handleDeleteReview}
+        onAdminDelete={handleAdminDeleteReview}
         isPosting={isPostingReview}
         loading={loadingReviews}
       />
@@ -523,6 +639,36 @@ function MoviePage() {
         show={showCreateModal}
         onHide={() => setShowCreateModal(false)}
         onSuccess={handleCreatePlaylistSuccess}
+      />
+
+      <ModifyMovieModal
+        show={showModifyModal}
+        onHide={() => setShowModifyModal(false)}
+        movie={movie}
+        onSuccess={handleModifySuccess}
+      />
+
+      <ConfirmModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Movie"
+        message={`Are you sure you want to delete "${movie?.title}"? This action is permanent and cannot be undone.`}
+        confirmText="Delete"
+        isDanger={true}
+      />
+
+      <ConfirmModal
+        show={showReviewDeleteModal}
+        onHide={() => setShowReviewDeleteModal(false)}
+        onConfirm={handleConfirmReviewDelete}
+        title={reviewDeletionInfo?.type === 'admin' ? "Admin: Delete Review" : "Delete Review"}
+        message={reviewDeletionInfo?.type === 'admin' 
+          ? `Are you sure you want to delete ${reviewDeletionInfo.username}'s review? This action is permanent.`
+          : "Are you sure you want to delete your review? This action cannot be undone."
+        }
+        confirmText="Delete"
+        isDanger={true}
       />
 
     </div>

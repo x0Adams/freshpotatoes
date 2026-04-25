@@ -107,14 +107,22 @@ public class MovieService {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new EntityNotFoundException("Movie not found"));
 
-        // Remove dependencies explicitly to avoid FK conflicts in schemas without full cascade coverage.
+        // Clear local collections to prevent Hibernate from trying to "double-delete" or sync them
+        movie.getMovieInPlaylists().clear();
+        movie.getCountries().clear();
+        movie.getRates().clear();
+        movie.getReviews().clear();
+        movie.getStaffRoleInMovies().clear();
+        movie.getGenres().clear();
+        if (movie.getViews() != null) movie.getViews().clear();
+
+        // Remove dependencies explicitly from DB
         movieInPlaylistRepository.deleteByMovieId(movieId);
         productionsCountryRepository.deleteByMovie(movie);
         reviewRepository.deleteByMovie(movie);
         rateRepository.deleteByMovie(movie);
         staffRoleInMovieRepository.deleteByMovie(movie);
 
-        movie.getGenres().clear();
         movieRepository.delete(movie);
     }
 

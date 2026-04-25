@@ -11,6 +11,10 @@ function GenreMoviesByKey({ genreName, initialMovies }) {
   const [page, setPage] = useState(0)
   const [fetchingMore, setFetchingMore] = useState(false)
 
+  const displayTitle = genreName.toLowerCase().includes('film') 
+    ? genreName 
+    : `${genreName} movies`;
+
   useEffect(() => {
     if (!initialMovies) {
       setLoading(true)
@@ -34,10 +38,6 @@ function GenreMoviesByKey({ genreName, initialMovies }) {
       setFetchingMore(false);
     }
   }
-
-  const displayTitle = genreName.toLowerCase().includes('film') 
-    ? genreName 
-    : `${genreName} movies`;
 
   if (loading) return <MovieTrackSkeleton title={displayTitle} hideTopBorder={true} />
 
@@ -68,10 +68,19 @@ export function MultiGenreMovies() {
         
         // We iterate through shuffled genres until we find 3 that have at least 5 movies
         for (const g of shuffled) {
-          const movies = await movieApi.getMoviesByGenre(g.name, 0, 20);
-          if (movies.length >= 5) {
-            selected.push({ ...g, initialMovies: movies });
+          // Skip genres with slashes as they break URL path variables in the current backend
+          if (g.name.includes('/')) continue;
+
+          try {
+            const movies = await movieApi.getMoviesByGenre(g.name, 0, 20);
+            if (movies.length >= 5) {
+              selected.push({ ...g, initialMovies: movies });
+            }
+          } catch (err) {
+             // Silently skip problematic genres
+             console.debug(`Skipping genre ${g.name} due to fetch error`);
           }
+          
           if (selected.length >= 3) break;
         }
         setValidGenres(selected);
@@ -95,7 +104,7 @@ export function MultiGenreMovies() {
   return (
     <>
       {validGenres.map(g => (
-        <GenreMoviesByKey key={g.id} genreName={g.name} initialMovies={g.initialMovies} />
+        <GenreMoviesByKey key={g.name} genreName={g.name} initialMovies={g.initialMovies} />
       ))}
     </>
   )

@@ -2,16 +2,16 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { movieApi } from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import { useSearch } from '../context/SearchContext'
 import AuthModal from './AuthModal'
 
 function Navbar() {
-  const { user, logout } = useAuth()
-  const [showAuthModal, setShowAuthModal] = useState(false)
+  const { user, logout, showAuthModal, setShowAuthModal } = useAuth()
+  const { liveQuery, setLiveQuery } = useSearch()
   const [scrolled, setScrolled] = useState(false)
   
   const navigate = useNavigate()
   const location = useLocation()
-  const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
   const [suggestions, setSuggestions] = useState([])
   const [open, setOpen] = useState(false)
   const wrapperRef = useRef(null)
@@ -23,22 +23,14 @@ function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // 2. Sync State FROM URL (Back/Forward navigation)
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const q = params.get('q') || ''
-    if (q !== query) {
-      setQuery(q)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search])
+  // 2. Sync State FROM URL (Handled by SearchContext)
 
   // 3. Live Suggestions
   useEffect(() => {
     const controller = new AbortController()
-    if (query.trim().length >= 3) {
+    if (liveQuery.trim().length >= 3) {
       const timeoutId = setTimeout(() => {
-        movieApi.search(query, controller.signal)
+        movieApi.search(liveQuery, controller.signal)
           .then(data => {
             if (!controller.signal.aborted) {
               setSuggestions(data.slice(0, 5))
@@ -58,7 +50,7 @@ function Navbar() {
       setSuggestions(prev => prev.length > 0 ? [] : prev)
       setOpen(false)
     }
-  }, [query])
+  }, [liveQuery])
 
   // 4. Click outside to close
   useEffect(() => {
@@ -71,9 +63,17 @@ function Navbar() {
 
   function handleSearchSubmit(e) {
     if (e) e.preventDefault()
-    if (query.trim().length >= 3) {
+    if (liveQuery.trim().length >= 3) {
       setOpen(false)
-      navigate(`/search?q=${encodeURIComponent(query.trim())}`)
+      
+      // If we are already on the search page, preserve current filters
+      if (location.pathname === '/search') {
+        const params = new URLSearchParams(location.search)
+        params.set('q', liveQuery.trim())
+        navigate(`/search?${params.toString()}`)
+      } else {
+        navigate(`/search?q=${encodeURIComponent(liveQuery.trim())}`)
+      }
     }
   }
 
@@ -101,15 +101,15 @@ function Navbar() {
                 type="search"
                 className="form-control border-secondary bg-transparent text-light"
                 placeholder="Search movies…"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
+                value={liveQuery}
+                onChange={e => setLiveQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onFocus={() => suggestions.length > 0 && setOpen(true)}
               />
             </div>
 
-            {open && suggestions.length > 0 && (
-              <div className="search-dropdown">
+            {location.pathname !== '/search' && open && suggestions.length > 0 && (
+              <div className="search-dropdown animate-fade-in">
                 {suggestions.map(item => (
                   <Link
                     key={item.id}
@@ -130,7 +130,9 @@ function Navbar() {
           </form>
 
           <div className="d-flex align-items-center gap-2">
-            <Link to="/search" className="btn btn-link text-light d-lg-none p-2"><i className="bi bi-search fs-5" /></Link>
+            <Link to="/search" className="btn btn-link text-light d-lg-none p-2">
+              <i className="bi bi-search fs-5" />
+            </Link>
             {user ? (
               <div className="dropdown">
                 <button 
@@ -142,6 +144,16 @@ function Navbar() {
                   <span className="text-truncate d-none d-sm-inline" style={{ maxWidth: '100px' }}>{user.username}</span>
                 </button>
                 <ul className="dropdown-menu dropdown-menu-end">
+                  {user.isAdmin && (
+                    <>
+                      <li>
+                        <Link className="dropdown-item text-warning" to="/admin">
+                          <i className="bi bi-shield-lock-fill" /> Control Center
+                        </Link>
+                      </li>
+                      <li><hr className="dropdown-divider border-opacity-25" /></li>
+                    </>
+                  )}
                   <li>
                     <Link className="dropdown-item" to="/profile">
                       <i className="bi bi-person-badge" /> Profile

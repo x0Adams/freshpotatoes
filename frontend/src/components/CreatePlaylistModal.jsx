@@ -1,13 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { playlistApi } from '../services/api';
+import { useToast } from '../context/ToastContext';
 
 function CreatePlaylistModal({ show, onHide, onSuccess }) {
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [shouldRender, setRender] = useState(show);
 
-  if (!show) return null;
+  useEffect(() => {
+    if (show) {
+      setRender(true);
+      document.body.classList.add('modal-open-lock');
+    } else {
+      document.body.classList.remove('modal-open-lock');
+    }
+    return () => {
+      document.body.classList.remove('modal-open-lock');
+    };
+  }, [show]);
+
+  const onAnimationEnd = () => {
+    if (!show) setRender(false);
+  };
+
+  if (!shouldRender) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +40,7 @@ function CreatePlaylistModal({ show, onHide, onSuccess }) {
       const newPlaylist = await playlistApi.create(name.trim(), isPublic, token);
       setName('');
       setIsPublic(false);
+      showToast("Collection created!");
       if (onSuccess) onSuccess(newPlaylist);
       onHide();
     } catch (err) {
@@ -31,7 +51,11 @@ function CreatePlaylistModal({ show, onHide, onSuccess }) {
   };
 
   return (
-    <div className="custom-modal-overlay animate-fade-in" onClick={onHide}>
+    <div 
+      className={`custom-modal-overlay ${show ? 'animate-fade-in' : 'animate-fade-out'}`} 
+      onAnimationEnd={onAnimationEnd}
+      onClick={onHide}
+    >
       <div className="custom-modal-container" onClick={e => e.stopPropagation()}>
         <div className="custom-modal-glow" />
         
@@ -81,7 +105,7 @@ function CreatePlaylistModal({ show, onHide, onSuccess }) {
             <div className="d-flex gap-3 mt-2">
               <button 
                 type="button" 
-                className="btn-custom-secondary w-50" 
+                className="btn-fresh-secondary w-50" 
                 onClick={onHide} 
                 disabled={isProcessing}
               >
@@ -89,7 +113,7 @@ function CreatePlaylistModal({ show, onHide, onSuccess }) {
               </button>
               <button 
                 type="submit" 
-                className="btn-custom-primary w-50" 
+                className="btn-fresh-primary w-50" 
                 disabled={isProcessing || !name.trim()}
               >
                 {isProcessing ? (

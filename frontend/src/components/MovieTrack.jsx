@@ -62,9 +62,9 @@ export default function MovieTrack({ title, movies, fetchingMore, onLoadMore, hi
 
         {/*track*/}
         <div className="coming-track" ref={trackRef}>
-          {movies.map(movie => (
+          {movies.map((movie, idx) => (
             <Link
-              key={movie.id}
+              key={`${movie.id}-${idx}`}
               to={`/movie/${movie.id}`}
               className="coming-card"
             >
