@@ -8,7 +8,7 @@ import testBg from '../assets/test_bg.jpg'
 
 function PublicProfile() {
   const { id } = useParams()
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, setShowAuthModal } = useAuth()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [ratedMovies, setRatedMovies] = useState([])
@@ -103,6 +103,50 @@ function PublicProfile() {
               <i className="bi bi-gender-ambiguous text-warning me-3"></i>
               Gender: {profile.genderName || 'Unknown'}
             </span>
+          </div>
+
+          <div className="mt-4 ps-4 border-start border-warning profile-description" style={{ maxWidth: '700px', borderLeftWidth: '4px' }}>
+            <p className="text-light fs-5 mb-4 lh-sm">
+              You can see here <strong>{profile.username}'s</strong> highly rated movies, reviews, and curated collections.
+            </p>
+
+            <div className="d-flex flex-wrap gap-3 mb-4">
+               <div className="bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+                  <i className="bi bi-star-fill text-warning small" />
+                  <span className="text-light smaller fw-bold">{ratedMovies.length}</span>
+                  <span className="text-secondary smaller uppercase tracking-wider">Ratings</span>
+               </div>
+               <div className="bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+                  <i className="bi bi-chat-left-text-fill text-warning small" />
+                  <span className="text-light smaller fw-bold">{reviewedMovies.length}</span>
+                  <span className="text-secondary smaller uppercase tracking-wider">Reviews</span>
+               </div>
+               <div className="bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+                  <i className="bi bi-collection-play-fill text-warning small" />
+                  <span className="text-light smaller fw-bold">{profile.playlists?.length || 0}</span>
+                  <span className="text-secondary smaller uppercase tracking-wider">Collections</span>
+               </div>
+            </div>
+            
+            {!currentUser && (
+              <div className="mt-4 animate-fade-in">
+                <div 
+                  className="bg-warning bg-opacity-10 border border-warning border-opacity-25 px-4 py-3 d-inline-block"
+                  style={{ cursor: 'pointer', borderRadius: '20px' }}
+                  onClick={() => setShowAuthModal(true)}
+                >
+                  <div className="d-flex align-items-center gap-3">
+                    <i className="bi bi-person-plus-fill text-warning fs-4" />
+                    <div>
+                      <div className="text-light fs-6 fw-bold uppercase tracking-widest">Join the freshPotatoes community</div>
+                      <div className="text-secondary smaller mt-1">
+                        <span className="text-warning text-decoration-underline fw-black">Login or register</span> to rate movies and create your own playlists!
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

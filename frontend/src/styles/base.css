@@ -1,0 +1,37 @@
+/* ── freshPotatoes Base & Resets ── */
+
+body {
+  overflow-x: hidden;
+  margin: 0;
+}
+
+/* Global Form Focus & Interactive States */
+.form-control:focus {
+  box-shadow: none;
+  border-color: rgba(255, 193, 7, 0.5) !important;
+}
+
+.form-check-input:checked {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+}
+
+.form-check-input:focus {
+  border-color: #ffc107 !important;
+  box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25) !important;
+}
+
+/* Hide number input arrows (spinners) */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.smallest { font-size: 0.65rem; }
+.hover-underline:hover { text-decoration: underline !important; }
+.hover-warning:hover { color: #ffc107 !important; }

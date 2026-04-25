@@ -1,0 +1,203 @@
+/* Playlist Section Redesign */
+.playlist-pill-row {
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+}
+.playlist-pill-row::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+}
+
+.playlist-pill {
+  white-space: nowrap;
+  padding: 0.6rem 1.4rem;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+}
+
+.playlist-pill:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.playlist-pill.active {
+  background: #ffc107;
+  border-color: #ffc107;
+  color: #000;
+  box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+}
+
+.playlist-pill.active i {
+  color: #000 !important;
+}
+
+.playlist-empty-state {
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}
+
+
+/* Refined Playlist Dashboard Design */
+.playlist-dashboard {
+  min-height: 20vh;
+}
+
+.playlist-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.playlist-sidebar-item {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+}
+
+.playlist-sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(5px);
+  color: #fff;
+}
+
+.playlist-sidebar-item.active {
+  background: rgba(255, 193, 7, 0.1);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+  transform: translateX(8px);
+}
+
+.playlist-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.playlist-sidebar-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.playlist-sidebar-meta {
+  font-size: 0.72rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Rigid Movie Grid for Playlists */
+.playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.playlist-card-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.playlist-card-wrapper .coming-card {
+  width: 100%;
+  flex: none; /* override the global coming-card flex basis */
+  margin: 0;
+}
+
+.playlist-remove-btn {
+  position: absolute !important;
+  top: -8px !important;
+  right: -8px !important;
+  z-index: 20 !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  background: #dc3545 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 2px solid #0d0d12 !important;
+}
+
+.playlist-card-wrapper:hover .playlist-remove-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (max-width: 850px) {
+  .playlist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+  
+  .playlist-sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+  }
+  
+  .playlist-sidebar::-webkit-scrollbar { display: none; }
+  
+  .playlist-sidebar-item {
+    flex: 0 0 auto;
+    width: 240px;
+    transform: none !important;
+  }
+
+  .playlist-remove-btn {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    width: 32px !important;
+    height: 32px !important;
+    top: -10px !important;
+    right: -10px !important;
+  }
+}

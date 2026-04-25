@@ -1,0 +1,80 @@
+/* ── Discovery Tracks & Sections ── */
+
+.coming-section {
+  padding: 5rem 0 4rem;
+  overflow: hidden;
+}
+
+.genre-section {
+  padding: 0 0 4rem;
+  overflow: hidden;
+}
+
+.coming-section, .movie-section, .genre-section {
+  position: relative;
+}
+
+.coming-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffc107;
+  box-shadow: 0 4px 50px 6px rgba(255, 193, 7, 1);
+}
+
+.coming-heading {
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 900;
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+  padding: 0 4rem;
+  margin-bottom: 3rem;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.55) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.genre-section .coming-heading {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.coming-track-wrap {
+  position: relative;
+  padding: 0 4rem;
+}
+
+.coming-track {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1rem;
+  cursor: grab;
+}
+
+.coming-track:active {
+  cursor: grabbing;
+}
+
+/* hide scrollbar */
+.coming-track::-webkit-scrollbar { display: none; }
+.coming-track { scrollbar-width: none; }
+
+/* ── Responsive Tracks ── */
+
+@media (max-width: 900px) {
+  .coming-track-wrap { padding: 0 2rem; }
+  .coming-heading { padding: 0 2rem; }
+}
+
+@media (max-width: 600px) {
+  .coming-track-wrap { padding: 0 1rem; }
+  .coming-heading { padding: 0 1rem; margin-bottom: 1.5rem; }
+}

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import PlaylistSection from '../components/PlaylistSection';
 import MovieTrack from '../components/MovieTrack';
+import RecommendationsTrack from '../components/RecommendationsTrack';
 import { movieApi, reviewApi } from '../services/api';
 import testBg from '../assets/test_bg.jpg';
 
@@ -85,10 +86,23 @@ function UserPage() {
             </span>
           </div>
 
-          <div className="movie-links mt-5">
+          <div className="movie-links mt-5 d-flex flex-wrap gap-3 align-items-center">
             <button className="btn-fresh-danger px-4" onClick={handleLogout}>
               <i className="bi bi-box-arrow-right me-2"></i> Logout
             </button>
+
+            <div className="d-flex flex-wrap gap-2 ms-md-auto">
+               <div className="bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+                  <i className="bi bi-star-fill text-warning small" />
+                  <span className="text-light smaller fw-bold">{ratedMovies.length}</span>
+                  <span className="text-secondary smaller uppercase tracking-wider">Ratings</span>
+               </div>
+               <div className="bg-dark bg-opacity-50 border border-secondary border-opacity-25 rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+                  <i className="bi bi-chat-left-text-fill text-warning small" />
+                  <span className="text-light smaller fw-bold">{reviewedMovies.length}</span>
+                  <span className="text-secondary smaller uppercase tracking-wider">Reviews</span>
+               </div>
+            </div>
           </div>
         </div>
       </div>
@@ -117,6 +131,10 @@ function UserPage() {
               <p>Start rating and reviewing movies to see your history here!</p>
            </div>
         )}
+
+        <div className="mt-5">
+           <RecommendationsTrack title="Recommended for you" hideIfEmpty={false} />
+        </div>
       </div>
     </div>
   );

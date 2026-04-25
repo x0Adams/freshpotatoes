@@ -1,6 +1,5 @@
 package hu.pogany.freshPotato.config;
 
-import com.nimbusds.jose.jwk.RSAKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -8,17 +7,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import org.springframework.security.crypto.password4j.BcryptPassword4jPasswordEncoder;
 import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -32,8 +27,16 @@ public class SecurityConfig {
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        http.oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.oauth2ResourceServer((oauth2) -> 
+                /*
+                // --- OLD IMPLEMENTATION (Default scopes, doesn't map ROLE_ADMIN) ---
+                oauth2.jwt(Customizer.withDefaults())
+                */
+                
+                // --- NEW IMPLEMENTATION (Maps "authorities" claim to Spring Roles) ---
+                oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+        )
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session ->
@@ -51,20 +54,27 @@ public class SecurityConfig {
     }
 
     @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthorityPrefix(""); 
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities");
+
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
+    }
+
+    @Bean
     public KeyPair rsaKeypair() throws NoSuchAlgorithmException {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
-        KeyPair keyPair = generator.generateKeyPair();
-
-
-        return keyPair;
+        return generator.generateKeyPair();
     }
 
     @Bean
     public RSAPublicKey rsaPublicKey(KeyPair rsaPair) {
         RSAPublicKey publicKey = (RSAPublicKey) rsaPair.getPublic();
-        log.info("RSA public key: {}}", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-
+        log.info("RSA public key: {}", Base64.getEncoder().encodeToString(publicKey.getEncoded()));
         return publicKey;
     }
 
@@ -72,7 +82,6 @@ public class SecurityConfig {
     public RSAPrivateKey rsaPrivateKey(KeyPair rsaPair) {
         return (RSAPrivateKey) rsaPair.getPrivate();
     }
-
 
     @Bean
     public NimbusJwtEncoder jwtEncoder(RSAPublicKey publicKey, RSAPrivateKey privateKey) {

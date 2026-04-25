@@ -1,14 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { playlistApi } from '../services/api'
+import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import MoviePoster from './MoviePoster'
 import CreatePlaylistModal from './CreatePlaylistModal'
+import ConfirmModal from './ConfirmModal'
 
 export default function PlaylistSection({ user, initialPlaylists = [], readOnly = false }) {
+  const { user: currentUser } = useAuth()
+  const { showToast } = useToast()
   const [playlists, setPlaylists] = useState(initialPlaylists)
   const [loading, setLoading] = useState(!readOnly)
   const [selectedPlaylist, setSelectedPlaylist] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [playlistToDelete, setPlaylistToDelete] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
   const fetchPlaylists = useCallback(async () => {
@@ -49,21 +56,37 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
     }
   }
 
-  const handleDelete = async (playlistId) => {
-    if (readOnly) return
-    if (!window.confirm('Delete this playlist?') || isProcessing) return
+  const handleDelete = (playlistId) => {
+    if (readOnly && !currentUser?.isAdmin) return
+    setPlaylistToDelete(playlistId)
+    setShowDeleteModal(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!playlistToDelete || isProcessing) return
     
     setIsProcessing(true)
     const token = localStorage.getItem('accessToken')
     
     try {
-      await playlistApi.delete(playlistId, token)
-      if (selectedPlaylist?.id === playlistId) setSelectedPlaylist(null)
-      await fetchPlaylists()
+      if (currentUser?.isAdmin && readOnly) {
+         await playlistApi.adminDeletePlaylist(playlistToDelete, token)
+      } else {
+         await playlistApi.delete(playlistToDelete, token)
+      }
+      if (selectedPlaylist?.id === playlistToDelete) setSelectedPlaylist(null)
+      
+      if (readOnly) {
+         setPlaylists(playlists.filter(p => p.id !== playlistToDelete))
+      } else {
+         await fetchPlaylists()
+      }
+      showToast("Playlist deleted successfully.")
     } catch (err) {
-      alert(err.message)
+      showToast(err.message, "error")
     } finally {
       setIsProcessing(false)
+      setPlaylistToDelete(null)
     }
   }
 
@@ -103,9 +126,10 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
       // We don't necessarily need fetchPlaylists() here if we sync manually, 
       // but keeping it for other metadata (like name changes/visibility)
       await fetchPlaylists()
+      showToast("Movie removed from playlist")
     } catch (err) {
       setSelectedPlaylist(originalPlaylist);
-      alert(err.message || "Failed to remove movie")
+      showToast(err.message || "Failed to remove movie", "error")
     } finally {
       setIsProcessing(false)
     }
@@ -202,13 +226,15 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
                     )}
                   </div>
                 </div>
-                {!readOnly && (
+                {(!readOnly || currentUser?.isAdmin) && (
                   <button 
-                    className="btn btn-outline-danger btn-sm border-0 opacity-25 hover-opacity-100"
+                    className="btn-fresh-danger p-0"
+                    style={{ width: '36px', height: '36px', borderRadius: '50%' }}
                     onClick={() => handleDelete(selectedPlaylist.id)}
-                    title="Delete collection"
+                    disabled={isProcessing}
+                    title={currentUser?.isAdmin && readOnly ? "Admin: Delete Playlist" : "Delete playlist"}
                   >
-                    <i className="bi bi-trash3 fs-5" />
+                    <i className={`bi bi-${currentUser?.isAdmin && readOnly ? 'shield-x' : 'trash3'} fs-5`} />
                   </button>
                 )}
               </div>
@@ -237,7 +263,7 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
                       </Link>
                       {!readOnly && (
                         <button 
-                          className="btn btn-danger btn-sm playlist-remove-btn"
+                          className="playlist-remove-btn"
                           onClick={(e) => handleRemoveMovie(e, selectedPlaylist.id, movie.id)}
                           disabled={isProcessing}
                         >
@@ -248,7 +274,7 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-5 rounded border border-secondary border-dashed bg-dark bg-opacity-25">
+                <div className="text-center py-5 admin-panel-modern border-dashed">
                   <i className="bi bi-camera-reels text-secondary fs-1 mb-3 d-block opacity-10" />
                   <h5 className="text-secondary">This collection is empty</h5>
                   {!readOnly && <p className="text-secondary smaller italic">Add movies from discovery to start your collection!</p>}
@@ -256,7 +282,7 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
               )}
             </div>
           ) : (
-            <div className="h-100 d-flex flex-column align-items-center justify-content-center py-5 border border-secondary border-opacity-10 rounded">
+            <div className="h-100 d-flex flex-column align-items-center justify-content-center py-5 admin-panel-modern border-dashed">
                <div className="mb-4 opacity-10" style={{ fontSize: '5rem' }}>
                   <i className="bi bi-collection-play" />
                </div>
@@ -274,6 +300,16 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
           onSuccess={handleCreateSuccess}
         />
       )}
+
+      <ConfirmModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Collection"
+        message="Are you sure you want to delete this collection? This action is permanent and cannot be undone."
+        confirmText="Delete"
+        isDanger={true}
+      />
     </div>
   )
 }

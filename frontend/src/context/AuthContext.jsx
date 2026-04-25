@@ -6,22 +6,35 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(() => !!localStorage.getItem('accessToken'));
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Check if we are already logged in when the app loads
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    if (token) {
-      authApi.getMe(token)
-        .then(userData => setUser(userData))
-        .catch(() => {
-          // If token is invalid/expired, clear it
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          setUser(null);
-        })
-        .finally(() => setLoading(false));
+    const refresh = localStorage.getItem('refreshToken');
+    
+    // No tokens? Start as guest immediately, no server call needed.
+    if (!token && !refresh) {
+      setLoading(false);
+      return;
     }
-    // If no token, initial loading state is already handled by the useState initializer
+
+    const initAuth = async () => {
+      try {
+        // If we have a token, getMe will use smartFetch which handles auto-refresh
+        const userData = await authApi.getMe(token);
+        setUser(userData);
+      } catch (err) {
+        console.warn("Initial session check failed, starting as guest.");
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
   const login = async (username, password) => {
@@ -52,7 +65,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, showAuthModal, setShowAuthModal }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -104,13 +104,21 @@ public class UserService {
 
     public UserDtoPublic getByUserIdPublic(int id) {
         UserDto user = getByUserid(id);
+        List<PlaylistDetailsDto> publicPlayLists = user.playlists();
         if (user.playlists() != null && !user.playlists().isEmpty()) {
-            var publicPlayLists = user.playlists().stream().filter(it -> !it.isPrivate()).toList();
-            user.playlists().removeAll(user.playlists());
-            user.playlists().addAll(publicPlayLists);
+            publicPlayLists = user.playlists().stream().filter(it -> !it.isPrivate()).toList();
         }
-        return mapper.toPublicDto(user);
+        UserDto filteredUser = UserDto.builder()
+                .id(user.id())
+                .username(user.username())
+                .email(user.email())
+                .gender(user.gender())
+                .age(user.age())
+                .playlists(publicPlayLists)
+                .ratedMovies(user.ratedMovies())
+                .reviewedMovies(user.reviewedMovies())
+                .build();
+
+        return mapper.toPublicDto(filteredUser);
     }
-
-
 }

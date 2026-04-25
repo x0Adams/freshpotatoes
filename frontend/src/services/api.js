@@ -1,23 +1,8 @@
-const BASE_URL = '/api'   // was 'http://localhost:8080/api'
+const BASE_URL = '/api';
 
-/* export const movieApi = {
-  async search(query, signal) {
-    const res = await fetch(`${BASE_URL}/movie/search/${encodeURIComponent(query)}`, { signal })
-    if (!res.ok) throw new Error(`Search failed: ${res.status}`)
-    const data = await res.json()
-    return data.map(movie => ({
-      id: movie.id,
-      title: movie.name,
-      posterUrl: movie.posterPath || null,
-      year: movie.year || null,
-    }))
-  },
-} */
-// Helper to format poster URLs
 function formatPosterUrl(path) {
-  if (!path || path === "Not Fetched") return null;
+  if (!path || path === 'Not Fetched' || path === 'Not%20Fetched') return null;
   if (path.startsWith('http')) return path;
-  if (path.startsWith('//')) return `https:${path}`;
   return `https://${path}`;
 }
 
@@ -60,9 +45,107 @@ function formatBasicMovie(movie) {
 
 const isValidMovie = m => (m.name || m.title) && (m.name !== 'None' && m.title !== 'None');
 
+// Helper to decode JWT without a library
+function decodeToken(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (_) {
+    return null;
+  }
+}
+
+// Helper to check if a token is expired locally
+function isTokenExpired(token) {
+  if (!token) return true;
+  const decoded = decodeToken(token);
+  if (!decoded || !decoded.exp) return true;
+  // Check if expiration is in the past (with a 5s buffer)
+  return (decoded.exp * 1000) < (Date.now() + 5000);
+}
+
+/**
+ * SMART FETCH WRAPPER
+ * Handles automatic token refresh on 401 Unauthorized
+ */
+async function smartFetch(url, options = {}) {
+  const isAuthRequest = url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/register');
+  
+  // If it's a secure request, check token before sending
+  const token = localStorage.getItem('accessToken');
+  if (!isAuthRequest && options.headers?.Authorization && isTokenExpired(token)) {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      try {
+        const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+
+        if (refreshRes.ok) {
+          const tokens = await refreshRes.json();
+          localStorage.setItem('accessToken', tokens.jwtToken);
+          localStorage.setItem('refreshToken', tokens.refreshToken);
+
+          if (options.headers) {
+            options.headers['Authorization'] = `Bearer ${tokens.jwtToken}`;
+          }
+        } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          return refreshRes; // Return the 401 from refresh
+        }
+      } catch (err) {
+        console.error("Auto-refresh failed during pre-check:", err);
+      }
+    }
+  }
+
+  let res = await fetch(url, options);
+
+  // If unauthorized, try to refresh ONLY IF we have a refresh token
+  if (res.status === 401 && !isAuthRequest) {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      try {
+        const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+
+        if (refreshRes.ok) {
+          const tokens = await refreshRes.json();
+          localStorage.setItem('accessToken', tokens.jwtToken);
+          localStorage.setItem('refreshToken', tokens.refreshToken);
+
+          const newOptions = { ...options };
+          const newHeaders = { ...(newOptions.headers || {}) };
+          newHeaders['Authorization'] = `Bearer ${tokens.jwtToken}`;
+          newOptions.headers = newHeaders;
+          
+          return fetch(url, newOptions);
+        } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+        }
+      } catch (err) {
+        console.error("Auto-refresh failed:", err);
+      }
+    }
+  }
+
+  return res;
+}
+
 export const movieApi = {
   async search(query, signal) {
-    const res = await fetch(`${BASE_URL}/movie/search/${encodeURIComponent(query)}`, { signal });
+    const res = await smartFetch(`${BASE_URL}/movie/search/${encodeURIComponent(query)}`, { signal });
     if (!res.ok) throw new Error(`Search failed`);
     const data = await res.json();
     return data.filter(isValidMovie).map(formatBasicMovie);
@@ -74,7 +157,7 @@ export const movieApi = {
     if (genre) url += `&genre=${encodeURIComponent(genre)}`;
     if (staff) url += `&staff=${encodeURIComponent(staff)}`;
 
-    const res = await fetch(url, { signal });
+    const res = await smartFetch(url, { signal });
     if (!res.ok) {
       if (res.status === 404) return [];
       throw new Error(`Advanced search failed`);
@@ -83,108 +166,67 @@ export const movieApi = {
     return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
-  // NEW: Fetch paginated movies
   async getMovies(page = 0, size = 30) {
-    const res = await fetch(`${BASE_URL}/movie?page=${page}&size=${size}`);
+    const res = await smartFetch(`${BASE_URL}/movie?page=${page}&size=${size}`);
     if (!res.ok) throw new Error('Failed to fetch movies');
     const data = await res.json();
     return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
-  // NEW: Fetch movies by genre using sequential random letter discovery
   async getMoviesByGenre(genre, page = 0, size = 30) {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('').sort(() => 0.5 - Math.random());
-    const seenIds = new Set();
-    const allResults = [];
-
-    // On the first page, we hunt for at least 10 movies
-    // If page > 0, we just do one fetch to keep pagination simple
-    const maxAttempts = page === 0 ? 10 : 1;
-
-    for (let i = 0; i < maxAttempts; i++) {
-      const char = alphabet[i];
-      try {
-        const res = await fetch(`${BASE_URL}/movie/search?title=${char}&genre=${encodeURIComponent(genre)}&page=${page}&size=${size}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            data.forEach(m => {
-              if (isValidMovie(m)) {
-                if (!seenIds.has(m.id)) {
-                  seenIds.add(m.id);
-                  allResults.push(m);
-                }
-              }
-            });
-          }
-        }
-      } catch (err) {
-        console.error(`Genre hunt failed for letter ${char}:`, err);
-      }
-
-      // If we've reached our threshold of 20 movies, we can stop hunting
-      if (allResults.length >= 20) break;
+    const res = await smartFetch(`${BASE_URL}/movie/genre/${encodeURIComponent(genre)}?page=${page}&size=${size}`);
+    if (!res.ok) {
+      if (res.status === 404) return [];
+      throw new Error(`Failed to fetch movies for genre: ${genre}`);
     }
-
-    return allResults.map(formatBasicMovie);
+    const data = await res.json();
+    return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
-  // NEW: Fetch random movies
   async getRandomMovies() {
-    const res = await fetch(`${BASE_URL}/movie/random`);
+    const res = await smartFetch(`${BASE_URL}/movie/random`);
     if (!res.ok) throw new Error('Failed to fetch random movies');
     const data = await res.json();
     return data.filter(isValidMovie).map(formatBasicMovie);
   },
 
-  // NEW: Fetch full movie details
   async getById(id) {
-    const res = await fetch(`${BASE_URL}/movie/${id}`);
+    const res = await smartFetch(`${BASE_URL}/movie/${id}`);
     if (!res.ok) throw new Error(`Failed to fetch movie details: ${res.status}`);
     const m = await res.json();
-
-    const posterPath = m.posterPath || m.poster_path || m.posterUrl;
-
     return {
       id: m.id,
       title: m.name || m.title,
-      posterUrl: formatPosterUrl(posterPath),
+      posterUrl: formatPosterUrl(m.posterPath),
+      releaseDate: m.releaseDate,
       year: m.releaseDate ? m.releaseDate.substring(0, 4) : null,
       duration: m.duration,
       trailerUrl: m.trailer && m.trailer !== "Not Fetched" ? m.trailer : null,
-      youtubeUrl: m.youtubeMovie && m.youtubeMovie !== "Not Fetched" ? `https://www.youtube.com/watch?v=${m.youtubeMovie}` : null,
-      // Map nested arrays to flat string arrays or simple objects
-      genres: m.genres ? m.genres.map(g => g.name).sort() : [],
-      actors: m.actors ? m.actors.sort((a, b) => a.name.localeCompare(b.name)) : [],
-      directors: m.directors ? m.directors.sort((a, b) => a.name.localeCompare(b.name)) : [],
-      description: m.description,
-      country: m.productionCountries && m.productionCountries.length > 0 
-        ? m.productionCountries.map(c => c.name).sort().join(', ') 
-        : null,
-      // Backend already provides the average on a 1-5 scale
-      rating: m.rate ? Number(m.rate).toFixed(1) : null
+      youtubeMovie: m.youtubeMovie && m.youtubeMovie !== "Not Fetched" ? m.youtubeMovie : null,
+      description: m.wikipediaTitle || m.name,
+      rating: m.rate ? Number(m.rate).toFixed(1) : null,
+      genres: m.genres ? m.genres.map(g => g.name) : [],
+      actors: m.actors ? m.actors.map(a => ({ id: a.id, name: a.name })) : [],
+      directors: m.directors ? m.directors.map(d => ({ id: d.id, name: d.name })) : [],
+      country: m.productionCountries && m.productionCountries.length > 0 ? m.productionCountries[0].name : null
     };
   },
 
   async rate(movieId, rating, token) {
-    const res = await fetch(`${BASE_URL}/rate/secure`, {
+    const res = await smartFetch(`${BASE_URL}/rate/secure`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ movieId, rate: Number(rating) })
+      body: JSON.stringify({ movieId: Number(movieId), rate: Number(rating) })
     });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => 'Unknown error');
-      console.error('Rating error from backend:', errText);
-      throw new Error(errText || 'Failed to save rating');
-    }
-    return res.text();
+    if (!res.ok) throw new Error('Failed to save rating');
+    return true;
   },
 
   async getUserRating(userId, movieId) {
-    const res = await fetch(`${BASE_URL}/rate?userid=${userId}`);
+    const res = await smartFetch(`${BASE_URL}/rate?userid=${userId}`);
     if (!res.ok) return 0;
     const ratings = await res.json();
     const movieRating = ratings.find(r => r.movieId === Number(movieId));
@@ -192,14 +234,14 @@ export const movieApi = {
   },
 
   async getRatingsByUser(userId) {
-    const res = await fetch(`${BASE_URL}/rate?userid=${userId}`);
+    const res = await smartFetch(`${BASE_URL}/rate?userid=${userId}`);
     if (!res.ok) throw new Error('Failed to fetch user ratings');
     const data = await res.json();
     return data.map(formatBasicMovie);
   },
 
   async deleteRate(movieId, token) {
-    const res = await fetch(`${BASE_URL}/rate/secure`, {
+    const res = await smartFetch(`${BASE_URL}/rate/secure`, {
       method: 'DELETE',
       headers: { 
         'Content-Type': 'application/json',
@@ -212,18 +254,36 @@ export const movieApi = {
       throw new Error(errText || 'Failed to delete rating');
     }
     return true;
+  },
+
+  // Admin methods
+  async adminDeleteMovie(movieId, token) {
+    const res = await smartFetch(`${BASE_URL}/movie/admin/${movieId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to delete movie as admin');
+    return true;
+  },
+
+  async adminModifyMovie(movieId, movieData, token) {
+    const res = await smartFetch(`${BASE_URL}/movie/admin/${movieId}`, {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(movieData)
+    });
+    if (!res.ok) throw new Error('Failed to modify movie as admin');
+    return res.json();
   }
 };
 
 export const staffApi = {
-  async search() {
-    // Search by actor name is not supported by the current backend API.
-    return [];
-  },
-
   async getById(id) {
-    const res = await fetch(`${BASE_URL}/staff/${id}`);
-    if (!res.ok) throw new Error('Failed to fetch staff details');
+    const res = await smartFetch(`${BASE_URL}/staff/${id}`);
+    if (!res.ok) throw new Error('Staff not found');
     const s = await res.json();
     return {
       ...s,
@@ -261,7 +321,6 @@ export const authApi = {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.message || errData.error || `Registration failed: ${res.status}`);
     }
-    // Backend returns a plain string "User is created", so we don't call .json()
     return res.text();
   },
 
@@ -273,21 +332,38 @@ export const authApi = {
     });
   },
 
+  async refresh(refreshToken) {
+    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    });
+
+    if (!res.ok) {
+      throw new Error('Refresh failed');
+    }
+    return res.json();
+  },
+
   async getMe(token) {
-    const res = await fetch(`${BASE_URL}/auth/me`, {
+    const res = await smartFetch(`${BASE_URL}/auth/me`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) throw new Error('Failed to fetch user data');
     const data = await res.json();
-    // Map backend UserDto to our frontend-friendly user object
+    
+    const decoded = decodeToken(token);
+    const authorities = decoded?.authorities || [];
+
     return {
       id: data.id,
       username: data.username,
       email: data.email,
       age: data.age,
       genderName: data.gender,
-      roles: [] // UserDto doesn't currently provide roles
+      roles: authorities,
+      isAdmin: authorities.includes('ROLE_ADMIN') || authorities.includes('ADMIN')
     };
   },
 
@@ -295,11 +371,11 @@ export const authApi = {
     const idNum = parseInt(userId);
     if (isNaN(idNum) || idNum === 0) throw new Error('Invalid User ID');
 
-    const res = await fetch(`${BASE_URL}/auth/user/${idNum}`);
+    const res = await smartFetch(`${BASE_URL}/auth/user/${idNum}`);
     if (!res.ok) {
       if (res.status === 404) {
          const errText = await res.text().catch(() => '');
-         throw new Error(errText || 'User not found.');
+         throw new Error(errText || `User not found (ID: ${idNum})`);
       }
       if (res.status >= 500) {
          throw new Error('Server error: The backend failed to load this profile.');
@@ -320,19 +396,42 @@ export const authApi = {
       reviewedMovies: Array.isArray(data.reviewedMovies) ? data.reviewedMovies.map(formatBasicMovie) : []
     };
   }
-  };
+};
 
 export const genreApi = {
   async getAll() {
-    const res = await fetch(`${BASE_URL}/genre`);
+    const res = await smartFetch(`${BASE_URL}/genre`);
     if (!res.ok) throw new Error('Failed to fetch genres');
     return res.json();
   }
 };
 
+export const recommendationApi = {
+  async getForMe(token) {
+    const res = await smartFetch(`${BASE_URL}/recommend/secure/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      if (res.status === 404) return []; // No interactions yet
+      throw new Error('Recommendations unavailable');
+    }
+    const data = await res.json();
+    return data.map(formatBasicMovie);
+  },
+
+  async getForUserAdmin(userId, token) {
+    const res = await smartFetch(`${BASE_URL}/recommend/admin/${userId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to fetch recommendations for user');
+    const data = await res.json();
+    return data.map(formatBasicMovie);
+  }
+};
+
 export const playlistApi = {
   async getByOwner(ownerId, token) {
-    const res = await fetch(`${BASE_URL}/playlist?ownerId=${ownerId}`, {
+    const res = await smartFetch(`${BASE_URL}/playlist?ownerId=${ownerId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) throw new Error('Failed to fetch playlists');
@@ -340,7 +439,7 @@ export const playlistApi = {
   },
 
   async getById(playlistId, token) {
-    const res = await fetch(`${BASE_URL}/playlist/${playlistId}`, {
+    const res = await smartFetch(`${BASE_URL}/playlist/${playlistId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) throw new Error('Failed to fetch playlist details');
@@ -352,7 +451,7 @@ export const playlistApi = {
   },
 
   async create(name, isPublic, token) {
-    const res = await fetch(`${BASE_URL}/playlist/secure`, {
+    const res = await smartFetch(`${BASE_URL}/playlist/secure`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -360,49 +459,21 @@ export const playlistApi = {
       },
       body: JSON.stringify({ name, isPrivate: !isPublic })
     });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || errData.error || `Failed to create playlist: ${res.status}`);
-    }
+    if (!res.ok) throw new Error('Failed to create playlist');
     return res.json();
   },
 
   async delete(playlistId, token) {
-    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}`, {
+    const res = await smartFetch(`${BASE_URL}/playlist/secure/${playlistId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) throw new Error('Failed to delete playlist');
-  },
-
-  async rename(playlistId, name, token) {
-    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}/name`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ name })
-    });
-    if (!res.ok) throw new Error('Failed to rename playlist');
-    return res.json();
-  },
-
-  async changeVisibility(playlistId, isPublic, token) {
-    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}/visibility`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ isPrivate: !isPublic })
-    });
-    if (!res.ok) throw new Error('Failed to change visibility');
-    return res.json();
+    return true;
   },
 
   async addMovie(playlistId, movieId, token) {
-    const res = await fetch(`${BASE_URL}/playlist/secure/${playlistId}/movies`, {
+    const res = await smartFetch(`${BASE_URL}/playlist/secure/${playlistId}/movies`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -414,55 +485,43 @@ export const playlistApi = {
     return res.json();
   },
 
-  async removeMovie(playlistId, movieId, token) {
-    const pId = Number(playlistId);
-    const mId = Number(movieId);
+  async removeMovie(pId, mId, token) {
     const url = `${BASE_URL}/playlist/secure/${pId}/movies/${mId}`;
-    
-    const res = await fetch(url, {
+    const res = await smartFetch(url, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!res.ok) throw new Error('Failed to remove movie');
+    return res.json();
+  },
 
-    if (!res.ok) {
-      const errBody = await res.text().catch(() => 'No error body');
-      let message = errBody;
-      try {
-        const json = JSON.parse(errBody);
-        message = json.message || message;
-      } catch { /* not json */ }
-      
-      throw new Error(`Server Error (${res.status}): ${message}`);
-    }
-
-    try {
-      const data = await res.json();
-      return {
-        ...data,
-        movies: data.movies ? data.movies.map(formatBasicMovie) : []
-      };
-    } catch {
-      return null;
-    }
+  // Admin methods
+  async adminDeletePlaylist(playlistId, token) {
+    const res = await smartFetch(`${BASE_URL}/playlist/admin/${playlistId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Failed to delete playlist as admin');
+    return true;
   }
 };
 
 export const reviewApi = {
   async getAllByMovie(movieId) {
-    const res = await fetch(`${BASE_URL}/review/${movieId}`);
+    const res = await smartFetch(`${BASE_URL}/review/${movieId}`);
     if (!res.ok) throw new Error('Failed to fetch reviews');
     return res.json();
   },
 
   async getReviewsByUser(userId) {
-    const res = await fetch(`${BASE_URL}/review?userid=${userId}`);
+    const res = await smartFetch(`${BASE_URL}/review?userid=${userId}`);
     if (!res.ok) throw new Error('Failed to fetch user reviews');
     const data = await res.json();
     return data.map(formatBasicMovie);
   },
 
   async postReview(movieId, reviewText, token) {
-    const res = await fetch(`${BASE_URL}/review/secure`, {
+    const res = await smartFetch(`${BASE_URL}/review/secure`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -470,15 +529,12 @@ export const reviewApi = {
       },
       body: JSON.stringify({ movieId: Number(movieId), rate: reviewText })
     });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => 'Unknown error');
-      throw new Error(errText || 'Failed to save review');
-    }
-    return res.text();
+    if (!res.ok) throw new Error('Failed to post review');
+    return true;
   },
 
   async deleteReview(movieId, token) {
-    const res = await fetch(`${BASE_URL}/review/secure`, {
+    const res = await smartFetch(`${BASE_URL}/review/secure`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -486,10 +542,20 @@ export const reviewApi = {
       },
       body: JSON.stringify({ movieId: Number(movieId) })
     });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => 'Unknown error');
-      throw new Error(errText || 'Failed to delete review');
-    }
+    if (!res.ok) throw new Error('Failed to delete review');
+    return true;
+  },
+
+  async adminDeleteReview(userId, movieId, token) {
+    const res = await smartFetch(`${BASE_URL}/review/admin`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ userId: Number(userId), movieId: Number(movieId) })
+    });
+    if (!res.ok) throw new Error('Failed to delete review as admin');
     return true;
   }
 };

@@ -7,6 +7,7 @@ import MoviePage from './pages/MoviePage'
 import UserPage from './pages/UserPage'
 import StaffPage from './pages/StaffPage'
 import PublicProfile from './pages/PublicProfile'
+import AdminDashboard from './pages/AdminDashboard'
 import ScrollToTop from './components/ScrollToTop'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/staff/:id" element={<StaffPage />} />
           <Route path="/profile" element={<UserPage />} />
           <Route path="/user/:id" element={<PublicProfile />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </div>
       <Footer />

@@ -1,0 +1,48 @@
+/* ── freshPotatoes Design System Synchronization ── */
+
+/* Force hardware acceleration for glass panels */
+.admin-panel-modern,
+.card-glass,
+.custom-modal-container {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Ensure consistent button rounding across all modules */
+.btn-fresh-primary,
+.btn-fresh-secondary,
+.btn-fresh-danger,
+.btn-nav-login,
+.btn-nav-user,
+.playlist-pill {
+  border-radius: 30px !important;
+}
+
+/* Fix specific inconsistencies in movie posters */
+.movie-poster-img,
+.movie-poster-frame,
+.poster-frame,
+.coming-card,
+.movie-poster-fallback,
+.hero-poster {
+  border-radius: 30px !important;
+}
+
+/* Sync mobile spacing and profile quoted borders */
+@media (max-width: 850px) {
+  .profile-description {
+    border-start: none !important;
+    padding-left: 0 !important;
+    border-left: none !important;
+    text-align: center;
+  }
+}
+
+/* Standardize horizontal padding for all rounded inputs */
+.form-control,
+.custom-select-minimal,
+.custom-input-group input,
+.filter-input-group input {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
