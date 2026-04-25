@@ -31,54 +31,70 @@ function CreatePlaylistModal({ show, onHide, onSuccess }) {
   };
 
   return (
-    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1070 }}>
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content bg-dark border-secondary shadow-lg">
-          <div className="modal-header border-secondary">
-            <h5 className="modal-title text-warning fw-bold">Create New Playlist</h5>
-            <button type="button" className="btn-close btn-close-white" onClick={onHide} aria-label="Close"></button>
+    <div className="custom-modal-overlay animate-fade-in" onClick={onHide}>
+      <div className="custom-modal-container" onClick={e => e.stopPropagation()}>
+        <div className="custom-modal-glow" />
+        
+        <div className="custom-modal-content">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="custom-modal-title">Create Collection</h2>
+            <button className="btn-close-custom" onClick={onHide}>
+              <i className="bi bi-x-lg" />
+            </button>
           </div>
-          <form onSubmit={handleSubmit}>
-            <div className="modal-body py-4">
-              {error && <div className="alert alert-danger small py-2">{error}</div>}
-              
-              <div className="mb-4">
-                <label className="text-secondary small mb-2 fw-semibold uppercase tracking-wider">Playlist Name</label>
-                <input
-                  type="text"
-                  className="form-control bg-transparent text-light border-secondary py-2"
-                  placeholder="e.g. My Favorite Sci-Fi"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  autoFocus
-                  disabled={isProcessing}
-                />
-              </div>
 
-              <div className="form-check form-switch mb-2">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="modalIsPublic"
-                  checked={isPublic}
-                  onChange={(e) => setIsPublic(e.target.checked)}
-                  disabled={isProcessing}
-                />
-                <label className="form-check-label text-light small ms-2" htmlFor="modalIsPublic">
-                  Make this playlist public
-                </label>
-              </div>
-              <p className="text-secondary smaller mb-0">Public playlists can be seen by other users on your public profile.</p>
+          <form onSubmit={handleSubmit}>
+            {error && <div className="custom-modal-error mb-3">{error}</div>}
+            
+            <div className="custom-input-group mb-4">
+              <label>Collection Name</label>
+              <input
+                type="text"
+                placeholder="e.g. Midnight Thrillers"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoFocus
+                disabled={isProcessing}
+              />
             </div>
-            <div className="modal-footer border-secondary">
-              <button type="button" className="btn btn-outline-secondary btn-sm px-4" onClick={onHide} disabled={isProcessing}>
-                Cancel
+
+            <div className="custom-checkbox-row mb-5">
+              <div className="d-flex align-items-center gap-3">
+                 <div className="custom-switch">
+                    <input
+                      type="checkbox"
+                      id="modalIsPublic"
+                      checked={isPublic}
+                      onChange={(e) => setIsPublic(e.target.checked)}
+                      disabled={isProcessing}
+                    />
+                    <label htmlFor="modalIsPublic" />
+                 </div>
+                 <div>
+                    <div className="text-light fw-bold smaller uppercase tracking-widest">Public Access</div>
+                    <div className="text-secondary smallest">Allow others to see this collection on your profile</div>
+                 </div>
+              </div>
+            </div>
+
+            <div className="d-flex gap-3 mt-2">
+              <button 
+                type="button" 
+                className="btn-custom-secondary w-50" 
+                onClick={onHide} 
+                disabled={isProcessing}
+              >
+                Dismiss
               </button>
-              <button type="submit" className="btn btn-warning btn-sm px-4 fw-bold text-dark" disabled={isProcessing || !name.trim()}>
+              <button 
+                type="submit" 
+                className="btn-custom-primary w-50" 
+                disabled={isProcessing || !name.trim()}
+              >
                 {isProcessing ? (
                   <><span className="spinner-border spinner-border-sm me-2" /> Creating...</>
-                ) : 'Create Playlist'}
+                ) : 'Create Now'}
               </button>
             </div>
           </form>

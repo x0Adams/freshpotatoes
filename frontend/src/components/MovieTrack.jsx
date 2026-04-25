@@ -74,8 +74,12 @@ export default function MovieTrack({ title, movies, fetchingMore, onLoadMore, hi
                 className="coming-card-img"
               />
               <div className="coming-card-overlay">
-                <p className="coming-card-genre">{Array.isArray(movie.genre) ? movie.genre[0] : movie.genre}</p>
-                <p className="coming-card-title">{movie.title}</p>
+                <div className="coming-card-genres">
+                  {movie.genres?.slice(0, 3).map(g => (
+                    <p key={g} className="coming-card-genre">{g}</p>
+                  ))}
+                </div>
+                <p className="coming-card-title text-truncate w-100">{movie.title}</p>
                 <p className="coming-card-date">
                   <i className="bi bi-calendar3" />
                   {movie.year}

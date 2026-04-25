@@ -6,6 +6,7 @@ import SearchPage from './pages/SearchPage'
 import MoviePage from './pages/MoviePage'
 import UserPage from './pages/UserPage'
 import StaffPage from './pages/StaffPage'
+import PublicProfile from './pages/PublicProfile'
 import ScrollToTop from './components/ScrollToTop'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/movie/:id" element={<MoviePage />} />
           <Route path="/staff/:id" element={<StaffPage />} />
           <Route path="/profile" element={<UserPage />} />
+          <Route path="/user/:id" element={<PublicProfile />} />
         </Routes>
       </div>
       <Footer />

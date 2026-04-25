@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !!localStorage.getItem('accessToken'));
 
   // Check if we are already logged in when the app loads
   useEffect(() => {
@@ -17,11 +17,11 @@ export function AuthProvider({ children }) {
           // If token is invalid/expired, clear it
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          setUser(null);
         })
         .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
     }
+    // If no token, initial loading state is already handled by the useState initializer
   }, []);
 
   const login = async (username, password) => {

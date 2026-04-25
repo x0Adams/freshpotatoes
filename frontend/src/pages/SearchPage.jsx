@@ -67,7 +67,7 @@ function SearchPage() {
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
             />
-            <button className="btn btn-warning text-dark fw-bold px-4" type="submit">
+            <button className="btn-fresh-primary rounded-start-0" type="submit">
               Search
             </button>
           </div>
@@ -116,9 +116,11 @@ function SearchPage() {
                 className="coming-card-img"
               />
               <div className="coming-card-overlay">
-                <p className="coming-card-genre">
-                  {(Array.isArray(item.genre) ? item.genre[0] : item.genre)}
-                </p>
+                <div className="coming-card-genres">
+                  {item.genres?.slice(0, 3).map(g => (
+                    <p key={g} className="coming-card-genre">{g}</p>
+                  ))}
+                </div>
                 <p className="coming-card-title">{item.title}</p>
                 <p className="coming-card-date">
                   <i className="bi bi-calendar3" />

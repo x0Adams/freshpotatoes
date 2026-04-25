@@ -16,7 +16,6 @@ function AuthModal({ show, onHide }) {
     confirmPassword: ''
   });
 
-  // Clear state when modal closes/opens
   useEffect(() => {
     if (show) {
       setError('');
@@ -59,7 +58,7 @@ function AuthModal({ show, onHide }) {
           password: formData.password
         });
       }
-      onHide(); // Close modal on success
+      onHide();
     } catch (err) {
       setError(err.message || 'Authentication failed. Please try again.');
     } finally {
@@ -70,112 +69,121 @@ function AuthModal({ show, onHide }) {
   if (!show) return null;
 
   return (
-    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content bg-dark text-light border-secondary">
-          <div className="modal-header border-secondary">
-            <h5 className="modal-title text-light fw-bold">
-              {isLogin ? (
-                <>Login to fresh<span className="text-warning">Potatoes</span></>
-              ) : (
-                'Create Account'
-              )}
-            </h5>
-            <button type="button" className="btn-close btn-close-white" onClick={onHide}></button>
+    <div className="custom-modal-overlay animate-fade-in" onClick={onHide}>
+      <div className="custom-modal-container" onClick={e => e.stopPropagation()}>
+        <div className="custom-modal-glow" />
+        
+        <div className="custom-modal-content">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="custom-modal-title">
+              {isLogin ? 'Welcome Back' : 'Create Account'}
+            </h2>
+            <button className="btn-close-custom" onClick={onHide}>
+              <i className="bi bi-x-lg" />
+            </button>
           </div>
-          <div className="modal-body">
-            {error && <div className="alert alert-danger py-2">{error}</div>}
-            
-            <form onSubmit={handleSubmit}>
-              {!isLogin && (
-                <div className="mb-3">
-                  <input 
-                    type="email" 
-                    name="email" 
-                    className="form-control bg-transparent text-light border-secondary" 
-                    placeholder="Email Address" 
-                    required 
-                    value={formData.email} 
-                    onChange={handleChange} 
-                  />
-                </div>
-              )}
 
-              <div className="mb-3">
+          <form onSubmit={handleSubmit}>
+            {error && <div className="custom-modal-error mb-4">{error}</div>}
+            
+            {!isLogin && (
+              <div className="custom-input-group mb-3">
+                <label>Email Address</label>
                 <input 
-                  type="text" 
-                  name="username" 
-                  className="form-control bg-transparent text-light border-secondary" 
-                  placeholder="Username" 
+                  type="email" 
+                  name="email" 
+                  placeholder="name@example.com" 
                   required 
-                  value={formData.username} 
+                  value={formData.email} 
                   onChange={handleChange} 
                 />
               </div>
+            )}
 
-              {!isLogin && (
-                <div className="d-flex gap-2 mb-3">
-                  <select 
-                    name="genderName" 
-                    className="form-select bg-transparent text-light border-secondary" 
-                    required 
-                    value={formData.genderName} 
-                    onChange={handleChange}
-                  >
-                    <option value="None" disabled>Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="transfeminine">Transfeminine</option>
-                    <option value="transmasculine">Transmasculine</option>
-                  </select>
+            <div className="custom-input-group mb-3">
+              <label>Username</label>
+              <input 
+                type="text" 
+                name="username" 
+                placeholder="potatoFan" 
+                required 
+                value={formData.username} 
+                onChange={handleChange} 
+              />
+            </div>
 
-                  <input 
-                    type="number" 
-                    name="age" 
-                    className="form-control bg-transparent text-light border-secondary" 
-                    placeholder="Age" 
-                    required 
-                    min="1" 
-                    value={formData.age} 
-                    onChange={handleChange} 
-                  />
+            {!isLogin && (
+              <div className="row g-3 mb-3">
+                <div className="col-7">
+                  <div className="custom-input-group">
+                    <label>Gender</label>
+                    <select 
+                      name="genderName" 
+                      className="custom-select-minimal"
+                      required 
+                      value={formData.genderName} 
+                      onChange={handleChange}
+                    >
+                      <option value="None" disabled>Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
                 </div>
-              )}
+                <div className="col-5">
+                  <div className="custom-input-group">
+                    <label>Age</label>
+                    <input 
+                      type="number" 
+                      name="age" 
+                      placeholder="21" 
+                      required 
+                      min="1" 
+                      value={formData.age} 
+                      onChange={handleChange} 
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
-              <div className="mb-3">
+            <div className="custom-input-group mb-3">
+              <label>Password</label>
+              <input 
+                type="password" 
+                name="password" 
+                placeholder="••••••••" 
+                required 
+                value={formData.password} 
+                onChange={handleChange} 
+              />
+            </div>
+
+            {!isLogin && (
+              <div className="custom-input-group mb-4">
+                <label>Confirm Password</label>
                 <input 
                   type="password" 
-                  name="password" 
-                  className="form-control bg-transparent text-light border-secondary" 
-                  placeholder="Password" 
+                  name="confirmPassword" 
+                  placeholder="••••••••" 
                   required 
-                  value={formData.password} 
+                  value={formData.confirmPassword} 
                   onChange={handleChange} 
                 />
               </div>
+            )}
 
-              {!isLogin && (
-                <div className="mb-4">
-                  <input 
-                    type="password" 
-                    name="confirmPassword" 
-                    className="form-control bg-transparent text-light border-secondary" 
-                    placeholder="Confirm Password" 
-                    required 
-                    value={formData.confirmPassword} 
-                    onChange={handleChange} 
-                  />
-                </div>
-              )}
+            <button type="submit" className="btn-custom-primary w-100 mt-2" disabled={loading}>
+              {loading ? (
+                <><span className="spinner-border spinner-border-sm me-2" /> Working...</>
+              ) : (isLogin ? 'Sign In' : 'Join Now')}
+            </button>
+          </form>
 
-              <button type="submit" className="btn btn-warning w-100 fw-bold mt-2" disabled={loading}>
-                {loading ? 'Processing...' : (isLogin ? 'Log In' : 'Sign Up')}
-              </button>
-            </form>
-          </div>
-          <div className="modal-footer border-secondary justify-content-center">
-            <p className="text-secondary m-0">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <div className="text-center mt-4">
+            <p className="text-secondary smaller">
+              {isLogin ? "New to freshPotatoes? " : "Already have an account? "}
               <button 
                 type="button" 
                 className="btn btn-link text-warning p-0 align-baseline text-decoration-none fw-bold" 
@@ -184,7 +192,7 @@ function AuthModal({ show, onHide }) {
                   setError('');
                 }}
               >
-                {isLogin ? 'Sign Up' : 'Log In'}
+                {isLogin ? 'Create one' : 'Sign in'}
               </button>
             </p>
           </div>

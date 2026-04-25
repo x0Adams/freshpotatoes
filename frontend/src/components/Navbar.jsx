@@ -11,7 +11,7 @@ function Navbar() {
   
   const navigate = useNavigate()
   const location = useLocation()
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(() => new URLSearchParams(window.location.search).get('q') || '')
   const [suggestions, setSuggestions] = useState([])
   const [open, setOpen] = useState(false)
   const wrapperRef = useRef(null)
@@ -23,10 +23,14 @@ function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // 2. Sync State FROM URL (Initial load and Back/Forward)
+  // 2. Sync State FROM URL (Back/Forward navigation)
   useEffect(() => {
     const params = new URLSearchParams(location.search)
-    setQuery(params.get('q') || '')
+    const q = params.get('q') || ''
+    if (q !== query) {
+      setQuery(q)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search])
 
   // 3. Live Suggestions
@@ -36,8 +40,10 @@ function Navbar() {
       const timeoutId = setTimeout(() => {
         movieApi.search(query, controller.signal)
           .then(data => {
-            setSuggestions(data.slice(0, 5))
-            setOpen(true)
+            if (!controller.signal.aborted) {
+              setSuggestions(data.slice(0, 5))
+              setOpen(true)
+            }
           })
           .catch(err => {
             if (err.name !== 'AbortError') console.error("Search failed:", err)
@@ -48,7 +54,8 @@ function Navbar() {
         controller.abort()
       }
     } else {
-      setSuggestions([])
+      // Avoid extra renders if suggestions are already empty
+      setSuggestions(prev => prev.length > 0 ? [] : prev)
       setOpen(false)
     }
   }, [query])
@@ -126,18 +133,35 @@ function Navbar() {
             <Link to="/search" className="btn btn-link text-light d-lg-none p-2"><i className="bi bi-search fs-5" /></Link>
             {user ? (
               <div className="dropdown">
-                <button className="btn btn-link text-warning text-decoration-none dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-                  <i className="bi bi-person-circle fs-5"></i>
-                  <span className="fw-bold text-truncate" style={{ maxWidth: '100px' }}>{user.username}</span>
+                <button 
+                  className="btn btn-nav-user dropdown-toggle" 
+                  type="button" 
+                  data-bs-toggle="dropdown"
+                >
+                  <i className="bi bi-person-circle fs-5" />
+                  <span className="text-truncate d-none d-sm-inline" style={{ maxWidth: '100px' }}>{user.username}</span>
                 </button>
-                <ul className="dropdown-menu dropdown-menu-end dropdown-menu-dark border-secondary">
-                  <li><Link className="dropdown-item" to="/profile"><i className="bi bi-person me-2"></i> Profile</Link></li>
-                  <li><hr className="dropdown-divider border-secondary" /></li>
-                  <li><button className="dropdown-item text-danger" onClick={logout}><i className="bi bi-box-arrow-right me-2"></i> Logout</button></li>
+                <ul className="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <Link className="dropdown-item" to="/profile">
+                      <i className="bi bi-person-badge" /> Profile
+                    </Link>
+                  </li>
+                  <li><hr className="dropdown-divider border-opacity-25" /></li>
+                  <li>
+                    <button className="dropdown-item text-danger" onClick={logout}>
+                      <i className="bi bi-box-arrow-right" /> Logout
+                    </button>
+                  </li>
                 </ul>
               </div>
             ) : (
-              <button className="btn btn-warning btn-sm px-4 fw-bold text-dark" onClick={() => setShowAuthModal(true)}>Log In</button>
+              <button 
+                className="btn btn-nav-login" 
+                onClick={() => setShowAuthModal(true)}
+              >
+                Log In
+              </button>
             )}
           </div>
         </div>
