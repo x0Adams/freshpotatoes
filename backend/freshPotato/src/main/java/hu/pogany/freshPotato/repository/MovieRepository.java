@@ -1,5 +1,6 @@
 package hu.pogany.freshPotato.repository;
 
+import hu.pogany.freshPotato.entity.Genre;
 import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.entity.StaffRole;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,9 @@ public interface MovieRepository extends JpaRepository<Movie, Integer>, JpaSpeci
 
     @Query("select m.id from Movie m left join m.views v group by m.id order by count(v) desc, m.id asc")
     List<Integer> findPopularMovieIds(Pageable pageable);
+
+    @Query("select m.id from Movie m join m.genres g left join m.views v where g.name = :genre group by m.id order by count(v) desc, m.id asc")
+    List<Integer> findPopularMovieIdsByGenre(@Param("genre") String genre, Pageable pageable);
 
     @Query("select distinct m from Movie m join m.staffRoleInMovies srm join m.genres where srm.staff.id = :staffId and srm.id.role = :role")
     List<Movie> findByStaffAndRole(@Param("staffId") Integer staffId, @Param("role") StaffRole role);
