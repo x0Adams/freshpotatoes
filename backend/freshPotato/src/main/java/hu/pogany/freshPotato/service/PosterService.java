@@ -97,7 +97,12 @@ public class PosterService {
     }
 
     private boolean isPosterNode(JsonNode node) {
-        return node.get("title").asString().contains("poster") && node.get("type").asString().equals("image");
+        try {
+            return node.get("title").asString().contains("poster") && node.get("type").asString().equals("image");
+        } catch (RuntimeException e) {
+            return false;
+        }
+
     }
 
 
