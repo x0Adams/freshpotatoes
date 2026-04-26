@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.JsonNode;
@@ -48,7 +49,7 @@ public class TrailerService {
         fetchTrailer(optMovie.orElseThrow(() -> new EntityNotFoundException("no movie with this id")));
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = {NotContextException.class, InterruptedException.class, TimeLimitExceededException.class, CredentialException.class})
     public void fetchTrailer(Movie movie) throws NotContextException, InterruptedException, TimeLimitExceededException, CredentialException {
         validateTitle(movie);
 
@@ -78,23 +79,21 @@ public class TrailerService {
     }
 
     private ResponseEntity<String> fetchFromYoutube(Movie movie) {
-        try {
-            return restClient.get()
-                    .uri(builder -> builder
-                            .queryParam("part", "snippet")
-                            .queryParam("type", "video")
-                            .queryParam("maxResults", 1)
-                            .queryParam("q", String.format("%s %s trailer", movie.getName(), getMovieReleaseYear(movie)))
-                            .queryParam("relevanceLanguage", "en")
-                            .queryParam("key", youtubeConfig.apiKey())
-                            .build()
-                    )
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .toEntity(String.class);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatusCode.valueOf(403));
-        }
+        return restClient.get()
+                .uri(builder -> builder
+                        .queryParam("part", "snippet")
+                        .queryParam("type", "video")
+                        .queryParam("maxResults", 1)
+                        .queryParam("q", String.format("%s %s trailer", movie.getName(), getMovieReleaseYear(movie)))
+                        .queryParam("relevanceLanguage", "en")
+                        .queryParam("key", youtubeConfig.apiKey())
+                        .build()
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        (request, response) -> { /* no throw; allow body/status handling */ })
+                .toEntity(String.class);
 
     }
 
@@ -107,7 +106,7 @@ public class TrailerService {
             case 400 -> throw new CredentialException("youtube request is invalid (bad request)");
             case 401 -> throw new CredentialException("youtube api key is missing or invalid");
             case 403 -> {
-                while (bucket.tryConsume(1, Duration.ZERO));
+                while (bucket.tryConsume(1, Duration.ofNanos(1))) ;
                 throw new TimeLimitExceededException("youtube daily quota exceeded");
             }
             case 404 -> throw new EntityNotFoundException("youtube endpoint not found");
@@ -131,7 +130,6 @@ public class TrailerService {
             return "";
         }
     }
-
 
 
 }
