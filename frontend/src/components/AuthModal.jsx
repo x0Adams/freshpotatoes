@@ -6,6 +6,7 @@ function AuthModal({ show, onHide }) {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, register } = useAuth();
   const { showToast } = useToast();
   const [shouldRender, setRender] = useState(show);
@@ -16,6 +17,7 @@ function AuthModal({ show, onHide }) {
       document.body.classList.add('modal-open-lock');
       setError('');
       setLoading(false);
+      setShowPassword(false);
       setFormData({
         email: '',
         username: '',
@@ -171,29 +173,45 @@ function AuthModal({ show, onHide }) {
               </div>
             )}
 
-            <div className="custom-input-group mb-3">
+            <div className="custom-input-group has-action mb-3">
               <label>Password</label>
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 name="password" 
                 placeholder="••••••••" 
                 required 
                 value={formData.password} 
                 onChange={handleChange} 
               />
+              <button 
+                type="button" 
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide Password" : "Show Password"}
+              >
+                <i className={`bi bi-eye${showPassword ? '-slash' : ''}-fill`} />
+              </button>
             </div>
 
             {!isLogin && (
-              <div className="custom-input-group mb-4">
+              <div className="custom-input-group has-action mb-4">
                 <label>Confirm Password</label>
                 <input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   name="confirmPassword" 
                   placeholder="••••••••" 
                   required 
                   value={formData.confirmPassword} 
                   onChange={handleChange} 
                 />
+                <button 
+                  type="button" 
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? "Hide Password" : "Show Password"}
+                >
+                  <i className={`bi bi-eye${showPassword ? '-slash' : ''}-fill`} />
+                </button>
               </div>
             )}
 

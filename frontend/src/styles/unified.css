@@ -14,7 +14,11 @@
 .btn-fresh-danger,
 .btn-nav-login,
 .btn-nav-user,
-.playlist-pill {
+.playlist-pill,
+.custom-input-minimal,
+.custom-select-minimal,
+.custom-input-group input,
+.form-control {
   border-radius: 30px !important;
 }
 
@@ -40,6 +44,7 @@
 
 /* Standardize horizontal padding for all rounded inputs */
 .form-control,
+.custom-input-minimal,
 .custom-select-minimal,
 .custom-input-group input,
 .filter-input-group input {

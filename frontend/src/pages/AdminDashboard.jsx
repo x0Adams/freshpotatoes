@@ -132,7 +132,7 @@ function AdminDashboard() {
       <div className="movie-hero" style={{ minHeight: '350px', padding: '8rem 5% 3rem', overflow: 'hidden' }}>
         <div className="movie-hero-bg" />
 
-        <div className="movie-info position-relative">
+        <div className="movie-info position-relative animate-hero-reveal">
           {/* subtle colorful glow behind text */}
           <img 
             src={testBg} 

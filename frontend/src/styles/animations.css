@@ -32,23 +32,39 @@
   100% { transform: rotate(360deg) scale(1); }
 }
 
+@keyframes heroReveal {
+  from { 
+    opacity: 0; 
+    transform: scale(0.98) translateY(5px);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) translateY(0);
+  }
+}
+
 /* ── Global Animation Classes ── */
 
+.animate-hero-reveal {
+  animation: heroReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  will-change: transform, opacity;
+}
+
 .animate-fade-in {
-  animation: fadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
   will-change: transform, opacity;
 }
 
 .animate-fade-out {
-  animation: fadeOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .animate-toast-in {
-  animation: toastIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  animation: toastIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
 }
 
 .animate-toast-out {
-  animation: toastOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: toastOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .skeleton-pulse {

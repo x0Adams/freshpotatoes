@@ -202,6 +202,7 @@ function MoviePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showReviewDeleteModal, setShowReviewDeleteModal] = useState(false)
   const [reviewDeletionInfo, setReviewDeletionInfo] = useState(null)
+  const [showAllActors, setShowAllActors] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -457,7 +458,7 @@ function MoviePage() {
         <div className="movie-hero-bg" />
 
         {/* poster */}
-        <div className="movie-poster-frame">
+        <div className="movie-poster-frame animate-hero-reveal">
           <img 
             src={movie.posterUrl || testBg} 
             alt="" 
@@ -472,7 +473,7 @@ function MoviePage() {
         </div>
 
         {/* info */}
-        <div className="movie-info">
+        <div className="movie-info animate-hero-reveal" style={{ animationDelay: '0.2s' }}>
 
           <div className="movie-genres">
             {movie.genres && movie.genres.map(g => (
@@ -599,14 +600,22 @@ function MoviePage() {
               <div className="movie-credit-group">
                 <h6>Starring</h6>
                 <div className="d-flex flex-wrap gap-2">
-                  {movie.actors.map((a, index) => (
+                  {(showAllActors ? movie.actors : movie.actors.slice(0, 10)).map((a, index) => (
                     <span key={a.id}>
                       <Link to={`/staff/${a.id}`} className="text-warning text-decoration-none hover-underline">
                         {a.name}
                       </Link>
-                      {index < movie.actors.length - 1 && <span className="text-secondary">,</span>}
+                      {index < (showAllActors ? movie.actors.length : Math.min(movie.actors.length, 10)) - 1 && <span className="text-secondary">,</span>}
                     </span>
                   ))}
+                  {movie.actors.length > 10 && (
+                    <button 
+                      className="toggle-credits-btn" 
+                      onClick={() => setShowAllActors(!showAllActors)}
+                    >
+                      {showAllActors ? 'Show Less' : `+${movie.actors.length - 10} More`}
+                    </button>
+                  )}
                 </div>
               </div>
             )}

@@ -125,6 +125,33 @@
   box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.1);
 }
 
+.custom-input-group.has-action {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.8rem;
+  top: 2.2rem; /* Adjusted for the label */
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  color: #ffc107;
+}
+
+.custom-input-group.has-action input {
+  padding-right: 3.5rem;
+}
+
 .custom-switch {
   position: relative;
   width: 44px;
@@ -211,6 +238,7 @@
 }
 
 
+.custom-input-minimal,
 .custom-select-minimal {
   width: 100%;
   background: rgba(255, 255, 255, 0.03);
@@ -220,6 +248,9 @@
   color: #fff;
   font-size: 1rem;
   transition: all 0.2s ease;
+}
+
+.custom-select-minimal {
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -227,6 +258,7 @@
   background-size: 1em;
 }
 
+.custom-input-minimal:focus,
 .custom-select-minimal:focus {
   outline: none;
   background-color: rgba(255, 255, 255, 0.06);

@@ -208,7 +208,7 @@ export const movieApi = {
       genres: m.genres ? m.genres.map(g => g.name) : [],
       actors: m.actors ? m.actors.map(a => ({ id: a.id, name: a.name })) : [],
       directors: m.directors ? m.directors.map(d => ({ id: d.id, name: d.name })) : [],
-      country: m.productionCountries && m.productionCountries.length > 0 ? m.productionCountries[0].name : null
+      country: m.productionCountries ? m.productionCountries.map(c => c.name).join(', ') : null
     };
   },
 
@@ -355,7 +355,10 @@ export const authApi = {
      if (!res.ok) throw new Error('Failed to fetch user profile');
      const data = await res.json();
 
-     const decoded = decodeToken(token);
+     // Always decode the freshest token from localStorage, 
+     // as smartFetch might have silently refreshed it.
+     const currentToken = localStorage.getItem('accessToken');
+     const decoded = decodeToken(currentToken);
      const authorities = decoded?.authorities || [];
 
      return {

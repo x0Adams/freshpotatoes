@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { movieApi } from '../services/api'
 import MoviePoster from './MoviePoster'
 import testBg from '../assets/test_bg.jpg'
+import * as bootstrap from 'bootstrap'
 
-function HeroSlide({ movie, isActive }) {
+function HeroSlide({ movie, isActive, isFirstLoad }) {
   return (
-    <div className={`carousel-item h-100 ${isActive ? 'active' : ''}`}>
+    <div className={`carousel-item h-100 ${isActive ? 'active' : ''} ${isFirstLoad ? 'hero-first-load' : ''}`}>
       <div className="hero-slide">
         <div className="container-fluid h-100">
           <div className="row h-100 align-items-center">
@@ -87,6 +88,9 @@ function HeroSkeleton() {
 function HeroCarousel() {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isFirstLoad, setIsFirstLoad] = useState(true)
+  const [isSliding, setIsSliding] = useState(false)
+  const carouselRef = useRef(null)
 
   useEffect(() => {
     movieApi.getMovies(0, 10)
@@ -95,17 +99,58 @@ function HeroCarousel() {
       .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    if (!loading && movies.length > 0 && carouselRef.current) {
+      const carousel = new bootstrap.Carousel(carouselRef.current, {
+        interval: 8000,
+        pause: false
+      })
+
+      const handleSlide = () => {
+        setIsFirstLoad(false)
+        setIsSliding(true)
+      }
+      const handleSlid = () => setIsSliding(false)
+
+      carouselRef.current.addEventListener('slide.bs.carousel', handleSlide)
+      carouselRef.current.addEventListener('slid.bs.carousel', handleSlid)
+
+      carousel.cycle()
+
+      return () => {
+        if (carouselRef.current) {
+          carouselRef.current.removeEventListener('slide.bs.carousel', handleSlide)
+          carouselRef.current.removeEventListener('slid.bs.carousel', handleSlid)
+        }
+        carousel.dispose()
+      }
+    }
+  }, [loading, movies])
+
   if (loading) return <HeroSkeleton />
 
   if (movies.length === 0) return null
+
+  const handlePrev = () => {
+    if (isSliding) return
+    const inst = bootstrap.Carousel.getInstance(carouselRef.current)
+    inst?.prev()
+  }
+
+  const handleNext = () => {
+    if (isSliding) return
+    const inst = bootstrap.Carousel.getInstance(carouselRef.current)
+    inst?.next()
+  }
 
   return (
     <div className="hero-carousel">
       <div
         id="heroCarousel"
-        className="carousel slide h-100"
-        data-bs-ride="carousel"
-        data-bs-interval="6000">
+        ref={carouselRef}
+        className="carousel slide h-100 slide"
+        data-bs-interval="8000"
+        data-bs-pause="false">
         <div className="carousel-indicators">
           {movies.map((_, i) => (
             <button key={i}
@@ -114,20 +159,36 @@ function HeroCarousel() {
               data-bs-slide-to={i}
               className={i === 0 ? 'active' : ''}
               aria-label={`Slide ${i + 1}`}
+              disabled={isSliding}
             />
           ))}
         </div>
 
         <div className="carousel-inner h-100">
           {movies.map((movie, i) => (
-            <HeroSlide key={`${movie.id}-${i}`} movie={movie} isActive={i === 0} />
+            <HeroSlide 
+              key={`${movie.id}-${i}`} 
+              movie={movie} 
+              isActive={i === 0} 
+              isFirstLoad={i === 0 && isFirstLoad} 
+            />
           ))}
         </div>
 
-        <button className="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <button 
+          className="carousel-control-prev" 
+          type="button" 
+          onClick={handlePrev}
+          style={{ cursor: isSliding ? 'default' : 'pointer', pointerEvents: isSliding ? 'none' : 'auto' }}
+        >
           <span className="carousel-control-prev-icon" />
         </button>
-        <button className="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <button 
+          className="carousel-control-next" 
+          type="button" 
+          onClick={handleNext}
+          style={{ cursor: isSliding ? 'default' : 'pointer', pointerEvents: isSliding ? 'none' : 'auto' }}
+        >
           <span className="carousel-control-next-icon" />
         </button>
       </div>
