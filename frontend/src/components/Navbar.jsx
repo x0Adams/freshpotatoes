@@ -14,7 +14,9 @@ function Navbar() {
   const location = useLocation()
   const [suggestions, setSuggestions] = useState([])
   const [open, setOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const wrapperRef = useRef(null)
+  const dropdownRef = useRef(null)
 
   // 1. Handle scroll effect
   useEffect(() => {
@@ -56,6 +58,7 @@ function Navbar() {
   useEffect(() => {
     function handleClick(e) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false)
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsDropdownOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -134,20 +137,21 @@ function Navbar() {
               <i className="bi bi-search fs-5" />
             </Link>
             {user ? (
-              <div className="dropdown">
+              <div className="dropdown" ref={dropdownRef}>
                 <button 
-                  className="btn btn-nav-user dropdown-toggle" 
+                  className={`btn btn-nav-user ${isDropdownOpen ? 'show' : ''}`} 
                   type="button" 
-                  data-bs-toggle="dropdown"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-expanded={isDropdownOpen}
                 >
                   <i className="bi bi-person-circle fs-5" />
                   <span className="text-truncate d-none d-sm-inline" style={{ maxWidth: '100px' }}>{user.username}</span>
                 </button>
-                <ul className="dropdown-menu dropdown-menu-end">
+                <ul className={`dropdown-menu dropdown-menu-end ${isDropdownOpen ? 'show' : ''}`}>
                   {user.isAdmin && (
                     <>
                       <li>
-                        <Link className="dropdown-item text-warning" to="/admin">
+                        <Link className="dropdown-item text-warning" to="/admin" onClick={() => setIsDropdownOpen(false)}>
                           <i className="bi bi-shield-lock-fill" /> Control Center
                         </Link>
                       </li>
@@ -155,13 +159,13 @@ function Navbar() {
                     </>
                   )}
                   <li>
-                    <Link className="dropdown-item" to="/profile">
+                    <Link className="dropdown-item" to="/profile" onClick={() => setIsDropdownOpen(false)}>
                       <i className="bi bi-person-badge" /> Profile
                     </Link>
                   </li>
                   <li><hr className="dropdown-divider border-opacity-25" /></li>
                   <li>
-                    <button className="dropdown-item text-danger" onClick={logout}>
+                    <button className="dropdown-item text-danger" onClick={() => { logout(); setIsDropdownOpen(false); }}>
                       <i className="bi bi-box-arrow-right" /> Logout
                     </button>
                   </li>

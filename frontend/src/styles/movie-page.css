@@ -197,6 +197,25 @@
   line-height: 1.7;
 }
 
+.toggle-credits-btn {
+  background: rgba(255, 193, 7, 0.08);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.toggle-credits-btn:hover {
+  background: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
 /* Description */
 .movie-description {
   font-size: 0.95rem;

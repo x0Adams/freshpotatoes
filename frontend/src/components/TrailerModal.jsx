@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 function TrailerModal({ show, onHide, videoId, title }) {
   const [shouldRender, setRender] = useState(show);
@@ -21,7 +22,7 @@ function TrailerModal({ show, onHide, videoId, title }) {
 
   if (!shouldRender || !videoId) return null;
 
-  return (
+  return createPortal(
     <div 
       className={`custom-modal-overlay ${show ? 'animate-fade-in' : 'animate-fade-out'}`} 
       onAnimationEnd={onAnimationEnd}
@@ -51,7 +52,8 @@ function TrailerModal({ show, onHide, videoId, title }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

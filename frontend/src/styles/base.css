@@ -5,6 +5,10 @@ body {
   margin: 0;
 }
 
+body.modal-open-lock {
+  overflow: hidden !important;
+}
+
 /* Global Form Focus & Interactive States */
 .form-control:focus {
   box-shadow: none;

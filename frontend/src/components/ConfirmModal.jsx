@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 function ConfirmModal({ show, onHide, onConfirm, title, message, confirmText = "Confirm", isDanger = false }) {
   const [shouldRender, setRender] = useState(show);
@@ -21,7 +22,7 @@ function ConfirmModal({ show, onHide, onConfirm, title, message, confirmText = "
 
   if (!shouldRender) return null;
 
-  return (
+  return createPortal(
     <div 
       className={`custom-modal-overlay ${show ? 'animate-fade-in' : 'animate-fade-out'}`} 
       onAnimationEnd={onAnimationEnd}
@@ -59,7 +60,8 @@ function ConfirmModal({ show, onHide, onConfirm, title, message, confirmText = "
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

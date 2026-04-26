@@ -1,4 +1,8 @@
 /* Global Dropdown Design */
+.dropdown {
+  position: relative;
+}
+
 .dropdown-menu {
   background: #0d0d12 !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -21,6 +25,14 @@
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
+}
+
+/* Fix React-controlled dropdown positioning without Popper.js */
+.dropdown-menu-end {
+  right: 0 !important;
+  left: auto !important;
+  top: 100% !important;
+  position: absolute !important;
 }
 
 .dropdown-item {

@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6db7a011-25a4-47a4-bc86-1bc87a811d61" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/src/components/AuthModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/src/components/AuthModal.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,7 +75,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "copilot.sensitive.allow.copilot_read_file.jetbrains_settings_files": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "frontend-last-fix",
     "last_opened_file_path": "/home/notkulonme/Documents/freshpotato/backend/freshRecommendation",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -172,10 +170,10 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="FastAPI.freshRecommendation" />
       <item itemvalue="HTTP Request.All in test_main" />
-      <item itemvalue="Python.main" />
       <item itemvalue="Python.generate_ratings" />
+      <item itemvalue="Python.main" />
+      <item itemvalue="FastAPI.freshRecommendation" />
     </list>
     <recent_temporary>
       <list>
@@ -215,6 +213,7 @@
       <workItem from="1776859198573" duration="2132000" />
       <workItem from="1776880677225" duration="251000" />
       <workItem from="1777128630006" duration="1874000" />
+      <workItem from="1777202493246" duration="633000" />
     </task>
     <servers />
   </component>

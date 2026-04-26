@@ -16,7 +16,55 @@
 .hero-carousel .carousel-inner,
 .hero-carousel .carousel-item {
   height: 100%;
+  overflow: hidden;
 }
+
+/* ── Parallax & Cinematic Transition ── */
+
+.hero-slide .hero-info,
+.hero-slide .poster-frame {
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+/* 1. NEXT DIRECTION (Content moves Right -> Left) */
+/* Incoming slide from right */
+.carousel-item-next:not(.carousel-item-start) .hero-slide .hero-info { transform: translateX(250px); }
+.carousel-item-next:not(.carousel-item-start) .hero-slide .poster-frame { transform: translateX(50px); }
+
+/* Outgoing slide to left */
+.active.carousel-item-start .hero-slide .hero-info { transform: translateX(-250px); }
+.active.carousel-item-start .hero-slide .poster-frame { transform: translateX(-50px); }
+
+/* 2. PREV DIRECTION (Content moves Left -> Right) */
+/* Incoming slide from left */
+.carousel-item-prev:not(.carousel-item-end) .hero-slide .hero-info { transform: translateX(-250px); }
+.carousel-item-prev:not(.carousel-item-end) .hero-slide .poster-frame { transform: translateX(-50px); }
+
+/* Outgoing slide to right */
+.active.carousel-item-end .hero-slide .hero-info { transform: translateX(250px); }
+.active.carousel-item-end .hero-slide .poster-frame { transform: translateX(50px); }
+
+/* 3. STABLE / TARGET STATE */
+.carousel-item.active .hero-slide .hero-info,
+.carousel-item.active .hero-slide .poster-frame,
+.carousel-item-next.carousel-item-start .hero-slide .hero-info,
+.carousel-item-next.carousel-item-start .hero-slide .poster-frame,
+.carousel-item-prev.carousel-item-end .hero-slide .hero-info,
+.carousel-item-prev.carousel-item-end .hero-slide .poster-frame {
+  transform: translateX(0);
+}
+
+/* 
+   4. Initial Page Load Reveal 
+   We only want this on the very first slide, once. 
+   We'll use a specific class added via JS to identify the "fresh" load.
+*/
+.hero-first-load .hero-slide .poster-frame,
+.hero-first-load .hero-slide .hero-info {
+  animation: heroReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 
 .hero-slide {
   height: 100%;

@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { movieApi, reviewApi, playlistApi } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -202,6 +202,19 @@ function MoviePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showReviewDeleteModal, setShowReviewDeleteModal] = useState(false)
   const [reviewDeletionInfo, setReviewDeletionInfo] = useState(null)
+  const [showAllActors, setShowAllActors] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -457,7 +470,7 @@ function MoviePage() {
         <div className="movie-hero-bg" />
 
         {/* poster */}
-        <div className="movie-poster-frame">
+        <div className="movie-poster-frame animate-hero-reveal">
           <img 
             src={movie.posterUrl || testBg} 
             alt="" 
@@ -472,7 +485,7 @@ function MoviePage() {
         </div>
 
         {/* info */}
-        <div className="movie-info">
+        <div className="movie-info animate-hero-reveal" style={{ animationDelay: '0.2s' }}>
 
           <div className="movie-genres">
             {movie.genres && movie.genres.map(g => (
@@ -523,23 +536,23 @@ function MoviePage() {
             )}
 
             {user && (
-              <div className="dropdown">
-                <button 
-                  className="btn-fresh-secondary dropdown-toggle" 
-                  type="button" 
-                  data-bs-toggle="dropdown"
+              <div className="dropdown" ref={dropdownRef}>
+                <button
+                  className={`btn-fresh-secondary ${isDropdownOpen ? 'show' : ''}`}
+                  type="button"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-expanded={isDropdownOpen}
                   disabled={isAddingToPlaylist}
                 >
                   <i className="bi bi-plus-lg me-2" /> Add to Playlist
                 </button>
-                <ul className="dropdown-menu playlist-dropdown shadow-lg">
+                <ul className={`dropdown-menu playlist-dropdown shadow-lg ${isDropdownOpen ? 'show' : ''}`}>
                   {playlists.length === 0 ? (
                     <li className="px-3 py-2 text-secondary smaller italic">No playlists yet</li>
                   ) : (
                     playlists.map(pl => (
                       <li key={pl.id}>
-                        <button className="dropdown-item" onClick={() => handleAddToPlaylist(pl.id)}>
-                          <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'}`} />
+                        <button className="dropdown-item" onClick={() => { handleAddToPlaylist(pl.id); setIsDropdownOpen(false); }}>                          <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'}`} />
                           {pl.name}
                         </button>
                       </li>
@@ -599,14 +612,22 @@ function MoviePage() {
               <div className="movie-credit-group">
                 <h6>Starring</h6>
                 <div className="d-flex flex-wrap gap-2">
-                  {movie.actors.map((a, index) => (
+                  {(showAllActors ? movie.actors : movie.actors.slice(0, 10)).map((a, index) => (
                     <span key={a.id}>
                       <Link to={`/staff/${a.id}`} className="text-warning text-decoration-none hover-underline">
                         {a.name}
                       </Link>
-                      {index < movie.actors.length - 1 && <span className="text-secondary">,</span>}
+                      {index < (showAllActors ? movie.actors.length : Math.min(movie.actors.length, 10)) - 1 && <span className="text-secondary">,</span>}
                     </span>
                   ))}
+                  {movie.actors.length > 10 && (
+                    <button 
+                      className="toggle-credits-btn" 
+                      onClick={() => setShowAllActors(!showAllActors)}
+                    >
+                      {showAllActors ? 'Show Less' : `+${movie.actors.length - 10} More`}
+                    </button>
+                  )}
                 </div>
               </div>
             )}

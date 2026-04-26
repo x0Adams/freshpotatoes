@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { movieApi } from '../services/api';
 
 function ModifyMovieModal({ show, onHide, movie, onSuccess }) {
@@ -87,7 +88,7 @@ function ModifyMovieModal({ show, onHide, movie, onSuccess }) {
     }
   };
 
-  return (
+  return createPortal(
     <div 
       className={`custom-modal-overlay ${show ? 'animate-fade-in' : 'animate-fade-out'}`} 
       onAnimationEnd={onAnimationEnd}
@@ -169,7 +170,8 @@ function ModifyMovieModal({ show, onHide, movie, onSuccess }) {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

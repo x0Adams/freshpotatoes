@@ -153,7 +153,7 @@ function SearchPage() {
       <div className="container">
         {/* Cinematic Search Header */}
         <div className="search-page-header mb-5 d-flex justify-content-between align-items-end flex-wrap gap-3">
-          <div className="animate-fade-in">
+          <div className="animate-hero-reveal">
             <h1 className="search-page-title mb-0">
               {liveQuery || genreParam || staffParam
                 ? <>Results for <span>"{liveQuery || genreParam || staffParam}"</span></>
@@ -215,18 +215,13 @@ function SearchPage() {
 
             <div className="col-lg-5">
               <label className="text-secondary smallest uppercase fw-black mb-2 tracking-widest">Staff / Person</label>
-              <div className="input-group filter-input-group">
-                <span className="input-group-text">
-                  <i className="bi bi-person" />
-                </span>
-                <input 
-                  type="text" 
-                  className="form-control"
-                  placeholder="Director or Actor"
-                  value={localStaff}
-                  onChange={(e) => setLocalStaff(e.target.value)}
-                />
-              </div>
+              <input 
+                type="text" 
+                className="custom-input-minimal"
+                placeholder="Director or Actor"
+                value={localStaff}
+                onChange={(e) => setLocalStaff(e.target.value)}
+              />
             </div>
 
             <div className="col-lg-2 d-flex gap-2">

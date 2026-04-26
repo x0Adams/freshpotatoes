@@ -8,6 +8,7 @@ import UserPage from './pages/UserPage'
 import StaffPage from './pages/StaffPage'
 import PublicProfile from './pages/PublicProfile'
 import AdminDashboard from './pages/AdminDashboard'
+import NotFound from './pages/NotFound'
 import ScrollToTop from './components/ScrollToTop'
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/profile" element={<UserPage />} />
           <Route path="/user/:id" element={<PublicProfile />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
       <Footer />

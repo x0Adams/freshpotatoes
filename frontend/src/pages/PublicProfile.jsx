@@ -78,7 +78,7 @@ function PublicProfile() {
         <div className="movie-hero-bg" />
 
         {/* profile picture frame */}
-        <div className="movie-poster-frame">
+        <div className="movie-poster-frame animate-hero-reveal">
           <img src={testBg} alt="" aria-hidden className="movie-poster-glow opacity-50" />
           <div className="movie-poster-img bg-dark d-flex align-items-center justify-content-center border border-secondary" style={{ height: '100%', borderRadius: '12px' }}>
             <i className="bi bi-person-fill text-warning" style={{ fontSize: '8rem' }}></i>
@@ -86,7 +86,7 @@ function PublicProfile() {
         </div>
 
         {/* info */}
-        <div className="movie-info">
+        <div className="movie-info animate-hero-reveal" style={{ animationDelay: '0.2s' }}>
           <div className="movie-genres">
             <span className="movie-genre-badge">User Profile</span>
             <span className="movie-genre-badge bg-warning text-dark">Member</span>
