@@ -8,8 +8,8 @@ function Home() {
   return (
     <>
         <HeroCarousel/>
-        <RecommendationsTrack title="Recommended for you" />
         <DiscoverMovies />
+        <RecommendationsTrack title="Recommended for you" />
         <SurpriseMeSection />
         <MultiGenreMovies />
     </>

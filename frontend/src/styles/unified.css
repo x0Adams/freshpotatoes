@@ -61,3 +61,11 @@
   height: 48px !important;
   min-height: 48px !important;
 }
+
+/* ── Surprise Me Section Mobile Refinements ── */
+@media (max-width: 768px) {
+  .admin-panel-modern[style*="border-left"] {
+    border-left: none !important;
+    border-top: 4px solid #ffc107 !important;
+  }
+}

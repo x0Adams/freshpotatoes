@@ -228,8 +228,8 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
           {selectedPlaylist ? (
             <div className="playlist-main-content animate-fade-in">
               <div className="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                  <h2 className="text-light fw-black mb-1">{selectedPlaylist.name}</h2>
+                <div className="overflow-hidden">
+                  <h2 className="text-light fw-black mb-1 text-truncate">{selectedPlaylist.name}</h2>
                   <div className="d-flex align-items-center gap-3">
                     <span className="badge bg-warning text-dark px-3 rounded-pill uppercase smaller fw-bold">
                        {selectedPlaylist.movies?.length || 0} Titles
@@ -266,7 +266,7 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
                         />
                         <div className="coming-card-overlay">
                           <div className="coming-card-genres">
-                            {movie.genres?.slice(0, 3).map(g => (
+                            {movie.genres.slice(0, 2).map(g => (
                               <p key={g} className="coming-card-genre">{g}</p>
                             ))}
                           </div>

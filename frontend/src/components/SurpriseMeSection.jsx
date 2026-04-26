@@ -60,13 +60,13 @@ function SurpriseMeSection() {
   return (
     <div className="container mt-5 mb-2">
       <div 
-        className="admin-panel-modern p-4 d-flex align-items-center justify-content-between animate-fade-in"
+        className="admin-panel-modern p-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-4 animate-fade-in text-center text-md-start"
         style={{ 
           background: 'linear-gradient(90deg, rgba(255,193,7,0.05) 0%, rgba(13,13,18,0) 100%)',
           borderLeft: '4px solid #ffc107'
         }}
       >
-        <div className="d-flex align-items-center gap-4">
+        <div className="d-flex flex-column flex-md-row align-items-center gap-3 gap-md-4">
            <div className={`surprise-icon-box ${isRolling ? 'rolling' : ''}`} style={{ fontSize: '2.5rem' }}>
               <i className="bi bi-dice-5 text-warning" />
            </div>
@@ -77,7 +77,7 @@ function SurpriseMeSection() {
         </div>
 
         <button 
-          className={`btn-fresh-primary px-5 ${isRolling ? 'disabled' : ''}`}
+          className={`btn-fresh-primary px-5 w-100 w-md-auto ${isRolling ? 'disabled' : ''}`}
           onClick={handleSurprise}
           disabled={isRolling}
           style={{ height: '54px' }}

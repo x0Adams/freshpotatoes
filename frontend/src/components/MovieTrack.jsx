@@ -75,7 +75,7 @@ export default function MovieTrack({ title, movies, fetchingMore, onLoadMore, hi
               />
               <div className="coming-card-overlay">
                 <div className="coming-card-genres">
-                  {movie.genres?.slice(0, 3).map(g => (
+                  {movie.genres.slice(0, 2).map(g => (
                     <p key={g} className="coming-card-genre">{g}</p>
                   ))}
                 </div>

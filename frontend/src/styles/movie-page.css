@@ -87,6 +87,15 @@
   border: 1px solid rgba(255,193,7,0.4);
   padding: 0.2rem 0.65rem;
   border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.movie-genre-badge.clickable:hover {
+  background: rgba(255, 193, 7, 0.15);
+  border-color: #ffc107;
+  color: #ffc107;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
 }
 
 .movie-title {
@@ -214,6 +223,15 @@
 .toggle-credits-btn:hover {
   background: rgba(255, 193, 7, 0.15);
   border-color: rgba(255, 193, 7, 0.4);
+}
+
+.playlist-name-truncate {
+  max-width: 220px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 /* Description */

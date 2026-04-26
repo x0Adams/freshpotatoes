@@ -51,6 +51,7 @@
 .filter-input-group {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
   overflow: hidden;
   transition: all 0.3s ease;
 }

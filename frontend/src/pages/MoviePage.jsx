@@ -489,7 +489,13 @@ function MoviePage() {
 
           <div className="movie-genres">
             {movie.genres && movie.genres.map(g => (
-              <span key={g} className="movie-genre-badge">{g}</span>
+              <Link 
+                key={g} 
+                to={`/genre/${encodeURIComponent(g)}`} 
+                className="movie-genre-badge clickable text-decoration-none"
+              >
+                {g}
+              </Link>
             ))}
           </div>
 
@@ -552,8 +558,9 @@ function MoviePage() {
                   ) : (
                     playlists.map(pl => (
                       <li key={pl.id}>
-                        <button className="dropdown-item" onClick={() => { handleAddToPlaylist(pl.id); setIsDropdownOpen(false); }}>                          <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'}`} />
-                          {pl.name}
+                        <button className="dropdown-item" onClick={() => { handleAddToPlaylist(pl.id); setIsDropdownOpen(false); }}>
+                          <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'}`} />
+                          <span className="playlist-name-truncate">{pl.name}</span>
                         </button>
                       </li>
                     ))

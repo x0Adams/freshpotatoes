@@ -11,8 +11,8 @@
 
 .cv-nav--scrolled {
   background: rgba(13, 17, 23, 0.78) !important;
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border-bottom-color: rgba(255, 193, 7, 0.18) !important;
 }
 
@@ -66,8 +66,8 @@
   overflow: hidden;
   z-index: 1000;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
 }
 
 .search-dropdown-item {
