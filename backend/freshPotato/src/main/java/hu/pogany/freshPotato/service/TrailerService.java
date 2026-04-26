@@ -49,7 +49,7 @@ public class TrailerService {
         fetchTrailer(optMovie.orElseThrow(() -> new EntityNotFoundException("no movie with this id")));
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = {NotContextException.class, InterruptedException.class, TimeLimitExceededException.class, CredentialException.class})
+    @Transactional(noRollbackFor = {NotContextException.class, InterruptedException.class, TimeLimitExceededException.class, CredentialException.class})
     public void fetchTrailer(Movie movie) throws NotContextException, InterruptedException, TimeLimitExceededException, CredentialException {
         validateTitle(movie);
 

@@ -71,7 +71,7 @@ public class MovieService {
             throw new EntityNotFoundException("No movies found for name: " + name);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, noRollbackFor = {NotContextException.class, InterruptedException.class, TimeLimitExceededException.class, CredentialException.class})
     public MovieDto getMovieSaveView(int movieId, int userId) {
         Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
         fetchTrailerAndPoster(movie);
@@ -83,7 +83,7 @@ public class MovieService {
         return mapper.toMovieDto(movie);
     }
 
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, noRollbackFor = {NotContextException.class, InterruptedException.class, TimeLimitExceededException.class, CredentialException.class})
     public MovieDto getMovie(int id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Movie not found"));
         fetchTrailerAndPoster(movie);

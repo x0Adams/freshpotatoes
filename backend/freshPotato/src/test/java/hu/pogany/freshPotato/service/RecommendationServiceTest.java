@@ -5,8 +5,6 @@ import hu.pogany.freshPotato.dto.response.SearchMovieDto;
 import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.mapper.Mapper;
 import hu.pogany.freshPotato.repository.MovieRepository;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +19,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -76,47 +74,41 @@ class RecommendationServiceTest {
     }
 
     @Test
-    void getRecommendations_shouldThrowEntityNotFound_whenRecommendationServiceReturns404() {
+    void getRecommendations_shouldReturnEmptyList_whenRecommendationServiceReturns404() {
         server.expect(requestTo("http://localhost:8000/recommend/99?count=10"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(org.springframework.http.HttpStatus.NOT_FOUND));
 
-        EntityNotFoundException exception = assertThrows(
-                EntityNotFoundException.class,
-                () -> recommendationService.getRecommendations(99)
-        );
+        List<SearchMovieDto> result = recommendationService.getRecommendations(99);
 
-        assertEquals("No previous interaction for recommending movies", exception.getMessage());
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(movieRepository, mapper);
         server.verify();
     }
 
     @Test
-    void getRecommendations_shouldThrowValidationException_whenRecommendationServiceReturns4xx() {
+    void getRecommendations_shouldReturnEmptyList_whenRecommendationServiceReturns4xx() {
         server.expect(requestTo("http://localhost:8000/recommend/3?count=10"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(org.springframework.http.HttpStatus.BAD_REQUEST));
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> recommendationService.getRecommendations(3)
-        );
+        List<SearchMovieDto> result = recommendationService.getRecommendations(3);
 
-        assertTrue(exception.getMessage().contains("Recommendation request failed"));
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(movieRepository, mapper);
         server.verify();
     }
 
     @Test
-    void getRecommendations_shouldThrowIllegalStateException_whenRecommendationServiceReturns5xx() {
+    void getRecommendations_shouldReturnEmptyList_whenRecommendationServiceReturns5xx() {
         server.expect(requestTo("http://localhost:8000/recommend/5?count=10"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE));
 
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> recommendationService.getRecommendations(5)
-        );
+        List<SearchMovieDto> result = recommendationService.getRecommendations(5);
 
-        assertEquals("Recommendation service unavailable", exception.getMessage());
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(movieRepository, mapper);
         server.verify();
     }
 
@@ -128,4 +120,3 @@ class RecommendationServiceTest {
         return movie;
     }
 }
-
