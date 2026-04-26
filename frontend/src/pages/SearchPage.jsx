@@ -43,7 +43,13 @@ function SearchPage() {
     if (node) observer.current.observe(node)
   }, [loading, fetchingMore, hasMore])
 
-  // 1. Initial Load: Fetch Genres
+  // 1. Synchronize local state with URL params
+  useEffect(() => {
+    setLocalGenre(genreParam)
+    setLocalStaff(staffParam)
+  }, [genreParam, staffParam])
+
+  // 2. Initial Load: Fetch Genres
   useEffect(() => {
     genreApi.getAll()
       .then(data => {
@@ -181,7 +187,7 @@ function SearchPage() {
 
         {/* Mobile-Only Search Input */}
         <div className="d-lg-none mb-4 animate-fade-in">
-           <div className="input-group filter-input-group" style={{ height: '54px' }}>
+           <div className="input-group filter-input-group">
               <span className="input-group-text ps-4">
                  <i className="bi bi-search text-warning fs-5" />
               </span>

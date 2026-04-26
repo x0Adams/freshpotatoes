@@ -15,8 +15,8 @@
   pointer-events: auto;
   min-width: 320px;
   background: linear-gradient(135deg, rgba(20, 20, 25, 0.7), rgba(10, 10, 15, 0.8));
-  backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  backdrop-filter: blur(20px) saturate(1.8);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
   padding: 1.1rem 1.6rem;

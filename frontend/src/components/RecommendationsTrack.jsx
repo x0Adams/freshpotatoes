@@ -28,7 +28,7 @@ function RecommendationsTrack({ title = "For You", hideIfEmpty = true }) {
   }, [user])
 
   if (!user) return null
-  if (loading) return <MovieTrackSkeleton title={title} />
+  if (loading) return <MovieTrackSkeleton title={title} hideTopBorder={true} />
   if (error) return null // Silently hide on error to not ruin experience
   if (hideIfEmpty && movies.length === 0) return null
 
@@ -36,6 +36,7 @@ function RecommendationsTrack({ title = "For You", hideIfEmpty = true }) {
     <MovieTrack 
       title={title}
       movies={movies}
+      hideTopBorder={true}
     />
   )
 }

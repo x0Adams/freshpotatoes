@@ -117,6 +117,8 @@
 .playlist-sidebar-name {
   font-weight: 700;
   font-size: 0.95rem;
+  max-width: 160px;
+  display: block;
 }
 
 .playlist-sidebar-meta {

@@ -8,6 +8,7 @@ import UserPage from './pages/UserPage'
 import StaffPage from './pages/StaffPage'
 import PublicProfile from './pages/PublicProfile'
 import AdminDashboard from './pages/AdminDashboard'
+import GenrePage from './pages/GenrePage'
 import NotFound from './pages/NotFound'
 import ScrollToTop from './components/ScrollToTop'
 
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/genre/:genreName" element={<GenrePage />} />
           <Route path="/movie/:id" element={<MoviePage />} />
           <Route path="/staff/:id" element={<StaffPage />} />
           <Route path="/profile" element={<UserPage />} />
