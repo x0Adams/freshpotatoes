@@ -29,7 +29,10 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
         // Merge: keep movie data from prev if it exists for the same ID
         return newData.map(newItem => {
           const existing = prev.find(p => p.id === newItem.id)
-          return { ...newItem, movies: newItem.movies || existing?.movies || [] }
+          return {
+            ...newItem,
+            movies: Array.isArray(newItem.movies) ? newItem.movies : (existing?.movies || [])
+          }
         })
       })
     } catch (err) {
@@ -43,6 +46,13 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
     if (readOnly) {
       setPlaylists(initialPlaylists)
       setLoading(false)
+      return
+    }
+
+    // On /profile we already receive playlists (with movies) from /auth/me.
+    if (Array.isArray(initialPlaylists) && initialPlaylists.length > 0) {
+      setPlaylists(initialPlaylists)
+      setLoading(false)
     } else {
       fetchPlaylists()
     }
@@ -50,7 +60,15 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
 
   const handleCreateSuccess = (newPlaylist) => {
     if (readOnly) return
-    fetchPlaylists();
+
+    if (newPlaylist) {
+      const normalized = {
+        ...newPlaylist,
+        movies: Array.isArray(newPlaylist.movies) ? newPlaylist.movies : []
+      }
+      setPlaylists(prev => [normalized, ...prev.filter(p => p.id !== normalized.id)])
+    }
+
     if (newPlaylist && newPlaylist.id) {
        selectPlaylist(newPlaylist.id);
     }
@@ -75,11 +93,11 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
          await playlistApi.delete(playlistToDelete, token)
       }
       if (selectedPlaylist?.id === playlistToDelete) setSelectedPlaylist(null)
-      
+
       if (readOnly) {
-         setPlaylists(playlists.filter(p => p.id !== playlistToDelete))
+         setPlaylists(prev => prev.filter(p => p.id !== playlistToDelete))
       } else {
-         await fetchPlaylists()
+         setPlaylists(prev => prev.filter(p => p.id !== playlistToDelete))
       }
       showToast("Playlist deleted successfully.")
     } catch (err) {
@@ -108,24 +126,13 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
     const token = localStorage.getItem('accessToken')
 
     try {
-      const updated = await playlistApi.removeMovie(playlistId, movieId, token)
-      if (updated) {
-        setSelectedPlaylist(updated)
-        // Sync to sidebar
-        setPlaylists(prev => prev.map(pl => 
-          pl.id === playlistId ? { ...pl, movies: updated.movies } : pl
-        ))
-      } else {
-        const fresh = await playlistApi.getById(playlistId, token)
-        setSelectedPlaylist(fresh)
-        // Sync to sidebar
-        setPlaylists(prev => prev.map(pl => 
-          pl.id === playlistId ? { ...pl, movies: fresh.movies } : pl
-        ))
-      }
-      // We don't necessarily need fetchPlaylists() here if we sync manually, 
-      // but keeping it for other metadata (like name changes/visibility)
-      await fetchPlaylists()
+      await playlistApi.removeMovie(playlistId, movieId, token)
+      const fresh = await playlistApi.getById(playlistId, token)
+      setSelectedPlaylist(fresh)
+      // Sync updated movie list to the sidebar without owner-wide refetch.
+      setPlaylists(prev => prev.map(pl =>
+        pl.id === playlistId ? { ...pl, movies: fresh.movies } : pl
+      ))
       showToast("Movie removed from playlist")
     } catch (err) {
       setSelectedPlaylist(originalPlaylist);
@@ -147,6 +154,12 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
         setSelectedPlaylist(pl);
         return;
     }
+    const localPlaylist = playlists.find(p => p.id === id)
+    if (Array.isArray(localPlaylist?.movies)) {
+      setSelectedPlaylist(localPlaylist)
+      return
+    }
+
     const token = localStorage.getItem('accessToken')
     try {
       const data = await playlistApi.getById(id, token)
@@ -160,6 +173,8 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
       console.error(err)
     }
   }
+
+  const orderedPlaylists = [...playlists].sort((a, b) => Number(a?.id ?? 0) - Number(b?.id ?? 0))
 
   return (
     <div className="playlist-dashboard mt-4 pt-4 border-top border-secondary border-opacity-10">
@@ -181,7 +196,7 @@ export default function PlaylistSection({ user, initialPlaylists = [], readOnly 
           </div>
 
           <div className="playlist-sidebar">
-            {playlists.map(pl => (
+            {orderedPlaylists.map(pl => (
               <button
                 key={pl.id}
                 className={`playlist-sidebar-item ${selectedPlaylist?.id === pl.id ? 'active' : ''}`}
