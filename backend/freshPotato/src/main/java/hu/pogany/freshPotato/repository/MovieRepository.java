@@ -16,7 +16,6 @@ import java.util.List;
 public interface MovieRepository extends JpaRepository<Movie, Integer>, JpaSpecificationExecutor<Movie> {
     List<Movie> findTop5ByNameIsLike(String name, Sort sort);
 
-    @EntityGraph(attributePaths = {"genres"})
     @Query("SELECT movie FROM Movie movie where movie.name != 'None' and movie.wikipediaTitle != 'None' ORDER BY RAND() LIMIT 30")
     List<Movie> findRandom();
 
