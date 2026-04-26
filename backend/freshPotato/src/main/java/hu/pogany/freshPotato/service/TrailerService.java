@@ -5,6 +5,7 @@ import hu.pogany.freshPotato.entity.Movie;
 import hu.pogany.freshPotato.repository.MovieRepository;
 import io.github.bucket4j.BlockingBucket;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.catalina.connector.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -77,19 +78,23 @@ public class TrailerService {
     }
 
     private ResponseEntity<String> fetchFromYoutube(Movie movie) {
-        return restClient.get()
-                .uri(builder -> builder
-                        .queryParam("part", "snippet")
-                        .queryParam("type", "video")
-                        .queryParam("maxResults", 1)
-                        .queryParam("q", String.format("%s %s trailer", movie.getName(), getMovieReleaseYear(movie)))
-                        .queryParam("relevanceLanguage", "en")
-                        .queryParam("key", youtubeConfig.apiKey())
-                        .build()
-                )
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .toEntity(String.class);
+        try {
+            return restClient.get()
+                    .uri(builder -> builder
+                            .queryParam("part", "snippet")
+                            .queryParam("type", "video")
+                            .queryParam("maxResults", 1)
+                            .queryParam("q", String.format("%s %s trailer", movie.getName(), getMovieReleaseYear(movie)))
+                            .queryParam("relevanceLanguage", "en")
+                            .queryParam("key", youtubeConfig.apiKey())
+                            .build()
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .toEntity(String.class);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatusCode.valueOf(403));
+        }
 
     }
 

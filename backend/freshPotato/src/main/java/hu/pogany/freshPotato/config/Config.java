@@ -26,7 +26,7 @@ public class Config {
         return new OpenAPI()
                 .info(new Info()
                         .title("freshpotatoes docs")
-                        .version("in development")
+                        .version("release")
                         .description("Ádám Győri and Nagy Richárd's final project")
                 )
                 .components(new Components()
