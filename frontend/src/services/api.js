@@ -345,57 +345,65 @@ export const authApi = {
     return res.json();
   },
 
-  async getMe(token) {
-    const res = await smartFetch(`${BASE_URL}/auth/me`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error('Failed to fetch user data');
-    const data = await res.json();
-    
-    const decoded = decodeToken(token);
-    const authorities = decoded?.authorities || [];
 
-    return {
-      id: data.id,
-      username: data.username,
-      email: data.email,
-      age: data.age,
-      genderName: data.gender,
-      roles: authorities,
-      isAdmin: authorities.includes('ROLE_ADMIN') || authorities.includes('ADMIN')
-    };
-  },
+   async getMe(token) {
+     const res = await smartFetch(`${BASE_URL}/auth/me`, {
+       method: 'GET',
+       cache: 'no-store',
+       headers: { 'Authorization': `Bearer ${token}` }
+     });
+     if (!res.ok) throw new Error('Failed to fetch user profile');
+     const data = await res.json();
 
-  async getUserPublicById(userId) {
-    const idNum = parseInt(userId);
-    if (isNaN(idNum) || idNum === 0) throw new Error('Invalid User ID');
+     const decoded = decodeToken(token);
+     const authorities = decoded?.authorities || [];
 
-    const res = await smartFetch(`${BASE_URL}/auth/user/${idNum}`);
-    if (!res.ok) {
-      if (res.status === 404) {
-         const errText = await res.text().catch(() => '');
-         throw new Error(errText || `User not found (ID: ${idNum})`);
-      }
-      if (res.status >= 500) {
-         throw new Error('Server error: The backend failed to load this profile.');
-      }
-      throw new Error(`Profile unavailable (Status: ${res.status})`);
-    }
-    const data = await res.json();
-    return {
-      id: data.id,
-      username: data.username,
-      age: data.age,
-      genderName: data.gender,
-      playlists: Array.isArray(data.playlists) ? data.playlists.map(pl => ({
-        ...pl,
-        movies: Array.isArray(pl.movies) ? pl.movies.map(formatBasicMovie) : []
-      })) : [],
-      ratedMovies: Array.isArray(data.ratedMovies) ? data.ratedMovies.map(formatBasicMovie) : [],
-      reviewedMovies: Array.isArray(data.reviewedMovies) ? data.reviewedMovies.map(formatBasicMovie) : []
-    };
-  }
+     return {
+       id: data.id,
+       username: data.username,
+       email: data.email,
+       age: data.age,
+       genderName: data.gender,
+       roles: authorities,
+       isAdmin: authorities.includes('ROLE_ADMIN') || authorities.includes('ADMIN'),
+       playlists: Array.isArray(data.playlists) ? data.playlists.map(pl => ({
+         ...pl,
+         movies: Array.isArray(pl.movies) ? pl.movies.map(formatBasicMovie) : []
+       })) : [],
+       ratedMovies: Array.isArray(data.ratedMovies) ? data.ratedMovies.map(formatBasicMovie) : [],
+       reviewedMovies: Array.isArray(data.reviewedMovies) ? data.reviewedMovies.map(formatBasicMovie) : []
+     };
+   },
+
+   async getUserPublicById(userId) {
+     const idNum = parseInt(userId);
+     if (isNaN(idNum) || idNum === 0) throw new Error('Invalid User ID');
+
+     const res = await smartFetch(`${BASE_URL}/auth/user/${idNum}`);
+     if (!res.ok) {
+       if (res.status === 404) {
+          const errText = await res.text().catch(() => '');
+          throw new Error(errText || `User not found (ID: ${idNum})`);
+       }
+       if (res.status >= 500) {
+          throw new Error('Server error: The backend failed to load this profile.');
+       }
+       throw new Error(`Profile unavailable (Status: ${res.status})`);
+     }
+     const data = await res.json();
+     return {
+       id: data.id,
+       username: data.username,
+       age: data.age,
+       genderName: data.gender,
+       playlists: Array.isArray(data.playlists) ? data.playlists.map(pl => ({
+         ...pl,
+         movies: Array.isArray(pl.movies) ? pl.movies.map(formatBasicMovie) : []
+       })) : [],
+       ratedMovies: Array.isArray(data.ratedMovies) ? data.ratedMovies.map(formatBasicMovie) : [],
+       reviewedMovies: Array.isArray(data.reviewedMovies) ? data.reviewedMovies.map(formatBasicMovie) : []
+     };
+   }
 };
 
 export const genreApi = {

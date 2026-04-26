@@ -1,18 +1,18 @@
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import PlaylistSection from '../components/PlaylistSection';
 import MovieTrack from '../components/MovieTrack';
 import RecommendationsTrack from '../components/RecommendationsTrack';
-import { movieApi, reviewApi } from '../services/api';
+import { authApi } from '../services/api';
 import testBg from '../assets/test_bg.jpg';
 
 function UserPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [ratedMovies, setRatedMovies] = useState([]);
-  const [reviewedMovies, setReviewedMovies] = useState([]);
+  const [profileData, setProfileData] = useState(null);
   const [loadingContent, setLoadingContent] = useState(true);
 
   // If someone tries to access /profile without being logged in, send them home
@@ -24,13 +24,17 @@ function UserPage() {
 
     const fetchData = async () => {
       setLoadingContent(true);
+      const token = localStorage.getItem('accessToken');
+
+      if (!token) {
+        console.error("No access token available");
+        setLoadingContent(false);
+        return;
+      }
+
       try {
-        const [ratings, reviews] = await Promise.all([
-          movieApi.getRatingsByUser(user.id),
-          reviewApi.getReviewsByUser(user.id)
-        ]);
-        setRatedMovies(ratings);
-        setReviewedMovies(reviews);
+        const data = await authApi.getMe(token);
+        setProfileData(data);
       } catch (err) {
         console.error("Failed to fetch profile content:", err);
       } finally {
@@ -39,9 +43,14 @@ function UserPage() {
     };
 
     fetchData();
-  }, [user, navigate]);
+  }, [user, navigate, location.key]);
 
   if (!user) return null;
+
+  const displayUser = profileData || user;
+  const ratedMovies = displayUser?.ratedMovies || [];
+  const reviewedMovies = displayUser?.reviewedMovies || [];
+  const userPlaylists = displayUser?.playlists || [];
 
   const handleLogout = async () => {
     await logout();
@@ -69,20 +78,20 @@ function UserPage() {
             <span className="movie-genre-badge bg-warning text-dark">Member</span>
           </div>
 
-          <h1 className="movie-title mb-4">{user.username || 'User Profile'}</h1>
+          <h1 className="movie-title mb-4">{displayUser.username || 'User Profile'}</h1>
 
           <div className="movie-meta-row profile-meta-list gap-3">
             <span className="fs-5">
               <i className="bi bi-envelope-fill text-warning me-3"></i>
-              <span className="text-break">{user.email || 'No email provided'}</span>
+              <span className="text-break">{displayUser.email || 'No email provided'}</span>
             </span>
             <span className="fs-5">
               <i className="bi bi-calendar-event text-warning me-3"></i>
-              Age: {user.age || 'Unknown'}
+              Age: {displayUser.age || 'Unknown'}
             </span>
             <span className="fs-5">
               <i className="bi bi-gender-ambiguous text-warning me-3"></i>
-              Gender: {user.genderName || 'Unknown'}
+              Gender: {displayUser.genderName || 'Unknown'}
             </span>
           </div>
 
@@ -110,7 +119,7 @@ function UserPage() {
       <div className="container pb-5">
         
         {/* Playlists */}
-        <PlaylistSection user={user} />
+        <PlaylistSection user={displayUser} initialPlaylists={userPlaylists} />
 
         {/* User Content Tracks */}
         {ratedMovies.length > 0 && (
