@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { movieApi, reviewApi, playlistApi } from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -203,6 +203,18 @@ function MoviePage() {
   const [showReviewDeleteModal, setShowReviewDeleteModal] = useState(false)
   const [reviewDeletionInfo, setReviewDeletionInfo] = useState(null)
   const [showAllActors, setShowAllActors] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -524,23 +536,23 @@ function MoviePage() {
             )}
 
             {user && (
-              <div className="dropdown">
-                <button 
-                  className="btn-fresh-secondary dropdown-toggle" 
-                  type="button" 
-                  data-bs-toggle="dropdown"
+              <div className="dropdown" ref={dropdownRef}>
+                <button
+                  className={`btn-fresh-secondary ${isDropdownOpen ? 'show' : ''}`}
+                  type="button"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-expanded={isDropdownOpen}
                   disabled={isAddingToPlaylist}
                 >
                   <i className="bi bi-plus-lg me-2" /> Add to Playlist
                 </button>
-                <ul className="dropdown-menu playlist-dropdown shadow-lg">
+                <ul className={`dropdown-menu playlist-dropdown shadow-lg ${isDropdownOpen ? 'show' : ''}`}>
                   {playlists.length === 0 ? (
                     <li className="px-3 py-2 text-secondary smaller italic">No playlists yet</li>
                   ) : (
                     playlists.map(pl => (
                       <li key={pl.id}>
-                        <button className="dropdown-item" onClick={() => handleAddToPlaylist(pl.id)}>
-                          <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'}`} />
+                        <button className="dropdown-item" onClick={() => { handleAddToPlaylist(pl.id); setIsDropdownOpen(false); }}>                          <i className={`bi bi-${pl.isPrivate ? 'lock-fill' : 'collection-play-fill'}`} />
                           {pl.name}
                         </button>
                       </li>

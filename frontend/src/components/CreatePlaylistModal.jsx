@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { playlistApi } from '../services/api';
 import { useToast } from '../context/ToastContext';
 
@@ -50,7 +51,7 @@ function CreatePlaylistModal({ show, onHide, onSuccess }) {
     }
   };
 
-  return (
+  return createPortal(
     <div 
       className={`custom-modal-overlay ${show ? 'animate-fade-in' : 'animate-fade-out'}`} 
       onAnimationEnd={onAnimationEnd}
@@ -124,7 +125,8 @@ function CreatePlaylistModal({ show, onHide, onSuccess }) {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

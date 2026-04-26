@@ -51,3 +51,13 @@
   padding-left: 1.5rem !important;
   padding-right: 1.5rem !important;
 }
+
+/* Sync input and select heights globally */
+.form-control,
+.custom-input-minimal,
+.custom-select-minimal,
+.custom-input-group input,
+.filter-input-group {
+  height: 48px !important;
+  min-height: 48px !important;
+}

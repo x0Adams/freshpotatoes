@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -88,7 +89,7 @@ function AuthModal({ show, onHide }) {
 
   if (!shouldRender) return null;
 
-  return (
+  return createPortal(
     <div 
       className={`custom-modal-overlay ${show ? 'animate-fade-in' : 'animate-fade-out'}`} 
       onAnimationEnd={onAnimationEnd}
@@ -239,7 +240,8 @@ function AuthModal({ show, onHide }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
