@@ -1,4 +1,4 @@
-![image](https://github.com/0xAdams/freshpotatoes/utilities/readme_bg.png)
+![image](https://github.com/x0Adams/freshpotatoes/blob/main/utilities/readme_bg.png)
 
 # Film Értékelő Rendszer
 
